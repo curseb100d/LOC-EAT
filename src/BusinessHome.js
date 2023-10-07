@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Screens
@@ -9,8 +9,6 @@ import BusinessCreateView from './View/Business_Screens/BusinessCreateView';
 import BusinessFoodOrderView from './View/Business_Screens/BusinessFoodOrderView';
 import BusinessProfileView from './View/Business_Screens/BusinessProfileView';
 
-
-
 //Screen names
 const dashBoard = "Dashboard";
 const busCreate = "Create";
@@ -18,10 +16,11 @@ const foodOrder = "Orders";
 const busOwnerAccount = "Account";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-function OwnerHome() {
+function BusinessHome() {
   return (
-    <NavigationContainer>
+
       <Tab.Navigator
         initialRouteName={busCreate}
         screenOptions={({ route }) => ({
@@ -60,8 +59,7 @@ function OwnerHome() {
         <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} />
           
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
 
-export default OwnerHome;
+export default BusinessHome;

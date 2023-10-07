@@ -23,7 +23,6 @@ const Tab = createBottomTabNavigator();
 
 function StudentHome() {
   return (
-    <NavigationContainer>
       <Tab.Navigator
         initialRouteName={searchName}
         screenOptions={({ route }) => ({
@@ -70,7 +69,6 @@ function StudentHome() {
         <Tab.Screen name={menuName} component={StudentMenuView} />
         
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
 

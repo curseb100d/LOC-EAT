@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
+import { ref, set, update, remove } from "firebase/database";
+import { db } from '../../Components/config';
 
 export default function BusinessCreateView({ nvigation }) {
   const [foodItems, setFoodItems] = useState(BusinessCreateController.getAllFoodItems());
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [type, setType] = useState('');
+  const [type, setType] = useState(''); 
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
 
@@ -20,6 +22,19 @@ export default function BusinessCreateView({ nvigation }) {
     setName('');
     setPrice('');
     setType('');
+
+    set(ref(db, 'foodmenu/' + name), {
+      name: name,
+      price: price,
+      type : type
+    }).then(() => {
+      //Data saved successfully!
+      alert('data updated');
+    })
+      .catch((error) => {
+        //The write failed...
+        alert(error);
+      });
   };
 
   const handleEdit = (item) => {
@@ -38,11 +53,27 @@ export default function BusinessCreateView({ nvigation }) {
     setName('');
     setPrice('');
     setType('');
+
+    update(ref(db, 'foodmenu/' + name), {
+      name: name,
+      price: price,
+      type : type
+    }).then(() => {
+      //Data saved successfully!
+      alert('data submitted');
+    })
+      .catch((error) => {
+        //The write failed...
+        alert(error);
+      });
   };
 
   const handleDelete = (id) => {
     BusinessCreateController.deleteFoodItem(id);
     setFoodItems(BusinessCreateController.getAllFoodItems());
+
+    remove(ref(db, 'foodmenu/' + name));
+    alert('deleted');
   };
   
   const renderEditForm = () => {
