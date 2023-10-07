@@ -1,4 +1,4 @@
-import BusinessHomeModel from "../../Model/Business_Model/BusinessCreateModel";
+import BusinessCreateModel from "../../Model/Business_Model/BusinessCreateModel";
 
 class BusinessCreateController {
   constructor() {
@@ -11,7 +11,7 @@ class BusinessCreateController {
 
   addFoodItem(name, price, type) {
     const id = new Date().getTime().toString();
-    const foodItem = new BusinessHomeModel(id, name, price, type);
+    const foodItem = new BusinessCreateModel(id, name, price, type);
     this.foodItems.push(foodItem);
   }
 
