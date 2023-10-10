@@ -29,7 +29,7 @@ export default function BusinessCreateView({ nvigation }) {
       type : type
     }).then(() => {
       //Data saved successfully!
-      alert('data updated');
+      alert('Food added');
     })
       .catch((error) => {
         //The write failed...
@@ -60,7 +60,7 @@ export default function BusinessCreateView({ nvigation }) {
       type : type
     }).then(() => {
       //Data saved successfully!
-      alert('data submitted');
+      alert('Food Updated');
     })
       .catch((error) => {
         //The write failed...
@@ -73,7 +73,7 @@ export default function BusinessCreateView({ nvigation }) {
     setFoodItems(BusinessCreateController.getAllFoodItems());
 
     remove(ref(db, 'foodmenu/' + name));
-    alert('deleted');
+    alert('Food Deleted');
   };
   
   const renderEditForm = () => {
