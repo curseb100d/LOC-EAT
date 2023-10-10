@@ -47,13 +47,13 @@ export default function StudentSearchView() {
               <View style={styles.whiteSquare}></View>
               <Image source={{ uri: item.imageUrl }} style={{ width: 150, height: 100, marginRight: 10 }} />
               <View>
-                <Text style={{ top: -25, left: 139, fontWeight: 'bold', fontSize: 15, color: 'black' }}>
+                <Text style={{ top: 35, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                   {item.price}
                 </Text>
-                <Text style={{ top: -46, left: 0, fontWeight: 'bold', fontSize: 15, color: 'black' }}>
+                <Text style={{ top: -40, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                   {item.name}
                 </Text>
-                <Text style={{ fontSize: 15, color: 'black' }}>
+                <Text style={{ top: 5,left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                   {item.type}
                 </Text>
               </View>
@@ -83,15 +83,16 @@ export default function StudentSearchView() {
       return (
         <View key={key} style={styles.card}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image source={{ uri: item.imageUrl }} style={{ width: 120, height: 80, marginRight: 10 }} />
+          <View style={styles.whiteSquare}></View>
+            <Image source={{ uri: item.imageUrl }} style={{ width: 150, height: 100, marginRight: 10 }} />
             <View>
-              <Text style={{ top: -25, left: 139, fontWeight: 'bold', fontSize: 15, color: 'black' }}>
+              <Text style={{ top: 35, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                 {item.price}
               </Text>
-              <Text style={{ top: -46, left: 0, fontWeight: 'bold', fontSize: 15, color: 'black' }}>
+              <Text style={{ top: -40, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                 {item.name}
               </Text>
-              <Text style={{ fontSize: 15, color: 'black' }}>
+              <Text style={{ top: 5, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                 {item.type}
               </Text>
             </View>
@@ -107,14 +108,14 @@ export default function StudentSearchView() {
   const SmallCard = () => (
     <View style={styles.smallCard}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 15, color: 'white' }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'white' }}>
           x1
         </Text>
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 15, color: 'white', textAlign: 'right' }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'white', textAlign: 'right' }}>
             Total Calculated: 
           </Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 15, color: 'yellow' }}> ₱0</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'yellow' }}> ₱0</Text>
         </View>
       </View>
     </View>
@@ -139,7 +140,7 @@ export default function StudentSearchView() {
         style={styles.reviewButton}
         onPress={() => handleButtonClick()}
       >
-        <Text style={styles.reviewButtonText}>Review</Text>
+        <Text style={[styles.reviewButtonText, {textAlign:'center', marginTop:2}]}>Review</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

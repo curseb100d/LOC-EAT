@@ -16,7 +16,7 @@ export default function StudentCartView() {
         data={cart}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
-          <View style={styles.itemContainer}>
+          <View style={[styles.itemContainer, {borderColor: 'rgba(0, 0, 0, 0.5)' }]}>
             <Text style={styles.itemName}>Name: {item.name}</Text>
             <Text style={styles.itemPrice}>Price: ${item.price}</Text>
             <Text style={styles.itemType}>Type: {item.type}</Text>
@@ -53,19 +53,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   itemType: {
-    fontSize: 16,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   removeButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#BC3648',
     padding: 8,
     borderRadius: 5,
     marginTop: 8,
