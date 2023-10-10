@@ -9,7 +9,6 @@ import StudentStoreView from './View/Student_Screens/StudentStoreView';
 import StudentSearchView from './View/Student_Screens/StudentSearchView';
 import StudentCartView from './View/Student_Screens/StudentCartView';
 import StudentAccountView from './View/Student_Screens/StudentAccountView';
-import StudentMenuView from './View/Student_Screens/StudentMenuView';
 
 //Screen names
 const homeName = "Home";
@@ -17,7 +16,6 @@ const storeName = "Store";
 const searchName = "Search";
 const cartName = "Cart";
 const accountName = "Account";
-const menuName = "Menu";
 
 const Tab = createBottomTabNavigator();
 
@@ -45,10 +43,7 @@ function StudentHome() {
             } else if (rn === accountName) {
               iconName = focused ? 'account' : 'account-outline';
 
-            } else if (rn === menuName) {
-              iconName = focused ? 'menu' : 'menu-outline';
-
-            }
+            } 
 
             // You can return any component that you like here!
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -66,7 +61,6 @@ function StudentHome() {
         <Tab.Screen name={searchName} component={StudentSearchView} />
         <Tab.Screen name={cartName} component={StudentCartView} />
         <Tab.Screen name={accountName} component={StudentAccountView} />
-        <Tab.Screen name={menuName} component={StudentMenuView} />
         
       </Tab.Navigator>
   );

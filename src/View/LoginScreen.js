@@ -27,12 +27,17 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Text style={{ fontSize:50, marginBottom:120 }}>
+        <Text style={{ fontFamily: 'sans-serif', color: '#F7AD19', fontWeight:'bold' }}>LOC -</Text>
+        <Text style={{ fontFamily: 'sans-serif', color: '#f2f2f2', fontWeight:'bold' }}> EAT</Text>
+      </Text>
+
       
       <TextInput
         placeholder="Username"
         value={username}
         onChangeText={(text) => setUsername(text)}
-        style={[styles.input, styles.inputWithBorder]}
+        style={[styles.input, styles.inputWithBorder, {marginBottom:10}]}
       />
       <TextInput
         placeholder="Password"
@@ -41,14 +46,14 @@ export default function LoginScreen({ navigation }) {
         onChangeText={(text) => setPassword(text)}
         style={[styles.input, styles.inputWithBorder]}
       />
-      <Text style={styles.forgotPassword}>Forget Password?</Text>
+      <Text style={[styles.forgotPassword, {paddingTop:5, fontWeight:'bold'}]}>Forget Password?</Text>
       <TouchableOpacity
         onPress={handleLogin}
         style={[styles.loginButton, styles.centeredText]}
       >
-        <Text style={styles.loginButtonText}>Login</Text>
+        <Text style={[styles.loginButtonText, {fontWeight:'bold'}]}>Login</Text>
       </TouchableOpacity>
-      <Text style={styles.signupText}>Don't have an account? Sign up</Text>
+      <Text style={[styles.signupText, {marginBottom:200}]}>Don't have an account? Sign up</Text>
     </View>
   );
 }
