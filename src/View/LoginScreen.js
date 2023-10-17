@@ -1,59 +1,133 @@
-import * as React from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { db_auth } from '../Components/config';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../Components/config';
 
 export default function LoginScreen({ navigation }) {
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState('');
+  const auth = db_auth;
 
-  const handleLogin = () => {
-  const homeUsername = 'user';
-  const homeBUsername = 'owner';
-  const passwordSlave = 'user'; // Password for username 'user'
-  const passwordKing = 'owner';   // Password for username 'owner'
+  const checkOwnerPathExistence = async (ownerPath) => {
+    try {
+      const ownerSnapshot = await get(ref(db, ownerPath));
+      return ownerSnapshot.exists();
+    } catch (error) {
+      console.log('Error checking owner path:', error);
+      return false;
+    }
+  };
 
-  if (username === homeUsername && password === passwordSlave) {
-    // Navigate to HomeScreen if the entered username and password match
-    navigation.navigate('StudentHome');
-  } else if (username === homeBUsername && password === passwordKing) {
-    // Navigate to HomeB if the entered username and password match
-    navigation.navigate('BusinessHome');
-  } else {
-    // Username or password not recognized, show an error message or handle it as needed
-    alert('Invalid username or password. Please try again.');
-  }
-};
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        // Check if the user exists in the database
+        const dbPath = 'Users/' + email.replace('.', ',');
+        const ownerPath = 'Business user/' + email.replace('.', ',');
+        console.log('Fetching data from path:', dbPath);
+
+        const userSnapshot = await get(ref(db, dbPath));
+        console.log('User snapshot:', userSnapshot.val());
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          const userType = userData.userType;
+          setUserType(userType);
+        } else {
+          // If the user doesn't exist in the "Users" path, check the "ownerPath"
+          const ownerExists = await checkOwnerPathExistence(ownerPath);
+
+          if (ownerExists) {
+            setUserType('business');
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching user type:', error);
+        alert('Error fetching user type: ' + error.message);
+      }
+    };
+
+    fetchUserType();
+  }, [email]);
+
+  const navigateBasedOnUserType = () => {
+    if (userType === 'user') {
+      navigation.navigate('StudentHome');
+    } else if (userType === 'business') {
+      navigation.navigate('BusinessHome');
+    } else {
+      console.log('Unknown user type:', userType);
+      alert('Unknown user type');
+    }
+  };
+
+  const LoginIn = async () => {
+    setLoading(true);
+    try {
+      const response = await signInWithEmailAndPassword(auth, email, password);
+
+      // Check if userType is seta
+      if (userType) {
+        // Now, navigate based on userType
+        navigateBasedOnUserType();
+      } else {
+        console.log('User type not found');
+        alert('User type not found');
+      }
+    } catch (error) {
+      console.log('Sign in failed:', error);
+      alert('Sign in failed: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const navigateToSignUp = () => {
+    navigation.navigate('SignUpScreen');
+  };
+
+  const navigateToForgotPassword = () => {
+    navigation.navigate('ForgotPasswordScreen');
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize:50, marginBottom:120 }}>
-        <Text style={{ fontFamily: 'sans-serif', color: '#F7AD19', fontWeight:'bold' }}>LOC -</Text>
-        <Text style={{ fontFamily: 'sans-serif', color: '#f2f2f2', fontWeight:'bold' }}> EAT</Text>
-      </Text>
-
-      
       <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-        style={[styles.input, styles.inputWithBorder, {marginBottom:10}]}
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
       />
       <TextInput
+        style={styles.input}
         placeholder="Password"
-        secureTextEntry
+        secureTextEntry={true}
         value={password}
         onChangeText={(text) => setPassword(text)}
-        style={[styles.input, styles.inputWithBorder]}
       />
-      <Text style={[styles.forgotPassword, {paddingTop:5, fontWeight:'bold'}]}>Forget Password?</Text>
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={[styles.loginButton, styles.centeredText]}
-      >
-        <Text style={[styles.loginButtonText, {fontWeight:'bold'}]}>Login</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <Button title="Login" onPress={LoginIn} />
+      )}
+
+      <TouchableOpacity onPress={navigateToForgotPassword}>
+        <Text style={styles.linkText}>
+          Forgot Password?
+        </Text>
       </TouchableOpacity>
-      <Text style={[styles.signupText, {marginBottom:200}]}>Don't have an account? Sign up</Text>
+
+      <TouchableOpacity onPress={navigateToSignUp}>
+        <Text style={styles.linkText}>
+          Don't have an account? Sign up
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,54 +137,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'maroon', // Change background color to maroon
-  },
-  loginTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    backgroundColor: 'maroon',
   },
   input: {
     fontSize: 15,
     borderBottomWidth: 1,
     padding: 10,
     width: 300,
-    height: 43,
     marginBottom: 10,
-    color: 'black', // Text color for input
-    backgroundColor: 'white', // Change background color to white
   },
-  inputWithBorder: {
-    borderColor: 'grey', // Border color
-    borderWidth: 1, // Border width
-    borderRadius: 5, // Add border-radius for rounded corners
-  },
-  loginButton: {
-    backgroundColor: 'yellow',
-    padding: 7,
-    width: 300,
-    alignItems: 'center',
-    borderRadius: 100,
-    marginTop: 20,
-  },
-  loginButtonText: {
-    fontSize: 20,
-    fontFamily: 'Poppins',
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  centeredText: {
-    alignItems: 'center',
-  },
-  signupText: {
+  linkText: {
     fontSize: 16,
     marginTop: 10,
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  forgotPassword: {
-    fontSize: 16,
-    color: 'white',
-    marginBottom: 10,
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
 });
