@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Touchable } from 'react-native';
 import { db_auth } from '../Components/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Picker } from '@react-native-picker/picker';
@@ -65,17 +65,29 @@ export default function SignUpScreen({ navigation }) {
     }
   };
 
+  const handleLoginRedirect = () => {
+    // Navigate to the login page when the text is pressed
+    navigation.navigate('Login'); // Replace 'Login' with the name of your login screen in your navigation stack.
+  }
+
   return (
     <View style={styles.container}>
+      <Text style={{marginBottom:30}}>
+        <Text style={styles.yellowText}>LOC</Text>
+        <Text style={styles.whiteText}> - </Text>
+        <Text style={styles.whiteText}>EAT</Text>
+        </Text>
       <TextInput
         style={styles.input}
         placeholder="First Name"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         value={firstName}
         onChangeText={(text) => setFirstName(text)}
       />
       <TextInput
         style={styles.input}
         placeholder="Last Name"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         value={lastName}
         onChangeText={(text) => setLastName(text)}
       />
@@ -83,6 +95,7 @@ export default function SignUpScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="School ID"
+          placeholderTextColor="rgba(0, 0, 0, 0.5)"
           value={schoolId}
           onChangeText={(text) => setSchoolId(text)}
         />
@@ -91,6 +104,7 @@ export default function SignUpScreen({ navigation }) {
         <TextInput
           style={styles.input}
           placeholder="Business Name"
+          placeholderTextColor="rgba(0, 0, 0, 0.5)"
           value={businessName}
           onChangeText={(text) => setBusinessName(text)}
         />
@@ -98,18 +112,20 @@ export default function SignUpScreen({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         secureTextEntry={true}
         value={password}
         onChangeText={(text) => setPassword(text)}
       />
 
-      <Text style={{ fontSize: 16, marginBottom: 5 }}>Select User Type:</Text>
+      <Text style={{ fontSize: 16, marginTop: 10, fontWeight: 'bold', color:"white"}}>Select User Type:</Text>
       <Picker
         selectedValue={userType}
         onValueChange={(itemValue) => setUserType(itemValue)}
@@ -118,16 +134,28 @@ export default function SignUpScreen({ navigation }) {
         <Picker.Item label="User" value="user" />
         <Picker.Item label="Business User" value="business" />
       </Picker>
-
+      
+      <View>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <Button title="Create Account" onPress={signUp} />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={signUp}
+        >
+          <Text style={styles.buttonText}>Create Account</Text>
+        </TouchableOpacity>
       )}
+    </View>
 
-      <Text style={{ fontSize: 16, marginTop: 10 }}>
-        Already have an account? Log in
-      </Text>
+    <View>
+      {/* Your other content here */}
+      <TouchableOpacity onPress={handleLoginRedirect}>
+        <Text style={styles.redirect}>
+          Already have an account? Log in
+        </Text>
+      </TouchableOpacity>
+    </View>
     </View>
   );
 }
@@ -142,11 +170,45 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 15,
     borderBottomWidth: 1,
+    backgroundColor: 'white',
     padding: 10,
     width: 300,
-    marginBottom: 10,
+    marginTop:18,
   },
   picker: {
     width: 300,
+    color:'white',
   },
+  yellowText: {
+    color: 'yellow',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  whiteText: {
+    color: 'white',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  button: {
+    width: 180,
+    height: 45,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:5,
+  },
+  buttonText: {
+    fontWeight:'bold',
+    color: 'black',
+    fontSize: 20,
+  },
+  redirect: {
+    fontSize: 16,
+    marginTop: 5,
+    color: 'white',
+    fontWeight:'bold',
+  }
 });

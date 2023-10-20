@@ -1,60 +1,79 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, ScrollView } from 'react-native';
 import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
+import { ref, set, update, remove } from "firebase/database";
+import { db } from '../../Components/config';
+import { firebase } from '../../Components/config';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
-class DiscountView extends Component {
+class BusinessCreatePromotionView extends Component {
   constructor() {
     super();
     this.state = {
-      price: 0,
-      discountName: '',
-      discountDescription: '',
+      foodName: '',
+      foodDiscountDescription: '',
+      originalPrice: 0,
       discountPercentage: '',
       discounts: [],
-      startDate: '',
-      endDate: '',
-      daysDifference: null,
+      businessOwnerName: '',
+      location: ''
     };
   }
 
+
+
   handleAddDiscount = () => {
-    const { price, discountPercentage, discountName, discountDescription, discounts, startDate, endDate } = this.state;
+    const { foodName, foodDiscountDescription, originalPrice, discountPercentage, discounts, businessOwnerName, location } = this.state;
 
     if (
       discountPercentage !== '' &&
       !isNaN(discountPercentage) &&
-      discountName !== '' &&
-      discountDescription !== ''
+      foodName !== '' &&
+      foodDiscountDescription !== '' &&
+      businessOwnerName !== '' &&
+      location !== ''
     ) {
       const newDiscount = BusinessPromotionController.calculateDiscount(
-        price,
+        foodName,
+        foodDiscountDescription,
+        originalPrice,
         parseFloat(discountPercentage),
-        discountName,
-        discountDescription
+        businessOwnerName,
+        location
       );
 
       discounts.push(newDiscount);
       this.setState({
-        discounts,
-        discountName: '',
-        discountDescription: '',
+        foodName: '',
+        foodDiscountDescription: '',
         discountPercentage: '',
+        discounts,
+        businessOwnerName: '',
+        location: '',
       });
     }
 
-    if (startDate && endDate) {
-      const daysDifference = DiscountController.calculateDaysDifference(startDate, endDate);
-      this.setState({ daysDifference });
-    }
+    const databaseRef = ref(db, 'promotion');
+    set(databaseRef, discounts)
+      .then(() => {
+        // Data saved successfully!
+        alert('Food added');
+      })
+      .catch((error) => {
+        // The write failed...
+        alert(error);
+      });
+
   }
 
-  // handleCalculateDaysDifference = () => {
-  //   const { startDate, endDate } = this.state;
-  //   if (startDate && endDate) {
-  //     const daysDifference = BusinessPromotionController.calculateDaysDifference(startDate, endDate);
-  //     this.setState({ daysDifference });
-  //   }
-  // }
+  handleCalculateDaysDifference = () => {
+    const { startDate, endDate } = this.state;
+    if (startDate && endDate) {
+      const daysDifference = BusinessPromotionController.calculateDaysDifference(startDate, endDate);
+      this.setState({ daysDifference });
+    }
+  };
 
   render() {
     return (
@@ -62,26 +81,38 @@ class DiscountView extends Component {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            placeholder="Food Name"
+            value={this.state.foodName}
+            onChangeText={(text) => this.setState({ foodName: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Food Discount Description"
+            value={this.state.foodDiscountDescription}
+            onChangeText={(text) => this.setState({ foodDiscountDescription: text })}
+          />
+          <TextInput
+            style={styles.input}
             placeholder="Enter Price"
-            onChangeText={(text) => this.setState({ price: parseFloat(text) })}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Discount Name"
-            value={this.state.discountName}
-            onChangeText={(text) => this.setState({ discountName: text })}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Discount Description"
-            value={this.state.discountDescription}
-            onChangeText={(text) => this.setState({ discountDescription: text })}
+            onChangeText={(text) => this.setState({ originalPrice: parseFloat(text) })}
           />
           <TextInput
             style={styles.input}
             placeholder="Enter Discount Percentage"
             value={this.state.discountPercentage}
             onChangeText={(text) => this.setState({ discountPercentage: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Owner Name"
+            value={this.state.businessOwnerName}
+            onChangeText={(text) => this.setState({ businessOwnerName: text })}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Location"
+            value={this.state.location}
+            onChangeText={(text) => this.setState({ location: text })}
           />
           <TextInput
           style={styles.input}
@@ -95,8 +126,10 @@ class DiscountView extends Component {
           value={this.state.endDate}
           onChangeText={(text) => this.setState({ endDate: text })}
           />
-
+          
           <Button title="Add Discount" onPress={this.handleAddDiscount} />
+          <Button title="Total Days Left" onPress={this.handleCalculateDaysDifference} />
+
         </View>
         <FlatList
           data={this.state.discounts}
@@ -104,15 +137,23 @@ class DiscountView extends Component {
           renderItem={({ item }) => (
             <View style={styles.discountItem}>
               <View style={styles.discountItemContent}>
-                <Text style={styles.discountItemText}>Name: {item.name}</Text>
-                <Text style={styles.discountItemText}>Description: {item.description}</Text>
+                <Text style={styles.discountItemText}>Name: {item.foodName}</Text>
+                <Text style={styles.discountItemText}>Description: {item.foodDiscountDescription}</Text>
               </View>
-                <Text style={styles.discountItemPrice}>
-                  {item.percentage}% Discount: {item.discountedPrice}
-                </Text>
+                <Text style={styles.discountItemPrice}>{item.percentage}% off</Text>
+                <Text style={styles.discountItemPrice}>Discount: {item.discountedPrice}</Text>
+                <Text style={styles.discountItemPrice}>Owner Name: {item.businessOwnerName}</Text>
+                <Text style={styles.discountItemPrice}>Location: {item.location}</Text>
             </View>
           )}
         />
+        {this.state.daysDifference !== null && (
+          <View>
+            <Text style={styles.discountItemPrice}>
+              Days Left: {this.state.daysDifference}
+            </Text>
+          </View>
+        )}
       </ScrollView>
     );
   }
@@ -161,4 +202,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DiscountView;
+export default BusinessCreatePromotionView;

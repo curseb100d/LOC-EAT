@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Touchable } from 'react-native';
 import { db_auth } from '../Components/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { ref, get } from 'firebase/database';
@@ -97,35 +97,49 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Text style={{marginBottom:150}}>
+        <Text style={styles.yellowText}>LOC</Text>
+        <Text style={styles.whiteText}> - </Text>
+        <Text style={styles.whiteText}>EAT</Text>
+        </Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         value={email}
         onChangeText={(text) => setEmail(text)}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
         secureTextEntry={true}
         value={password}
         onChangeText={(text) => setPassword(text)}
       />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Button title="Login" onPress={LoginIn} />
-      )}
-
       <TouchableOpacity onPress={navigateToForgotPassword}>
-        <Text style={styles.linkText}>
-          Forgot Password?
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom:20}}>
+          Forgot password?
         </Text>
       </TouchableOpacity>
 
+      <View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={LoginIn}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+
       <TouchableOpacity onPress={navigateToSignUp}>
-        <Text style={styles.linkText}>
-          Don't have an account? Sign up
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 100, color: 'white', }}>
+        Sign up
         </Text>
       </TouchableOpacity>
     </View>
@@ -137,19 +151,40 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'maroon',
+    backgroundColor: '#800000',
   },
   input: {
     fontSize: 15,
-    borderBottomWidth: 1,
+    backgroundColor: 'white',
     padding: 10,
     width: 300,
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  linkText: {
-    fontSize: 16,
-    marginTop: 10,
-    color: 'blue',
-    textDecorationLine: 'underline',
+  button: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:20,
+    marginBottom:5,
+  },
+  buttonText: {
+    fontWeight:'bold',
+    color: 'black',
+    fontSize: 20,
+  },
+  yellowText: {
+    color: 'yellow',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  whiteText: {
+    color: 'white',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
   },
 });

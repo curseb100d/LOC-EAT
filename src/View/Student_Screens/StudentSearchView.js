@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
 import Axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../../Context/CartContext';
@@ -128,20 +128,22 @@ export default function StudentSearchView() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search for a food item"
-        value={searchQuery}
-        onChangeText={(text) => setSearchQuery(text)}
-      />
-      {filterDataBySearch()}
-      <SmallCard />
-      <TouchableOpacity
-        style={styles.reviewButton}
-        onPress={() => handleButtonClick()}
-      >
-        <Text style={[styles.reviewButtonText, {textAlign:'center', marginTop:2}]}>Review</Text>
-      </TouchableOpacity>
+      <ScrollView>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search for a food item"
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+        {filterDataBySearch()}
+        <SmallCard />
+        <TouchableOpacity
+          style={styles.reviewButton}
+          onPress={() => handleButtonClick()}
+        >
+          <Text style={[styles.reviewButtonText, {textAlign:'center', marginTop:2}]}>Review</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
