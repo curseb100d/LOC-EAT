@@ -1,59 +1,147 @@
-import * as React from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Touchable } from 'react-native';
+import { db_auth } from '../Components/config';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../Components/config';
 
 export default function LoginScreen({ navigation }) {
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState('');
+  const auth = db_auth;
 
-  const handleLogin = () => {
-  const homeUsername = 'user';
-  const homeBUsername = 'owner';
-  const passwordSlave = 'user'; // Password for username 'user'
-  const passwordKing = 'owner';   // Password for username 'owner'
+  const checkOwnerPathExistence = async (ownerPath) => {
+    try {
+      const ownerSnapshot = await get(ref(db, ownerPath));
+      return ownerSnapshot.exists();
+    } catch (error) {
+      console.log('Error checking owner path:', error);
+      return false;
+    }
+  };
 
-  if (username === homeUsername && password === passwordSlave) {
-    // Navigate to HomeScreen if the entered username and password match
-    navigation.navigate('StudentHome');
-  } else if (username === homeBUsername && password === passwordKing) {
-    // Navigate to HomeB if the entered username and password match
-    navigation.navigate('BusinessHome');
-  } else {
-    // Username or password not recognized, show an error message or handle it as needed
-    alert('Invalid username or password. Please try again.');
-  }
-};
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        // Check if the user exists in the database
+        const dbPath = 'Users/' + email.replace('.', ',');
+        const ownerPath = 'Business user/' + email.replace('.', ',');
+        console.log('Fetching data from path:', dbPath);
+
+        const userSnapshot = await get(ref(db, dbPath));
+        console.log('User snapshot:', userSnapshot.val());
+
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          const userType = userData.userType;
+          setUserType(userType);
+        } else {
+          // If the user doesn't exist in the "Users" path, check the "ownerPath"
+          const ownerExists = await checkOwnerPathExistence(ownerPath);
+
+          if (ownerExists) {
+            setUserType('business');
+          }
+        }
+      } catch (error) {
+        console.log('Error fetching user type:', error);
+        alert('Error fetching user type: ' + error.message);
+      }
+    };
+
+    fetchUserType();
+  }, [email]);
+
+  const navigateBasedOnUserType = () => {
+    if (userType === 'user') {
+      navigation.navigate('StudentHome');
+    } else if (userType === 'business') {
+      navigation.navigate('BusinessHome');
+    } else {
+      console.log('Unknown user type:', userType);
+      alert('Unknown user type');
+    }
+  };
+
+  const LoginIn = async () => {
+    setLoading(true);
+    try {
+      const response = await signInWithEmailAndPassword(auth, email, password);
+
+      // Check if userType is seta
+      if (userType) {
+        // Now, navigate based on userType
+        navigateBasedOnUserType();
+      } else {
+        console.log('User type not found');
+        alert('User type not found');
+      }
+    } catch (error) {
+      console.log('Sign in failed:', error);
+      alert('Sign in failed: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const navigateToSignUp = () => {
+    navigation.navigate('SignUpScreen');
+  };
+
+  const navigateToForgotPassword = () => {
+    navigation.navigate('ForgotPasswordScreen');
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize:50, marginBottom:120 }}>
-        <Text style={{ fontFamily: 'sans-serif', color: '#F7AD19', fontWeight:'bold' }}>LOC -</Text>
-        <Text style={{ fontFamily: 'sans-serif', color: '#f2f2f2', fontWeight:'bold' }}> EAT</Text>
-      </Text>
-
-      
+      <Text style={{marginBottom:150}}>
+        <Text style={styles.yellowText}>LOC</Text>
+        <Text style={styles.whiteText}> - </Text>
+        <Text style={styles.whiteText}>EAT</Text>
+        </Text>
       <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-        style={[styles.input, styles.inputWithBorder, {marginBottom:10}]}
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
       />
       <TextInput
+        style={styles.input}
         placeholder="Password"
-        secureTextEntry
+        placeholderTextColor="rgba(0, 0, 0, 0.5)"
+        secureTextEntry={true}
         value={password}
         onChangeText={(text) => setPassword(text)}
-        style={[styles.input, styles.inputWithBorder]}
       />
-      <Text style={[styles.forgotPassword, {paddingTop:5, fontWeight:'bold'}]}>Forget Password?</Text>
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={[styles.loginButton, styles.centeredText]}
-      >
-        <Text style={[styles.loginButtonText, {fontWeight:'bold'}]}>Login</Text>
+
+      <TouchableOpacity onPress={navigateToForgotPassword}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom:20}}>
+          Forgot password?
+        </Text>
       </TouchableOpacity>
-      <Text style={[styles.signupText, {marginBottom:200}]}>Don't have an account? Sign up</Text>
+
+      <View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={LoginIn}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+
+      <TouchableOpacity onPress={navigateToSignUp}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 100, color: 'white', }}>
+        Sign up
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,54 +151,40 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'maroon', // Change background color to maroon
-  },
-  loginTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    backgroundColor: '#800000',
   },
   input: {
     fontSize: 15,
-    borderBottomWidth: 1,
+    backgroundColor: 'white',
     padding: 10,
     width: 300,
-    height: 43,
-    marginBottom: 10,
-    color: 'black', // Text color for input
-    backgroundColor: 'white', // Change background color to white
+    marginBottom: 15,
   },
-  inputWithBorder: {
-    borderColor: 'grey', // Border color
-    borderWidth: 1, // Border width
-    borderRadius: 5, // Add border-radius for rounded corners
-  },
-  loginButton: {
-    backgroundColor: 'yellow',
-    padding: 7,
-    width: 300,
+  button: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 100,
-    marginTop: 20,
+    marginTop:20,
+    marginBottom:5,
   },
-  loginButtonText: {
-    fontSize: 20,
-    fontFamily: 'Poppins',
+  buttonText: {
+    fontWeight:'bold',
     color: 'black',
-    fontWeight: 'bold',
+    fontSize: 20,
   },
-  centeredText: {
-    alignItems: 'center',
+  yellowText: {
+    color: 'yellow',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
   },
-  signupText: {
-    fontSize: 16,
-    marginTop: 10,
+  whiteText: {
     color: 'white',
-    fontWeight: 'bold',
-  },
-  forgotPassword: {
-    fontSize: 16,
-    color: 'white',
-    marginBottom: 10,
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
   },
 });

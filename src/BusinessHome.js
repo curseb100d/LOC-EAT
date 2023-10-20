@@ -1,26 +1,25 @@
 import * as React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Screens
 import BusinessDashboardView from './View/Business_Screens/BusinessDashboardView';
+import BusinessCreatePromotionView from './View/Business_Screens/BusinessCreatePromotionView';
 import BusinessCreateView from './View/Business_Screens/BusinessCreateView';
 import BusinessFoodOrderView from './View/Business_Screens/BusinessFoodOrderView';
-import BusinessProfileView from './View/Business_Screens/BusinessProfileView';
+// import BusinessProfileView from './View/business_screens/BusinessProfileView';
 
 //Screen names
 const dashBoard = "Dashboard";
+const busPromote = "Promotion";
 const busCreate = "Create";
 const foodOrder = "Orders";
-const busOwnerAccount = "Account";
+// const busOwnerAccount = "Business Account";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
 
 function BusinessHome() {
   return (
-
       <Tab.Navigator
         initialRouteName={busCreate}
         screenOptions={({ route }) => ({
@@ -31,14 +30,17 @@ function BusinessHome() {
             if (rn === dashBoard) {
               iconName = focused ? 'search' : 'search-outline';
 
+            } else if (rn === busPromote) {
+              iconName = focused ? 'promotion' : 'promotion-outline';
+
             } else if (rn === busCreate) {
-              iconName = focused ? 'home' : 'home-outline';
+              iconName = focused ? 'create' : 'create-outline';
 
             } else if (rn === foodOrder) {
               iconName = focused ? 'cart' : 'cart-outline';
 
             } else if (rn === busOwnerAccount) {
-              iconName = focused ? 'store' : 'store-outline';
+              iconName = focused ? 'storeprofile' : 'store-outline';
 
             }
 
@@ -54,9 +56,10 @@ function BusinessHome() {
         }}>
 
         <Tab.Screen name={dashBoard} component={BusinessDashboardView} />
+        <Tab.Screen name={busPromote} component={BusinessCreatePromotionView} />
         <Tab.Screen name={busCreate} component={BusinessCreateView} />
         <Tab.Screen name={foodOrder} component={BusinessFoodOrderView} />
-        <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} />
+        {/* <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} /> */}
           
       </Tab.Navigator>
   );

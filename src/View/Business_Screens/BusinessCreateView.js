@@ -1,16 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Image, Alert } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
 import { ref, set, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
+import * as ImagePicker from 'expo-image-picker';
 
-export default function BusinessCreateView({ nvigation }) {
+
+export default function BusinessCreateView({ navigation }) {
   const [foodItems, setFoodItems] = useState(BusinessCreateController.getAllFoodItems());
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [type, setType] = useState(''); 
   const [editMode, setEditMode] = useState(false);
   const [editItemId, setEditItemId] = useState(null);
+
+  //Uploading
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Please grant permission to access your gallery.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8, // Adjust image quality as needed
+    });
+
+    if (!result.cancelled) {
+      const source = { uri: result.uri };
+      setImage(source);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!image) {
+      Alert.alert('No Image Selected', 'Please select an image to upload.');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const filename = image.uri.substring(image.uri.lastIndexOf('/') + 1);
+      const response = await fetch(image.uri);
+      const blob = await response.blob();
+
+      const storageRef = firebase.storage().ref().child('images/' + filename);
+      const uploadTask = storageRef.put(blob);
+
+      await uploadTask;
+
+      const downloadURL = await storageRef.getDownloadURL();
+
+      // Store the download URL in Firebase Realtime Database
+      const databaseRef = firebase.database().ref('images');
+      const newImageRef = databaseRef.push();
+      newImageRef.set(downloadURL);
+
+      setUploading(false);
+      Alert.alert('Photo Uploaded', 'Your photo has been successfully uploaded.');
+      setImage(null);
+    } catch (e) {
+      console.error(e);
+      setUploading(false);
+      Alert.alert('Error', 'An error occurred while uploading the photo.');
+    }
+  };
 
   useEffect(() => {
     setFoodItems(BusinessCreateController.getAllFoodItems());
@@ -147,6 +209,23 @@ export default function BusinessCreateView({ nvigation }) {
         onChangeText={(text) => setType(text)}
         style={styles.input}
       />
+      <SafeAreaView style={styles.container}>
+          <TouchableOpacity style={styles.pickButton} onPress={pickImage}>
+              <Text style={styles.buttonText}>Pick an Image</Text>
+          </TouchableOpacity>
+          <View style={styles.imageContainer}>
+            {image && (
+                <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />
+               )}
+               <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
+                <Text style={styles.buttonText}>
+                  Upload Image
+                </Text>
+               </TouchableOpacity>
+          </View>
+      </SafeAreaView>
+
+
       <TouchableOpacity onPress={handleAddFood} style={styles.addButton}>
         <Text style={styles.buttonText}>Add Food</Text>
       </TouchableOpacity>
@@ -248,4 +327,16 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       marginTop: 8,
     },
+    pickButton:{
+      backgroundColor: 'green',
+      padding: 12,
+      borderRadius: 5,
+      alignItems: 'center',
+    },
+    uploadButton:{
+      backgroundColor: 'green',
+      padding: 12,
+      borderRadius: 5,
+      alignItems: 'center',
+    }
   });
