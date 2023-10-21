@@ -3,6 +3,8 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
+import firebase from "firebase/compat/app";
+import "firebase/compat/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,6 +22,10 @@ const firebaseConfig = {
   measurementId: "G-SJXL8MMXYH"
 };
 
+if (!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
@@ -27,3 +33,5 @@ const analytics = getAnalytics(app);
 // Initialize database
 export const db = getDatabase(app);
 export const db_auth = getAuth(app);
+
+export { firebase };

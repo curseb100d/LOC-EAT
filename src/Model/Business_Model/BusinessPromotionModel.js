@@ -1,15 +1,16 @@
 class BusinessPromotionModel {
-  calculateDiscount(price, discountPercentage, name, description, startDate, endDate) {
-    //calculate discount
-    const discountedPrice = price - (price * (discountPercentage / 100));
-    
-    //calculate start to end date
+  calculateDiscount(foodName, foodDiscountDescription, originalPrice, discountPercentage, businessOwnerName, location) {
+    const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+    return { foodName, foodDiscountDescription, percentage: discountPercentage, discountedPrice, businessOwnerName, location};
+  }
+
+  calculateDaysDifference(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const timeDifference = Math.abs(end - start);
     const daysDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+    return daysDifference;
+  }  
 
-    return { name, description, percentage: discountPercentage, discountedPrice, daysDifference };
-  }
 }
 export default new BusinessPromotionModel();

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { db_auth } from '../Components/config';
 import { sendPasswordResetEmail } from 'firebase/auth';
 
@@ -24,28 +24,46 @@ export default function ForgotPasswordScreen({ navigation }) {
     }
   };
 
+  const resetPasswordButton = (
+    <TouchableOpacity
+      style={styles.button}
+      onPress={handleForgotPassword}
+    >
+      <Text style={styles.buttonText}>Reset Password</Text>
+    </TouchableOpacity>
+  );
+
+  const backToLoginButton = (
+    <TouchableOpacity
+      style={styles.buttonR}
+      onPress={() => navigation.navigate('Login')}
+    >
+      <Text style={styles.buttonText}>Back to Login</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Forgot Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-      />
+      <Text style={{marginTop:10,marginBottom:110}}>
+        <Text style={styles.yellowText}>LOC</Text>
+        <Text style={styles.whiteText}> - </Text>
+        <Text style={styles.whiteText}>EAT</Text>
+        </Text>
+    <Text style={styles.title}>Forgot Password</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Email"
+      value={email}
+      onChangeText={(text) => setEmail(text)}
+    />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Button title="Reset Password" onPress={handleForgotPassword} />
-      )}
+    {loading ? (
+      <ActivityIndicator size="large" color="#0000ff" />
+    ) : resetPasswordButton}
 
-      <Button
-        title="Back to Login"
-        onPress={() => navigation.navigate('Login')}
-      />
-    </View>
-  );
+    {backToLoginButton}
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
@@ -59,12 +77,49 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     color: 'white',
+    fontWeight:'bold',
   },
   input: {
     fontSize: 15,
-    borderBottomWidth: 1,
     padding: 10,
     width: 300,
     marginBottom: 10,
+    backgroundColor:'white',
+  },
+  button: {
+    width: 180,
+    height: 50,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:20,
+  },
+  buttonText: {
+    fontSize:20,
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  buttonR: {
+    width: 180,
+    height: 50,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:20,
+    marginBottom:150,
+  },
+  yellowText: {
+    color: 'yellow',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  whiteText: {
+    color: 'white',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
   },
 });

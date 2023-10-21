@@ -1,8 +1,12 @@
 import BusinessPromotionModel from "../../Model/Business_Model/BusinessPromotionModel";
 
 class BusinessPromotionController {
-  calculateDiscount(price, discountPercentage, name, description, startDate, endDate) {
-    return BusinessPromotionModel.calculateDiscount(price, discountPercentage, name, description, startDate, endDate);
+  calculateDiscount(foodName, foodDiscountDescription, originalPrice, discountPercentage, businessOwnerName, location) {
+    return BusinessPromotionModel.calculateDiscount(foodName, foodDiscountDescription, originalPrice, discountPercentage, businessOwnerName, location);
+  }
+
+  calculateDaysDifference(startDate, endDate) {
+    return BusinessPromotionModel.calculateDaysDifference(startDate, endDate);
   }
 }
 
