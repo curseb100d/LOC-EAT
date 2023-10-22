@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 // Screens
 import BusinessDashboardView from './View/Business_Screens/BusinessDashboardView';
 import BusinessCreatePromotionView from './View/Business_Screens/BusinessCreatePromotionView';
-import BusinessCreateView from './View/Business_Screens/BusinessCreateView';
+import BusinessCreateMain from './View/Business_Screens/BusinessCreateMain';
 import BusinessFoodOrderView from './View/Business_Screens/BusinessFoodOrderView';
 // import BusinessProfileView from './View/business_screens/BusinessProfileView';
 
@@ -57,7 +57,7 @@ function BusinessHome() {
 
         <Tab.Screen name={dashBoard} component={BusinessDashboardView} />
         <Tab.Screen name={busPromote} component={BusinessCreatePromotionView} />
-        <Tab.Screen name={busCreate} component={BusinessCreateView} />
+        <Tab.Screen name={busCreate} component={BusinessCreateMain} />
         <Tab.Screen name={foodOrder} component={BusinessFoodOrderView} />
         {/* <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} /> */}
           
