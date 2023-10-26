@@ -3,9 +3,14 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Imag
 import Axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../../Context/CartContext';
+import { ref, set, update, remove } from "firebase/database";
+import { db } from '../../Components/config';
 
 export default function StudentSearchView() {
   const [data, setData] = useState(null);
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [type, setType] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
   const navigation = useNavigation();
@@ -28,6 +33,18 @@ export default function StudentSearchView() {
   const addToCartAndNavigate = (item) => {
     addToCart(item);
     navigation.navigate('Cart');
+    set(ref(db, 'cart/' + name), {
+      name: name,
+      price: price,
+      type: type
+    }).then(() => {
+      //Data saved successfully!
+      alert('Food added');
+    })
+      .catch((error) => {
+        //The write failed...
+        alert(error);
+      });
   };
 
   const filterDataBySearch = () => {
@@ -53,7 +70,7 @@ export default function StudentSearchView() {
                 <Text style={{ top: -40, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                   {item.name}
                 </Text>
-                <Text style={{ top: 5,left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
+                <Text style={{ top: 5, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
                   {item.type}
                 </Text>
               </View>
@@ -83,7 +100,7 @@ export default function StudentSearchView() {
       return (
         <View key={key} style={styles.card}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={styles.whiteSquare}></View>
+            <View style={styles.whiteSquare}></View>
             <Image source={{ uri: item.imageUrl }} style={{ width: 150, height: 100, marginRight: 10 }} />
             <View>
               <Text style={{ top: 35, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
@@ -113,7 +130,7 @@ export default function StudentSearchView() {
         </Text>
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
           <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'white', textAlign: 'right' }}>
-            Total Calculated: 
+            Total Calculated:
           </Text>
           <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'yellow' }}> ₱0</Text>
         </View>
@@ -141,7 +158,7 @@ export default function StudentSearchView() {
           style={styles.reviewButton}
           onPress={() => handleButtonClick()}
         >
-          <Text style={[styles.reviewButtonText, {textAlign:'center', marginTop:2}]}>Review</Text>
+          <Text style={[styles.reviewButtonText, { textAlign: 'center', marginTop: 2 }]}>Review</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

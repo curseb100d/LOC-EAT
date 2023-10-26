@@ -7,11 +7,83 @@ import { firebase } from '../../Components/config';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useNavigation } from '@react-navigation/native';
-import BusinessCreateAdd from './BusinessCreateAdd';
 
 export default function BusinessCreateMain() {
   const [foodItems, setFoodItems] = useState(BusinessCreateController.getAllFoodItems());
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [type, setType] = useState(''); 
+  const [editMode, setEditMode] = useState(false);
+  const [editItemId, setEditItemId] = useState(null);
+  const [image, setImage] = useState(null);
+  const [uploading, setUploading] = useState(false); 
   const navigation = useNavigation();
+
+  const handleUpdate = () => {
+    BusinessCreateController.updateFoodItem(editItemId, name, price, type);
+    setFoodItems(BusinessCreateController.getAllFoodItems());
+    setEditMode(false);
+    setEditItemId(null);
+    setName('');
+    setPrice('');
+    setType('');
+
+    update(ref(db, 'foodmenu/' + name), {
+      name: name,
+      price: price,
+      type : type
+    }).then(() => {
+      //Data saved successfully!
+      alert('Food Updated');
+    })
+      .catch((error) => {
+        //The write failed...
+        alert(error);
+      });
+  };
+
+  const handleEdit = (item) => {
+    setEditItemId(item.id);
+    setName(item.name);
+    setPrice(item.price);
+    setType(item.type);
+    setEditMode(true);
+  };  
+
+  const renderEditForm = () => {
+    if (!editMode) return null;
+
+    return (
+      <View style={styles.editForm}>
+        <Text style={styles.editFormTitle}>Edit Food Item</Text>
+        <TextInput
+          placeholder="Name"
+          value={name}
+          onChangeText={(text) => setName(text)}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Price"
+          value={price}
+          onChangeText={(text) => setPrice(text)}
+          style={styles.input}
+          keyboardType="numeric"
+        />
+        <TextInput
+          placeholder="Type"
+          value={type}
+          onChangeText={(text) => setType(text)}
+          style={styles.input}
+        />
+        <TouchableOpacity onPress={handleUpdate} style={styles.updateButton}>
+          <Text style={styles.buttonText}>Update</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setEditMode(false)} style={styles.cancelButton}>
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -27,17 +99,25 @@ export default function BusinessCreateMain() {
     </View>
   );
 
+  const handleDelete = (id) => {
+    BusinessCreateController.deleteFoodItem(id);
+    setFoodItems(BusinessCreateController.getAllFoodItems());
+
+    remove(ref(db, 'foodmenu/' + name));
+    alert('Food Deleted');
+  };
+
   return (
     <View>
-
-      <TouchableOpacity onPress={handleEditFoodClick}>
-            <Text>Add Food</Text>
-      </TouchableOpacity>
+      {renderEditForm()}
       <FlatList
         data={foodItems}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
       />
+      <TouchableOpacity onPress={handleEditFoodClick}>
+        <Text>Add Food</Text>
+      </TouchableOpacity>
     </View>
   )
 

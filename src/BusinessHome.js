@@ -7,14 +7,15 @@ import BusinessDashboardView from './View/Business_Screens/BusinessDashboardView
 import BusinessCreatePromotionView from './View/Business_Screens/BusinessCreatePromotionView';
 import BusinessCreateMain from './View/Business_Screens/BusinessCreateMain';
 import BusinessFoodOrderView from './View/Business_Screens/BusinessFoodOrderView';
-// import BusinessProfileView from './View/business_screens/BusinessProfileView';
+import BusinessProfileView from './View/Business_Screens/BusinessProfileView';
 
 //Screen names
 const dashBoard = "Dashboard";
 const busPromote = "Promotion";
 const busCreate = "Create";
 const foodOrder = "Orders";
-// const busOwnerAccount = "Business Account";
+const busOwnerAccount = "Business Account";
+
 
 const Tab = createBottomTabNavigator();
 
@@ -59,7 +60,7 @@ function BusinessHome() {
         <Tab.Screen name={busPromote} component={BusinessCreatePromotionView} />
         <Tab.Screen name={busCreate} component={BusinessCreateMain} />
         <Tab.Screen name={foodOrder} component={BusinessFoodOrderView} />
-        {/* <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} /> */}
+        <Tab.Screen name={busOwnerAccount} component={BusinessProfileView} />
           
       </Tab.Navigator>
   );
