@@ -42,14 +42,19 @@ export default function ForgotPasswordScreen({ navigation }) {
     </TouchableOpacity>
   );
 
+  const handleLoginRedirect = () => {
+    // Navigate to the login page when the text is pressed
+    navigation.navigate('Login'); // Replace 'Login' with the name of your login screen in your navigation stack.
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={{marginTop:10,marginBottom:110}}>
+      <Text style={{marginTop:-50, marginBottom:10}}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.whiteText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
         </Text>
-    <Text style={styles.title}>Forgot Password</Text>
+    <Text style={styles.title}>Password Reset. {'\n\n'} If you wish to reset your password, please enter your email account.</Text>
     <TextInput
       style={styles.input}
       placeholder="Email"
@@ -61,7 +66,11 @@ export default function ForgotPasswordScreen({ navigation }) {
       <ActivityIndicator size="large" color="#0000ff" />
     ) : resetPasswordButton}
 
-    {backToLoginButton}
+    <TouchableOpacity onPress={handleLoginRedirect}>
+        <Text style={styles.redirect}>
+          Back to Login
+        </Text>
+    </TouchableOpacity>
   </View>
 );
 }
@@ -75,9 +84,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
     color: 'white',
     fontWeight:'bold',
+    justifyContent:'center',
+    textAlign:'center',
+    marginLeft:15,
+    marginRight:15,
+    marginBottom:100,
+    marginTop:15
   },
   input: {
     fontSize: 15,
@@ -121,5 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
     fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  redirect: {
+    fontSize: 16,
+    marginTop: 5,
+    color: 'white',
+    fontWeight:'bold',
+    marginBottom:55,
   },
 });

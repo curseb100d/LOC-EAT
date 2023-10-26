@@ -37,13 +37,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'maroon',
   },
   cartHeader: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
+    color:'white',
   },
   itemContainer: {
     borderWidth: 1,
@@ -51,6 +52,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 5,
     marginBottom: 12,
+    backgroundColor:'white',
   },
   itemName: {
     fontSize: 20,

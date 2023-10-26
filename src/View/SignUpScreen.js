@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Touchable } from 'react-native';
 import { db_auth } from '../Components/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Picker } from '@react-native-picker/picker';
@@ -77,9 +77,26 @@ export default function SignUpScreen({ navigation }) {
     }
   };
 
+  const handleLoginRedirect = () => {
+    // Navigate to the login page when the text is pressed
+    navigation.navigate('Login'); // Replace 'Login' with the name of your login screen in your navigation stack.
+  }
+
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <Text style={{marginBottom:10, marginTop:55}}>
+        <Text style={styles.yellowText}>LOC</Text>
+        <Text style={styles.yellowText}> - </Text>
+        <Text style={styles.whiteText}>EAT</Text>
+        </Text>
+      <ScrollView style={{
+        flex: 1, // Take up remaining horizontal space
+        borderWidth: 1,
+        borderColor: 'maroon',
+        borderRadius: 20,
+        padding: 10,
+        paddingRight:15,
+        }}>
         <TextInput
           style={styles.input}
           placeholder="First Name"
@@ -169,27 +186,37 @@ export default function SignUpScreen({ navigation }) {
           onChangeText={(text) => setConfirmPassword(text)}
         />
 
-        <Text style={{ fontSize: 16, marginBottom: 5 }}>Select User Type:</Text>
+        <Text style={{ fontSize: 16, marginTop: 2, fontWeight: 'bold', color:"white" }}>Select User Type:</Text>
         <Picker
           selectedValue={userType}
           onValueChange={(itemValue) => setUserType(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item label="User" value="user" />
-          <Picker.Item label="Business User" value="business" />
+          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="User" value="user" />
+          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="Business User" value="business" />
         </Picker>
+      </ScrollView>
 
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          <Button title="Create Account" onPress={signUp} />
-        )}
+      <View style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <TouchableOpacity style={styles.button} onPress={signUp}>
+          <Text style={styles.buttonText}>Create Account</Text>
+        </TouchableOpacity>
+      )}
 
-        <Text style={{ fontSize: 16, marginTop: 10 }}>
+      {/* Your other content here */}
+      <TouchableOpacity onPress={handleLoginRedirect}>
+        <Text style={styles.redirect}>
           Already have an account? Log in
         </Text>
-      </ScrollView>
+      </TouchableOpacity>
     </View>
+  </View>
   );
 }
 
@@ -203,11 +230,47 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 15,
     borderBottomWidth: 1,
+    backgroundColor: 'white',
     padding: 10,
     width: 300,
-    marginBottom: 10,
+    marginBottom: 18,
   },
   picker: {
     width: 300,
+    color:'white',
+    marginBottom:'35',
+  },
+  yellowText: {
+    color: 'yellow',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  whiteText: {
+    color: 'white',
+    fontSize: 50, // Set your desired font size
+    fontWeight: 'bold', // Make the text bold
+    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+  },
+  button: {
+    width: 180,
+    height: 45,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:25,
+  },
+  buttonText: {
+    fontWeight:'bold',
+    color: 'black',
+    fontSize: 20,
+  },
+  redirect: {
+    fontSize: 16,
+    marginTop: 5,
+    color: 'white',
+    fontWeight:'bold',
+    marginBottom:55,
   },
 });

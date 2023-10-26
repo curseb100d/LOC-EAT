@@ -99,7 +99,7 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={{marginBottom:150}}>
         <Text style={styles.yellowText}>LOC</Text>
-        <Text style={styles.whiteText}> - </Text>
+        <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
         </Text>
       <TextInput

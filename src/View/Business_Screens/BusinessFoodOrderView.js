@@ -1,12 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useCart } from '../../Context/CartContext';
+import { ref, set } from "firebase/database";
+import { db } from '../../Components/config';
 
 export default function BusinessFoodOrderView() {
   const { cart, removeFromCart } = useCart();
+  const [status, setStatus] = useState('Finish');
 
   const handleCancelOrder = (itemId) => {
     removeFromCart(itemId);
+  };
+
+  const toggleStatus = () => {
+    const newStatus = status === 'Finish' ? 'Preparing' : 'Finish';
+
+    // Get a reference to the 'status' node in your database
+    const statusRef = ref(db, 'status');
+
+    // Set the new status in the database
+    set(statusRef, newStatus)
+      .then(() => {
+        setStatus(newStatus);
+      })
+      .catch((error) => {
+        console.error('Error updating status:', error);
+      });
   };
 
   return (
@@ -17,12 +36,18 @@ export default function BusinessFoodOrderView() {
             <Text style={styles.itemName}>Name: {item.name}</Text>
             <Text style={styles.itemPrice}>Price: ${item.price}</Text>
             <Text style={styles.itemType}>Type: {item.type}</Text>
+            <Text style={styles.statusText}>Status: {status}</Text>
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => handleCancelOrder(item.id)}
             >
               <Text style={styles.cancelButtonText}>Cancel Order</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.circularButton, { backgroundColor: status === 'open' ? 'green' : 'red' }]}
+              onPress={toggleStatus}
+            >
+            </TouchableOpacity> 
           </View>
         ))
       ) : (
@@ -70,5 +95,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     marginTop: 20,
+  },
+  circularButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 50, // To make it circular
   },
 });

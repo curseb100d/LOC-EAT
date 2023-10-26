@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, ScrollView, TouchableOpacity, Touchable } from 'react-native';
 import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
 import { ref, set, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
@@ -127,8 +127,21 @@ class BusinessCreatePromotionView extends Component {
           onChangeText={(text) => this.setState({ endDate: text })}
           />
           
-          <Button title="Add Discount" onPress={this.handleAddDiscount} />
-          <Button title="Total Days Left" onPress={this.handleCalculateDaysDifference} />
+          <View>
+        <TouchableOpacity
+          style={{ /* Add your custom styles here */ }}
+          onPress={this.handleAddDiscount}
+        >
+          <Text style={styles.butt}>Add Discount</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ /* Add your custom styles here */ }}
+          onPress={this.handleCalculateDaysDifference}
+        >
+          <Text style={styles.butt}>Total Days Left</Text>
+        </TouchableOpacity>
+      </View>
 
         </View>
         <FlatList
@@ -163,9 +176,10 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+    backgroundColor:'maroon',
   },
   inputContainer: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#FFD68A',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
@@ -177,6 +191,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
+    backgroundColor:'white',
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
@@ -199,7 +214,22 @@ const styles = StyleSheet.create({
   discountItemPrice: {
     fontSize: 18,
     fontWeight: 'bold',
+    color:'white',
   },
+  butt: {
+    width: 180,
+    height: 50,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: 'green', // Button background color
+    marginTop:10,
+    marginBottom:5,
+    fontSize:20,
+    fontWeight:'bold',
+    textAlign:'center',
+    textAlignVertical:'center',
+    color:'white',
+    marginLeft:80
+  }
 });
 
 export default BusinessCreatePromotionView;
