@@ -5,14 +5,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 // Screens
 import StudentHomeView from './View/Student_Screens/StudentHomeView';
-import StudentStoreView from './View/Student_Screens/StudentStoreView';
 import StudentSearchView from './View/Student_Screens/StudentSearchView';
 import StudentCartView from './View/Student_Screens/StudentCartView';
 import StudentAccountView from './View/Student_Screens/StudentAccountView';
 
 //Screen names
 const homeName = "Home";
-const storeName = "Store";
 const searchName = "Search";
 const cartName = "Cart";
 const accountName = "Account";
@@ -30,9 +28,6 @@ function StudentHome() {
 
             if (rn === homeName) {
               iconName = focused ? 'home' : 'home-outline';
-
-            } else if (rn === storeName) {
-                iconName = focused ? 'store' : 'store-outline';
 
             } else if (rn === searchName) {
               iconName = focused ? 'search' : 'search-outline';
@@ -57,7 +52,6 @@ function StudentHome() {
         }}>
 
         <Tab.Screen name={homeName} component={StudentHomeView} />
-        <Tab.Screen name={storeName} component={StudentStoreView} />
         <Tab.Screen name={searchName} component={StudentSearchView} />
         <Tab.Screen name={cartName} component={StudentCartView} />
         <Tab.Screen name={accountName} component={StudentAccountView} />

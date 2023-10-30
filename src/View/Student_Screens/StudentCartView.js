@@ -1,82 +1,159 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useCart } from '../../Context/CartContext'; // Adjust the relative path as needed
+import React, { useState, useEffect } from 'react';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { ref, set, onValue, remove } from "firebase/database";
+import { db } from '../../Components/config';
 
-export default function StudentCartView() {
-  const { cart, removeFromCart } = useCart(); // Get the cart data and removeFromCart function from CartContext
+const StudentCartView = () => {
+  const [foodCart, setFoodCart] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const navigation = useNavigation();
 
-  const handleRemoveItem = (itemIndex) => {
-    removeFromCart(itemIndex);
+  useEffect(() => {
+    const foodcartRef = ref(db, 'foodcart');
+
+    const unsubscribe = onValue(foodcartRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const foodcartData = snapshot.val();
+        const foodcartArray = Object.keys(foodcartData).map((id) => ({
+          id,
+          ...foodcartData[id],
+        }));
+        setFoodCart(foodcartArray);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const calculateTotal = () => {
+    return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const toggleItemSelection = (itemId) => {
+    setSelectedItems((prevSelectedItems) => {
+      if (prevSelectedItems.includes(itemId)) {
+        return prevSelectedItems.filter((id) => id !== itemId);
+      } else {
+        return [...prevSelectedItems, itemId];
+      }
+    });
+  };
+
+  const handleDeleteItem = (itemId) => {
+    // Remove the item from Realtime Firebase and update the local state
+    const cartRef = ref(db, 'foodcart/' + itemId);
+    remove(cartRef).then(() => {
+      // Remove the item from the local state
+      setFoodCart((prevFoodCart) => prevFoodCart.filter((item) => item.id !== itemId));
+      // Deselect the item
+      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => id !== itemId));
+    });
+  };
+
+  const handleReviewButtonPress = () => {
+    const reviewedItems = foodCart.filter((item) => selectedItems.includes(item.id));
+    const cartRef = ref(db, 'reviewedorder');
+    set(cartRef, reviewedItems).then(() => {
+      navigation.navigate('StudentReviewOrder', { reviewedCart: reviewedItems });
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.cartHeader}>Your Cart:</Text>
+      <Text style={styles.header}>Your Cart</Text>
       <FlatList
-        data={cart}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View style={[styles.itemContainer, {borderColor: 'rgba(0, 0, 0, 0.5)' }]}>
-            <Text style={styles.itemName}>Name: {item.name}</Text>
-            <Text style={styles.itemPrice}>Price: ${item.price}</Text>
-            <Text style={styles.itemType}>Type: {item.type}</Text>
+        data={foodCart}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.itemContainer}>
             <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => handleRemoveItem(index)}>
-              <Text style={styles.buttonText}>Cancel</Text>
+              style={[
+                styles.itemContent,
+                selectedItems.includes(item.id) ? styles.selectedItem : null
+              ]}
+              onPress={() => toggleItemSelection(item.id)}
+            >
+              <Text style={styles.itemName}>{item.foodName}</Text>
+              <Text style={styles.itemPrice}>Price: ${item.price}</Text>
+              <Text style={styles.itemLocation}>Location: {item.location}</Text>
+              <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
             </TouchableOpacity>
-            {/* Add more details if needed */}
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeleteItem(item.id)}
+            >
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
           </View>
         )}
       />
+      <Button title="Review and Checkout" onPress={handleReviewButtonPress} />
+      <Text style={styles.total}>Total Calculated:${calculateTotal().toFixed(2)}</Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'maroon',
+    padding: 20,
   },
-  cartHeader: {
+  header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color:'white',
+    marginBottom: 10,
   },
   itemContainer: {
-    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 10,
     borderColor: '#ccc',
-    padding: 16,
-    borderRadius: 5,
-    marginBottom: 12,
-    backgroundColor:'white',
+    borderWidth: 1,
+    backgroundColor: 'white',
+  },
+  selectedItem: {
+    backgroundColor: '#e0f7fa',
+  },
+  itemContent: {
+    flex: 1,
   },
   itemName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
   },
   itemPrice: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontSize: 16,
+    color: '#555',
   },
-  itemType: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  itemLocation: {
+    fontSize: 14,
+    color: '#777',
   },
-  removeButton: {
-    backgroundColor: '#BC3648',
-    padding: 8,
+  itemQuantity: {
+    fontSize: 14,
+    color: '#777',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 5,
-    marginTop: 8,
-    alignItems: 'center',
+    marginHorizontal: 5,
   },
-  buttonText: {
+  deleteButtonText: {
     color: 'white',
+  },
+  total: {
+    fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 20,
   },
 });
+
+export default StudentCartView;

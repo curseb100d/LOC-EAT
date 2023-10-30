@@ -1,32 +1,31 @@
-export default class BusinessCreateModel {
-  constructor(id, name, price, type) {
-    this.id = id;
-    this._name = name;
-    this._price = price;
-    this._type = type;
+class BusinessCreateModel {
+  constructor() {
+    this.discounts = [];
+  }  
+
+  calculateDiscount(foodName, foodDescription, price, discountPercentage, storeName, location) {
+    const discountedPrice = price - (price * (discountPercentage / 100));
+    return {foodName, foodDescription, price, percentage: discountPercentage, discountedPrice, storeName, location};
   }
 
-  get name() {
-    return this._name;
+  updateDiscount(index, updatedDiscount) {
+    if (index >= 0 && index < this.discounts.length) {
+      this.discounts[index] = updatedDiscount;
+      return true; // Return true if update is successful
+    }
+    return false; // Return false if the index is out of bounds
+  }
+  
+  deleteDiscount(index) {
+    if (index >= 0 && index < this.discounts.length) {
+      this.discounts.splice(index, 1);
+      return true; // Return true if deletion is successful
+    }
+    return false; // Return false if the index is out of bounds
   }
 
-  set name(name) {
-    this._name = name;
-  }
-
-  get price() {
-    return this._price;
-  }
-
-  set price(price) {
-    this._price = price;
-  }
-
-  get type() {
-    return this._type;
-  }
-
-  set type(type) {
-    this._type = type;
-  }
+  getAllDiscounts() {
+    return this.discounts; // Return the array of discounts
+  }  
 }
+export default new BusinessCreateModel();

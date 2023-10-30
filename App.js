@@ -10,6 +10,7 @@ import BusinessCreateMain from './src/View/Business_Screens/BusinessCreateMain';
 import StudentEditScreen from './src/View/Student_Screens/StudentEditScreen';
 import ForgotPasswordScreen from './src/View/ForgotPasswordScreen';
 import StudentCartView from './src/View/Student_Screens/StudentCartView';
+import StudentReviewOrder from './src/View/Student_Screens/StudentReviewOrder';
 import StudentEmailScreen from './src/View/Student_Screens/StudentEmailScreen'
 import StudentSearchView from './src/View/Student_Screens/StudentSearchView';
 import BusinessCreateAdd from './src/View/Business_Screens/BusinessCreateAdd';
@@ -31,6 +32,8 @@ function App() {
           <Stack.Screen name="StudentHome" component={StudentHome} />
           <Stack.Screen name="BusinessHome" component={BusinessHome} />
           <Stack.Screen name="StudentSearchView" component={StudentSearchView} />
+          <Stack.Screen name="StudentCartView" component={StudentCartView} />
+          <Stack.Screen name="StudentReviewOrder" component={StudentReviewOrder} />
           <Stack.Screen name="Cart" component={StudentCartView} />
           <Stack.Screen name="BusinessCreateAdd" component={BusinessCreateAdd} />
         </Stack.Navigator>

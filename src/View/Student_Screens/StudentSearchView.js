@@ -1,250 +1,148 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Image, ScrollView } from 'react-native';
-import Axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
-import { useCart } from '../../Context/CartContext';
-import { ref, set, update, remove } from "firebase/database";
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { ref, set, onValue, remove } from "firebase/database";
 import { db } from '../../Components/config';
 
-export default function StudentSearchView() {
-  const [data, setData] = useState(null);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [type, setType] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const { addToCart } = useCart();
-  const navigation = useNavigation();
+const StudentSearchView = () => {
+  const [cart, setCart] = useState([]);
+  const [foodmenus, setFoodMenu] = useState([]);
 
-  const fetchData = async () => {
-    try {
-      const response = await Axios.get(
-        'https://loc-eat-ddb73-default-rtdb.firebaseio.com/foodmenu.json'
-      );
-      setData(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
+  // Fetch products from the database
   useEffect(() => {
-    fetchData();
+    const foodmenuRef = ref(db, 'foodmenu');
+
+    // Listen for changes in the database and update the state
+    const unsubscribe = onValue(foodmenuRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const foodmenusData = snapshot.val();
+        const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
+          id,
+          ...foodmenusData[id],
+          quantity: 0,
+          totalPrice: 0, // Initialize total price for each item
+        }));
+        setFoodMenu(foodmenusArray);
+      }
+    });
+
+    // Clean up the listener when the component unmounts
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const addToCartAndNavigate = (item) => {
-    addToCart(item);
-    navigation.navigate('Cart');
-    set(ref(db, 'cart/' + name), {
-      name: name,
-      price: price,
-      type: type
-    }).then(() => {
-      //Data saved successfully!
-      alert('Food added');
-    })
-      .catch((error) => {
-        //The write failed...
-        alert(error);
-      });
-  };
+  const addToCart = (foodName, quantity) => {
+    const updatedCart = [...cart];
+    const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
 
-  const filterDataBySearch = () => {
-    if (!data) {
-      return <Text>Loading...</Text>;
+    if (foodmenuIndex !== -1) {
+      updatedCart[foodmenuIndex].quantity += quantity;
+      updatedCart[foodmenuIndex].totalPrice = updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
+      if (updatedCart[foodmenuIndex].quantity <= 0) {
+        // If quantity reaches 0 or less, remove the item from the cart
+        updatedCart.splice(foodmenuIndex, 1);
+      }
+    } else {
+      updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
     }
 
-    if (!searchQuery) {
-      const firstTwoData = Object.keys(data).slice(0, 2);
+    setCart(updatedCart);
 
-      return firstTwoData.map((key) => {
-        const item = data[key];
-        return (
-          <View key={key} style={styles.card}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {/* White square shape */}
-              <View style={styles.whiteSquare}></View>
-              <Image source={{ uri: item.imageUrl }} style={{ width: 150, height: 100, marginRight: 10 }} />
-              <View>
-                <Text style={{ top: 35, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                  {item.price}
-                </Text>
-                <Text style={{ top: -40, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                  {item.name}
-                </Text>
-                <Text style={{ top: 5, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                  {item.type}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity onPress={() => addToCartAndNavigate(item)} style={styles.addButton}>
-              <Text style={styles.buttonText}>+</Text>
-            </TouchableOpacity>
-          </View>
-        );
-      });
-    }
-
-    // Filter data based on search query
-    const filteredData = Object.keys(data).filter((key) => {
-      const item = data[key];
-      return item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
-    if (filteredData.length === 0) {
-      return <Text>No results found</Text>;
-    }
-
-    const firstTwoMatchingData = filteredData.slice(0, 2);
-
-    return firstTwoMatchingData.map((key) => {
-      const item = data[key];
-      return (
-        <View key={key} style={styles.card}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={styles.whiteSquare}></View>
-            <Image source={{ uri: item.imageUrl }} style={{ width: 150, height: 100, marginRight: 10 }} />
-            <View>
-              <Text style={{ top: 35, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                {item.price}
-              </Text>
-              <Text style={{ top: -40, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                {item.name}
-              </Text>
-              <Text style={{ top: 5, left: 12, fontWeight: 'bold', fontSize: 25, color: 'black' }}>
-                {item.type}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={() => addToCartAndNavigate(item)} style={styles.addButton}>
-            <Text style={styles.buttonText}>+</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    });
+    // Update the cart data in Realtime Firebase
+    const cartRef = ref(db, 'foodcart');
+    set(cartRef, updatedCart);
   };
 
-  const SmallCard = () => (
-    <View style={styles.smallCard}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'white' }}>
-          x1
-        </Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'white', textAlign: 'right' }}>
-            Total Calculated:
-          </Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'yellow' }}> ₱0</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const handleButtonClick = () => {
-    // Add your logic for what should happen when the button is clicked here
-    // For example, you can navigate to another screen or perform some other action.
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + item.totalPrice, 0);
   };
+
+  const calculateTotalQuantity = () => {
+    return cart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
+  };  
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search for a food item"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
-        {filterDataBySearch()}
-        <SmallCard />
-        <TouchableOpacity
-          style={styles.reviewButton}
-          onPress={() => handleButtonClick()}
-        >
-          <Text style={[styles.reviewButtonText, { textAlign: 'center', marginTop: 2 }]}>Review</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.header}>Food Menu</Text>
+      <FlatList
+        data={foodmenus}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.itemContainer}>
+            <Text style={styles.itemName}>{item.foodName}</Text>
+            <Text style={styles.itemPrice}>P{item.price}</Text>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={() => addToCart(item, -1)}>
+                <Text style={styles.quantityButton}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.quantity}>{item.quantity}</Text>
+              <TouchableOpacity onPress={() => addToCart(item, 1)}>
+                <Text style={styles.quantityButton}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
+
+      <Text style={styles.total}>Total Calculated: P{calculateTotal()}</Text>
+      <Text style={styles.totalQuantity}>Total Quantity: {calculateTotalQuantity()}x</Text>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'maroon',
     flex: 1,
+    padding: 20,
+    backgroundColor: '#f0f0f0',
   },
-  searchBar: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 25,
-    backgroundColor: 'white',
-    margin: 10,
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
-  card: {
-    width: 345,
-    borderWidth: 2,
-    height: 140,
-    borderColor: 'transparent',
-    borderRadius: 10,
-    padding: 10,
-    left: 14,
-    margin: 10,
-    backgroundColor: '#FFAD31',
-    elevation: 5,
-  },
-  whiteSquare: {
-    backgroundColor: 'white',
-    width: 150, // Adjust the width as needed
-    height: 117, // Adjust the height as needed
-    borderRadius: 15,
-    marginRight: -150,
-  },
-  addButton: {
-    position: 'absolute',
-    width: 30,
-    height: 30,
-    top: 102,
-    right: 5,
-    backgroundColor: 'maroon',
-    borderRadius: 15,
+  itemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: 'maroon', // Add a black border color
-    borderWidth: 1, // Add a border width
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    elevation: 2,
   },
-  buttonText: {
-    fontSize: 20,
-    color: 'white', // Change the color to yellow
+  itemName: {
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  smallCard: {
-    width: 345,
-    left: 13,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: 10,
-    padding: 10,
-    margin: 10,
-    backgroundColor: '#207D00',
-    elevation: 5,
+  itemPrice: {
+    fontSize: 16,
+    color: '#555',
   },
-  reviewButton: {
-    position: 'absolute',
-    width: 150,
-    height: 35,
-    bottom: 30,
-    right: 10,
-    backgroundColor: 'maroon',
-    padding: 1,
-    borderRadius: 100,
+  quantityContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderColor: 'black',
-    borderWidth: 0,
-    backgroundColor: 'white',
   },
-  reviewButtonText: {
-    fontFamily: 'Poppins',
+  quantityButton: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'black',
+    paddingHorizontal: 8,
+  },
+  quantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
+  },
+  total: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
+  },
+  totalQuantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 });
+
+export default StudentSearchView;

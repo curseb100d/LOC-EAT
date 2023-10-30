@@ -1,234 +1,326 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
-import { ref, set, update, remove } from "firebase/database";
+import { ref, set, onValue, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
 import { firebase } from '../../Components/config';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useNavigation } from '@react-navigation/native';
+import { storage } from '../../Components/config';
+import { getDownloadURL, uploadBytes, deleteObject, listAll } from 'firebase/storage';
 
 export default function BusinessCreateMain() {
-  const [foodItems, setFoodItems] = useState(BusinessCreateController.getAllFoodItems());
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [type, setType] = useState(''); 
-  const [editMode, setEditMode] = useState(false);
-  const [editItemId, setEditItemId] = useState(null);
-  const [image, setImage] = useState(null);
-  const [uploading, setUploading] = useState(false); 
+  const [foodmenus, setFoodMenu] = useState([]);
   const navigation = useNavigation();
+  const [image, setImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleUpdate = () => {
-    BusinessCreateController.updateFoodItem(editItemId, name, price, type);
-    setFoodItems(BusinessCreateController.getAllFoodItems());
-    setEditMode(false);
-    setEditItemId(null);
-    setName('');
-    setPrice('');
-    setType('');
+  function handleEditFoodClick() {
+    navigation.navigate('BusinessCreateAdd');
+  }
 
-    update(ref(db, 'foodmenu/' + name), {
-      name: name,
-      price: price,
-      type : type
-    }).then(() => {
-      //Data saved successfully!
-      alert('Food Updated');
-    })
-      .catch((error) => {
-        //The write failed...
-        alert(error);
-      });
-  };
+  // Fetch products from the database
+  useEffect(() => {
+    const foodmenuRef = ref(db, 'foodmenu');
 
-  const handleEdit = (item) => {
-    setEditItemId(item.id);
-    setName(item.name);
-    setPrice(item.price);
-    setType(item.type);
-    setEditMode(true);
-  };  
+    // Listen for changes in the database and update the state
+    const unsubscribe = onValue(foodmenuRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const foodmenusData = snapshot.val();
+        const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
+          id,
+          ...foodmenusData[id],
+          quantity: 0,
+          totalPrice: 0, // Initialize total price for each item
+        }));
+        setFoodMenu(foodmenusArray);
+      }
+    });
 
-  const renderEditForm = () => {
-    if (!editMode) return null;
+    // Clean up the listener when the component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
-    return (
-      <View style={styles.editForm}>
-        <Text style={styles.editFormTitle}>Edit Food Item</Text>
-        <TextInput
-          placeholder="Name"
-          value={name}
-          onChangeText={(text) => setName(text)}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Price"
-          value={price}
-          onChangeText={(text) => setPrice(text)}
-          style={styles.input}
-          keyboardType="numeric"
-        />
-        <TextInput
-          placeholder="Type"
-          value={type}
-          onChangeText={(text) => setType(text)}
-          style={styles.input}
-        />
-        <TouchableOpacity onPress={handleUpdate} style={styles.updateButton}>
-          <Text style={styles.buttonText}>Update</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setEditMode(false)} style={styles.cancelButton}>
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemName}>{item.name}</Text>
-      <Text style={styles.itemDetail}>Price: {item.price}</Text>
-      <Text style={styles.itemDetail}>Type: {item.type}</Text>
-      <TouchableOpacity onPress={() => handleEdit(item)} style={styles.editButton}>
-        <Text style={styles.buttonText}>Edit</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
-        <Text style={styles.buttonText}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const handleDelete = (id) => {
-    BusinessCreateController.deleteFoodItem(id);
-    setFoodItems(BusinessCreateController.getAllFoodItems());
-
-    remove(ref(db, 'foodmenu/' + name));
-    alert('Food Deleted');
-  };
+  
 
   return (
-    <View>
-      {renderEditForm()}
+    <View style={styles.container}>
+      <Text style={styles.header}>Food Menu</Text>
       <FlatList
-        data={foodItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
+        data={foodmenus}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.itemContainer}>
+            <Text style={styles.itemName}>{item.foodName}</Text>
+            <Text style={styles.itemPrice}>P{item.price}</Text>
+            <View style={styles.quantityContainer}>
+            </View>
+          </View>
+        )}
       />
       <TouchableOpacity onPress={handleEditFoodClick}>
         <Text>Add Food</Text>
       </TouchableOpacity>
     </View>
   )
-
-  function handleEditFoodClick() {
-    navigation.navigate('BusinessCreateAdd');
-  }
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: '#f0f0f0',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-  addButton: {
-    backgroundColor: 'green',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  pickButton:{
-    backgroundColor: 'green',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  uploadButton:{
-    backgroundColor: 'green',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  imageContainer:{
-    marginTop: 30,
-    marginBottom: 50,
-    alignItems: 'center'
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    marginBottom: 20,
   },
   itemContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
-    borderRadius: 5,
-    marginBottom: 12,
+    marginVertical: 8,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    elevation: 2,
   },
   itemName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
   },
-  itemDetail: {
+  itemPrice: {
     fontSize: 16,
-    marginBottom: 4,
+    color: '#555',
   },
-  editButton: {
-    backgroundColor: 'blue',
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 8,
+  quantityContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
-  deleteButton: {
-    backgroundColor: 'red',
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 8,
-    alignItems: 'center',
+  quantityButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
   },
-  editForm: {
-    backgroundColor: '#f0f0f0',
-    padding: 16,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'gray',
-    marginBottom: 16,
-  },
-  editFormTitle: {
+  quantity: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
+    marginHorizontal: 8,
   },
-  updateButton: {
-    backgroundColor: 'green',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 8,
+  total: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 20,
   },
-  cancelButton: {
-    backgroundColor: 'red',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 8,
+  totalQuantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 });
+
+// import React, { Component, useState, useEffect } from 'react';
+// import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';
+// import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
+// import { ref, set, update, remove } from "firebase/database";
+// import { db } from '../../Components/config';
+// import { firebase } from '../../Components/config';
+// import * as ImagePicker from 'expo-image-picker';
+// import * as FileSystem from 'expo-file-system';
+
+// class BusinessCreateMain extends Component {
+//   constructor() {
+//     super();
+//     this.state = {
+//       foodName: '',
+//       foodDescription: '',
+//       price: 0,
+//       discountPercentage: '',
+//       discounts: [],
+//       selectedIndex: null,
+//       updatedDiscount: {},
+//       storeName: '',
+//       location: '',
+//     };
+//   }
+
+//   handleAddDiscount = () => {
+//     const { foodName, foodDescription, price, discountPercentage, discounts, storeName, location } = this.state;
+
+//     if (
+//       discountPercentage !== '' &&
+//       !isNaN(discountPercentage) &&
+//       foodName !== '' &&
+//       foodDescription !== '' &&
+//       price !== '' &&
+//       storeName !== '' &&
+//       location !== ''
+//     ) {
+//       const newDiscount = BusinessCreateController.calculateDiscount(
+//         foodName,
+//         foodDescription,
+//         price,
+//         parseFloat(discountPercentage),
+//         storeName,
+//         location
+//       );
+
+//       discounts.push(newDiscount);
+//       this.setState({
+//         foodName: '',
+//         foodDescription: '',
+//         discountPercentage: '',
+//         discounts,
+//         storeName: '',
+//         location: '',
+//       });
+//     }
+
+//     const databaseRef = ref(db, 'foodmenu');
+//     set(databaseRef, discounts)
+//       .then(() => {
+//         // Data saved successfully!
+//         alert('Food added');
+//       })
+//       .catch((error) => {
+//         // The write failed...
+//         alert(error);
+//       });
+
+//   }
+
+//   render() {
+//     return (
+//       <ScrollView contentContainerStyle={styles.container}>
+//         <View style={styles.inputContainer}>
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Food Name"
+//             value={this.state.foodName}
+//             onChangeText={(text) => this.setState({ foodName: text })}
+//           />
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Food Description"
+//             value={this.state.foodDescription}
+//             onChangeText={(text) => this.setState({ foodDescription: text })}
+//           />
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Enter Price"
+//             onChangeText={(text) => this.setState({ price: parseFloat(text) })}
+//           />
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Enter Discount Percentage"
+//             value={this.state.discountPercentage}
+//             onChangeText={(text) => this.setState({ discountPercentage: text })}
+//           />
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Owner Name"
+//             value={this.state.storeName}
+//             onChangeText={(text) => this.setState({ storeName: text })}
+//           />
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Location"
+//             value={this.state.location}
+//             onChangeText={(text) => this.setState({ location: text })}
+//           />
+//           <View>
+//             <TouchableOpacity
+//               onPress={this.handleAddDiscount}
+//             >
+//               <Text style={styles.butt}>Add Discount</Text>
+//             </TouchableOpacity>
+//           </View>
+
+//         </View>
+//         <FlatList
+//           data={this.state.discounts}
+//           keyExtractor={(item, index) => index.toString()}
+//           renderItem={({ item }) => (
+//             <View style={styles.discountItem}>
+//               <View style={styles.discountItemContent}>
+//                 <Text style={styles.discountItemText}>Food Name: {item.foodName}</Text>
+//                 <Text style={styles.discountItemText}>Description: {item.foodDescription}</Text>
+//               </View>
+//               <Text style={styles.discountItemPrice}>{item.percentage}% off</Text>
+//               <Text style={styles.discountItemPrice}>Discount: {item.discountedPrice}</Text>
+//               <Text style={styles.discountItemPrice}>Store Name: {item.storeName}</Text>
+//               <Text style={styles.discountItemPrice}>Location: {item.location}</Text>
+//             </View>
+//           )}
+//         />
+//       </ScrollView>
+//     );
+//   }
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flexGrow: 1,
+//     padding: 20,
+//     backgroundColor: 'maroon',
+//   },
+//   inputContainer: {
+//     backgroundColor: '#FFD68A',
+//     borderRadius: 5,
+//     padding: 10,
+//     marginBottom: 10,
+//     elevation: 3, // Adds a slight shadow (Android)
+//     shadowColor: 'black', // Adds a slight shadow (iOS)
+//     shadowOffset: { width: 0, height: 2 }, // Adds a slight shadow (iOS)
+//     shadowOpacity: 0.2, // Adds a slight shadow (iOS)
+//   },
+//   input: {
+//     borderWidth: 1,
+//     borderColor: '#ccc',
+//     backgroundColor: 'white',
+//     borderRadius: 5,
+//     padding: 10,
+//     marginBottom: 10,
+//   },
+//   discountItem: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 10,
+//     padding: 20,
+//     marginBottom: 10,
+//     elevation: 3,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.2,
+//   },
+//   discountItemContent: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     marginBottom: 10,
+//   },
+//   discountItemPrice: {
+//     fontSize: 18,
+//     fontWeight: 'bold',
+//     color: 'white',
+//   },
+//   butt: {
+//     width: 180,
+//     height: 50,
+//     borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+//     backgroundColor: 'green', // Button background color
+//     marginTop: 10,
+//     marginBottom: 5,
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     textAlign: 'center',
+//     textAlignVertical: 'center',
+//     color: 'white',
+//     marginLeft: 80
+//   }
+// });
+
+// export default BusinessCreateMain;
+
