@@ -14,6 +14,7 @@ import StudentReviewOrder from './src/View/Student_Screens/StudentReviewOrder';
 import StudentEmailScreen from './src/View/Student_Screens/StudentEmailScreen'
 import StudentSearchView from './src/View/Student_Screens/StudentSearchView';
 import BusinessCreateAdd from './src/View/Business_Screens/BusinessCreateAdd';
+import BusinessCreatePromotionAdd from './src/View/Business_Screens/BusinessCreatePromotionAdd';
 import { CartProvider } from './src/Context/CartContext';
 
 const Stack = createStackNavigator();
@@ -36,6 +37,7 @@ function App() {
           <Stack.Screen name="StudentReviewOrder" component={StudentReviewOrder} />
           <Stack.Screen name="Cart" component={StudentCartView} />
           <Stack.Screen name="BusinessCreateAdd" component={BusinessCreateAdd} />
+          <Stack.Screen name="BusinessCreatePromotionAdd" component={BusinessCreatePromotionAdd} />
         </Stack.Navigator>
       </NavigationContainer>
     </CartProvider>

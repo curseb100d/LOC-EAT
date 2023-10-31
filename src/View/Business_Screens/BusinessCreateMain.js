@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Image, ActivityIndicator, Button } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
 import { ref, set, onValue, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
-import { firebase } from '../../Components/config';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { useNavigation } from '@react-navigation/native';
 import { storage } from '../../Components/config';
 import { getDownloadURL, uploadBytes, deleteObject, listAll } from 'firebase/storage';
@@ -15,8 +13,26 @@ export default function BusinessCreateMain() {
   const navigation = useNavigation();
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
-  function handleEditFoodClick() {
+  const [foodName, setFoodName] = useState('');
+  const [foodDescription, setFoodDescription] = useState('');
+  const [price, setPrice] = useState(0);
+  const [discountPercentage, setDiscountPercentage] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [location, setLocation] = useState('');
+
+  function handleEditFoodItem(item) {
+    setSelectedItemId(item.id);
+    setFoodName(item.foodName);
+    setFoodDescription(item.foodDescription);
+    setPrice(item.price);
+    setDiscountPercentage(item.discountPercentage.toString());
+    setStoreName(item.storeName);
+    setLocation(item.location);
+  }
+
+  const handleEditFoodClick = () => {
     navigation.navigate('BusinessCreateAdd');
   }
 
@@ -44,7 +60,130 @@ export default function BusinessCreateMain() {
     };
   }, []);
 
-  
+  const pickImage = async () => {
+    setIsLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uploadURL = await uploadImageAsync(result.assets[0].uri);
+      setImage(uploadURL);
+      setIsLoading(false);
+    } else {
+      setImage(null);
+      setIsLoading(false);
+    }
+  };
+
+  const uploadImageAsync = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    try {
+      const storageRef = ref(storage, `Images/image-${Date.now()}`);
+      const result = await uploadBytes(storageRef, blob);
+
+      blob.close();
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      alert(`Error: ${error}`);
+    }
+  };
+
+  const deleteImage = async () => {
+    setIsLoading(true);
+    const deleteRef = ref(storage, image);
+    try {
+      deleteObject(deleteRef).then(() => {
+        setImage(null);
+        setIsLoading(false);
+      });
+    } catch (error) {
+      alert(`Error: ${error}`);
+    }
+  };
+
+  useEffect(() => {
+    // Function to fetch an image from Firebase Storage
+    const fetchImage = async () => {
+      const listRef = ref(storage, 'Images'); // Change 'Images' to your folder name
+      const images = await listAll(listRef);
+
+      if (images.items.length > 0) {
+        const imageRef = images.items[0]; // Fetch the first image, change as needed
+        const downloadURL = await getDownloadURL(imageRef);
+        setImage(downloadURL);
+      }
+    };
+
+    fetchImage();
+  }, []); // Fetch the image when the component mounts
+
+  const updateDiscount = async () => {
+    if (selectedItemId) {
+      const databaseRef = ref(db, `foodmenu/${selectedItemId}`);
+
+      // Calculate the discounted price based on the imported BusinessCreateController
+      const updatedDiscount = {
+        foodName,
+        foodDescription,
+        price,
+        discountPercentage: parseFloat(discountPercentage),
+        storeName,
+        location,
+        // Calculate the discounted price using BusinessCreateController
+        discountedPrice: BusinessCreateController.calculateDiscount(
+          foodName,
+          foodDescription,
+          price,
+          parseFloat(discountPercentage),
+          storeName,
+          location
+        ).discountedPrice,
+      };
+
+      try {
+        await update(databaseRef, updatedDiscount);
+        alert('Discount updated');
+        setSelectedItemId(null); // Clear the selected item
+        // Clear the form fields
+        setFoodName('');
+        setFoodDescription('');
+        setPrice(0);
+        setDiscountPercentage('');
+        setStoreName('');
+        setLocation('');
+      } catch (error) {
+        alert(`Error: ${error}`);
+      }
+    }
+  };
+
+  const handleDeleteItem = (itemId) => {
+    // Remove the item from Realtime Firebase and update the local state
+    const cartRef = ref(db, 'foodmenu/' + itemId);
+    remove(cartRef).then(() => {
+      // Remove the item from the local state
+      setFoodCart((prevFoodCart) => prevFoodCart.filter((item) => item.id !== itemId));
+      // Deselect the item
+      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => id !== itemId));
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -54,19 +193,76 @@ export default function BusinessCreateMain() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
+            {image && (
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: image }} style={styles.image} />
+              </View>
+            )}
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>P{item.price}</Text>
+            <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+            <Text style={styles.itemPrice}>Discounted Price: P{item.discountedPrice}</Text>
             <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={() => handleEditFoodItem(item)}>
+                <Text>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => handleDeleteItem(item.id)}
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
             </View>
+            {selectedItemId === item.id && (
+              <View style={styles.updateForm}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Food Name"
+                  value={foodName}
+                  onChangeText={(text) => setFoodName(text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Food Description"
+                  value={foodDescription}
+                  onChangeText={(text) => setFoodDescription(text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Price"
+                  onChangeText={(text) => setPrice(parseFloat(text))}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Discount Percentage"
+                  value={discountPercentage}
+                  onChangeText={(text) => setDiscountPercentage(text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Store Name"
+                  value={storeName}
+                  onChangeText={(text) => setStoreName(text)}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Location"
+                  value={location}
+                  onChangeText={(text) => setLocation(text)}
+                />
+                <TouchableOpacity style={styles.button} onPress={updateDiscount}>
+                  <Text style={styles.buttonText}>Update</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
       />
-      <TouchableOpacity onPress={handleEditFoodClick}>
-        <Text>Add Food</Text>
+      <TouchableOpacity style={styles.addButton} onPress={handleEditFoodClick}>
+        <Text style={styles.addButtonText}>Add Food</Text>
       </TouchableOpacity>
     </View>
-  )
-};
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -80,14 +276,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
     alignItems: 'center',
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
     backgroundColor: 'white',
     elevation: 2,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   itemName: {
     fontSize: 18,
@@ -101,27 +308,53 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  quantityButton: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    marginLeft: 10,
   },
-  quantity: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 8,
+  deleteButtonText: {
+    color: 'white',
   },
-  total: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: 20,
-  },
-  totalQuantity: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  updateForm: {
     marginTop: 10,
   },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'white',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+  },
+  addButton: {
+    backgroundColor: 'green',
+    borderRadius: 25,
+    width: 180,
+    height: 50,
+    marginTop: 10,
+    marginLeft: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white',
+  },  
 });
+
+
 
 // import React, { Component, useState, useEffect } from 'react';
 // import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Image, Alert, ScrollView } from 'react-native';

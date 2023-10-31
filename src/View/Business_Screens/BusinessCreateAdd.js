@@ -4,6 +4,7 @@ import BusinessCreateController from '../../Controller/Business_Controller/Busin
 import { ref, push, set } from "firebase/database";
 import { db } from '../../Components/config';
 import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
 
 function BusinessCreateAdd() {
     const navigation = useNavigation();
@@ -11,51 +12,50 @@ function BusinessCreateAdd() {
     const [foodDescription, setFoodDescription] = useState('');
     const [price, setPrice] = useState(0);
     const [discountPercentage, setDiscountPercentage] = useState('');
-    const [discounts, setDiscounts] = useState([]);
     const [storeName, setStoreName] = useState('');
-    const [location, setLocation] = useState('');
+    const [location, setLocation] = useState('Front Gate'); // Default to Front Gate
 
-    const handleAddDiscount = () => {
+    const handleAddFoodMenu = () => {
         if (
-          discountPercentage !== '' &&
-          !isNaN(discountPercentage) &&
-          foodName !== '' &&
-          foodDescription !== '' &&
-          price !== 0 &&
-          storeName !== '' &&
-          location !== ''
+            discountPercentage !== '' &&
+            !isNaN(discountPercentage) &&
+            foodName !== '' &&
+            foodDescription !== '' &&
+            price !== 0 &&
+            storeName !== '' &&
+            location !== ''
         ) {
-          const newDiscount = BusinessCreateController.calculateDiscount(
-            foodName,
-            foodDescription,
-            price,
-            parseFloat(discountPercentage),
-            storeName,
-            location
-          );
-      
-          // Push the new discount object to Firebase with a unique key
-          const databaseRef = ref(db, 'foodmenu');
-          const newDiscountRef = push(databaseRef); // Create a new reference with a unique key
-          set(newDiscountRef, newDiscount)
-            .then(() => {
-              // Data saved successfully!
-              alert('Food added');
-              navigation.goBack();
-            })
-            .catch((error) => {
-              // The write failed...
-              alert(error);
-            });
-      
-          // Clear the form fields
-          setFoodName('');
-          setFoodDescription('');
-          setDiscountPercentage('');
-          setStoreName('');
-          setLocation('');
+            const newDiscount = BusinessCreateController.calculateDiscount(
+                foodName,
+                foodDescription,
+                price,
+                parseFloat(discountPercentage),
+                storeName,
+                location
+            );
+
+            // Push the new discount object to Firebase with a unique key
+            const databaseRef = ref(db, 'foodmenu');
+            const newDiscountRef = push(databaseRef); // Create a new reference with a unique key
+            set(newDiscountRef, newDiscount)
+                .then(() => {
+                    // Data saved successfully!
+                    alert('Food added');
+                    navigation.goBack();
+                })
+                .catch((error) => {
+                    // The write failed...
+                    alert(error);
+                });
+
+            // Clear the form fields
+            setFoodName('');
+            setFoodDescription('');
+            setDiscountPercentage('');
+            setStoreName('');
+            setLocation('');
         }
-      };
+    };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -89,16 +89,18 @@ function BusinessCreateAdd() {
                     value={storeName}
                     onChangeText={(text) => setStoreName(text)}
                 />
-                <TextInput
+                <Picker
+                    selectedValue={location}
                     style={styles.input}
-                    placeholder="Location"
-                    value={location}
-                    onChangeText={(text) => setLocation(text)}
-                />
+                    onValueChange={(itemValue) => setLocation(itemValue)}
+                >
+                    <Picker.Item label="Front Gate" value="Front Gate" />
+                    <Picker.Item label="Back Gate" value="Back Gate" />
+                </Picker>
                 <View>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={handleAddDiscount}
+                        onPress={handleAddFoodMenu}
                     >
                         <Text style={styles.buttonText}>Add Discount</Text>
                     </TouchableOpacity>

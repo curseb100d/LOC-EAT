@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { ref, set, onValue, remove } from "firebase/database";
 import { db } from '../../Components/config';
 
 const StudentSearchView = () => {
   const [cart, setCart] = useState([]);
   const [foodmenus, setFoodMenu] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [selectedLocation, setSelectedLocation] = useState(''); // State for selected location
 
   // Fetch products from the database
   useEffect(() => {
@@ -59,18 +61,46 @@ const StudentSearchView = () => {
 
   const calculateTotalQuantity = () => {
     return cart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
-  };  
+  };
+
+  const filteredFoodMenus = foodmenus.filter((item) =>
+    (item.foodName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.price.toString().includes(searchQuery)) &&
+    (!selectedLocation || item.location === selectedLocation)
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Food Menu</Text>
       <FlatList
-        data={foodmenus}
+        data={[
+          { title: 'Front Gate', action: () => setSelectedLocation('Front Gate') },
+          { title: 'Back Gate', action: () => setSelectedLocation('Back Gate') },
+          { title: 'Canteen', action: () => setSelectedLocation('Canteen') },
+          { title: 'C', action: () => setSelectedLocation('') }, // Clear button
+        ]}
+        numColumns={2} // Organize in 2 columns
+        keyExtractor={(item) => item.title}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.button} onPress={item.action}>
+            <Text style={styles.buttonText}>{item.title}</Text>
+          </TouchableOpacity>
+        )}
+      />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search"
+        onChangeText={(text) => setSearchQuery(text)}
+        value={searchQuery}
+      />
+      <FlatList
+        data={filteredFoodMenus}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>P{item.price}</Text>
+            <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+            <Text style={styles.itemLocation}>Location: {item.location}</Text>
             <View style={styles.quantityContainer}>
               <TouchableOpacity onPress={() => addToCart(item, -1)}>
                 <Text style={styles.quantityButton}>-</Text>
@@ -83,9 +113,8 @@ const StudentSearchView = () => {
           </View>
         )}
       />
-
-      <Text style={styles.total}>Total Calculated: P{calculateTotal()}</Text>
-      <Text style={styles.totalQuantity}>Total Quantity: {calculateTotalQuantity()}x</Text>
+      <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
+      {/* <Text style={styles.totalQuantity}>Total Quantity: {calculateTotalQuantity()} items</Text> */}
     </View>
   );
 };
@@ -100,22 +129,44 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
+  },
+  locationButtons: {
+    flexDirection: 'column', // Arrange buttons in a column
+  },
+  button: {
+    flex: 1,
+    margin: 5,
+    backgroundColor: 'lightblue',
+    borderRadius: 50, // Make the buttons circular
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
     backgroundColor: 'white',
     elevation: 2,
+    marginBottom: 10,
   },
   itemName: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 5,
   },
   itemPrice: {
+    fontSize: 16,
+    color: '#555',
+  },
+  itemLocation: {
     fontSize: 16,
     color: '#555',
   },
@@ -137,11 +188,19 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
+    textAlign: 'right',
   },
   totalQuantity: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
+    textAlign: 'right',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 10,
   },
 });
 

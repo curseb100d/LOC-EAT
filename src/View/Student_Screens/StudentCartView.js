@@ -44,7 +44,7 @@ const StudentCartView = () => {
 
   const handleDeleteItem = (itemId) => {
     // Remove the item from Realtime Firebase and update the local state
-    const cartRef = ref(db, 'foodcart/' + itemId);
+    const cartRef = ref(db, 'foodcart/');
     remove(cartRef).then(() => {
       // Remove the item from the local state
       setFoodCart((prevFoodCart) => prevFoodCart.filter((item) => item.id !== itemId));
@@ -90,8 +90,8 @@ const StudentCartView = () => {
           </View>
         )}
       />
-      <Button title="Review and Checkout" onPress={handleReviewButtonPress} />
-      <Text style={styles.total}>Total Calculated:${calculateTotal().toFixed(2)}</Text>
+      <Text style={styles.total}>Total: P{calculateTotal().toFixed(2)}</Text>
+      <Button title="Review" onPress={handleReviewButtonPress} />
     </View>
   );
 };
