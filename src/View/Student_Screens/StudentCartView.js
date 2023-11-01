@@ -12,6 +12,7 @@ const StudentCartView = () => {
   useEffect(() => {
     const foodcartRef = ref(db, 'foodcart');
 
+    // Listen for changes in the database and update the state
     const unsubscribe = onValue(foodcartRef, (snapshot) => {
       if (snapshot.exists()) {
         const foodcartData = snapshot.val();
@@ -23,6 +24,7 @@ const StudentCartView = () => {
       }
     });
 
+    // Clean up the listener when the component unmounts
     return () => {
       unsubscribe();
     };

@@ -1,104 +1,135 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
-import { ref, set } from 'firebase/database';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { ref, set, onValue, remove } from 'firebase/database';
 import { db } from '../../Components/config';
+import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
 import { useNavigation } from '@react-navigation/native';
 
-function BusinessCreatePromotionAdd() {
+// Define the BusinessCreatePromotionAdd component
+const BusinessCreatePromotionAdd = () => {
+    // State variables for input fields and promotions
     const navigation = useNavigation();
-    // const [foodName, setFoodName] = useState('');
+    const [foodmenus, setFoodMenu] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
+
     const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
-    // const [originalPrice, setOriginalPrice] = useState(0);
-    // const [discountPercentage, setDiscountPercentage] = useState('');
-    // const [discounts, setDiscounts] = useState([]);
-    const [businessOwnerName, setBusinessOwnerName] = useState('');
+    const [discount, setDiscount] = useState(0);
+    const [storeName, setStoreName] = useState('');
     const [location, setLocation] = useState('');
+    const [promotions, setPromotions] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
-    const [daysDifference, setDaysDifference] = useState(null);
-    
-    const handleAddDiscount = () => {
+
+    // Function to add a promotion
+    const handleAddPromotion = () => {
         if (
-            // discountPercentage !== '' &&
-            // !isNaN(discountPercentage) &&
-            // foodName !== '' &&
+            discount !== '' &&
             foodDiscountDescription !== '' &&
-            businessOwnerName !== '' &&
+            storeName !== '' &&
             location !== ''
         ) {
-            const newDiscount = BusinessPromotionController.calculateDiscount(
-                // foodName,
+            // Calculate the promotion and add it to the promotions list
+            const newPromotion = BusinessPromotionController.calculatePromotion(
                 foodDiscountDescription,
-                // originalPrice,
-                // parseFloat(discountPercentage),
-                businessOwnerName,
-                location
+                discount,
+                storeName,
+                location,
+                startDate,
+                endDate
             );
 
-            setDiscounts([...discounts, newDiscount]);
+            // Create a new array with the updated promotions
+            const updatedPromotions = [...promotions, newPromotion];
 
-            setFoodName('');
-            setFoodDiscountDescription('');
-            // setDiscountPercentage('');
-            setBusinessOwnerName('');
-            setLocation('');
-
-            const databaseRef = ref(db, 'promotion');
-            set(databaseRef, discounts)
+            // Update the Firebase database with the updated promotions
+            const databaseRef = ref(db, 'promotions');
+            set(databaseRef, updatedPromotions)
                 .then(() => {
                     // Data saved successfully!
-                    alert('Food added');
-                    navigation.goBack();
+                    alert('Promotion added');
                 })
                 .catch((error) => {
                     // The write failed...
                     alert(error);
                 });
+
+            // Clear input fields
+            setFoodDiscountDescription('');
+            setDiscount('');
+            setStoreName('');
+            setLocation('');
         }
     };
 
-    const handleCalculateDaysDifference = () => {
-        if (startDate && endDate) {
-            const daysDifference = BusinessPromotionController.calculateDaysDifference(
-                startDate,
-                endDate
-            );
-            setDaysDifference(daysDifference);
-        }
+    // Fetch products from the database
+    useEffect(() => {
+        const foodmenuRef = ref(db, 'foodmenu');
+
+        // Listen for changes in the database and update the state
+        const unsubscribe = onValue(foodmenuRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const foodmenusData = snapshot.val();
+                const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
+                    id,
+                    ...foodmenusData[id],
+                    quantity: 0,
+                    totalPrice: 0, // Initialize total price for each item
+                }));
+                setFoodMenu(foodmenusArray);
+            }
+        });
+
+        // Clean up the listener when the component unmounts
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
+    const toggleItemSelection = (itemId) => {
+        setSelectedItems((prevSelectedItems) => {
+            if (prevSelectedItems.includes(itemId)) {
+                return prevSelectedItems.filter((id) => id !== itemId);
+            } else {
+                return [...prevSelectedItems, itemId];
+            }
+        });
+    };
+
+    const handleMainButtonPress = () => {
+        const mainItems = foodmenus.filter((item) => selectedItems.includes(item.id));
+        const mainRef = ref(db, 'selectFoodPromotion');
+        set(mainRef, mainItems).then(() => {
+            navigation.goBack('BusinessCreatePromotionMain', { reviewedMain: mainItems });
+        });
+    };
+
+    // Define a new function to call both handleAddPromotion and handleMainButtonPress
+    const handleAddPromotionAndMainButton = () => {
+        handleAddPromotion(); // Call the handleAddPromotion function
+        handleMainButtonPress(); // Call the handleMainButtonPress function
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            {/* Input fields */}
             <View style={styles.inputContainer}>
-                {/* <TextInput
-                    style={styles.input}
-                    placeholder="Food Name"
-                    value={foodName}
-                    onChangeText={(text) => setFoodName(text)}
-                /> */}
                 <TextInput
                     style={styles.input}
                     placeholder="Food Discount Description"
                     value={foodDiscountDescription}
                     onChangeText={(text) => setFoodDiscountDescription(text)}
                 />
-                {/* <TextInput
-                    style={styles.input}
-                    placeholder="Enter Price"
-                    onChangeText={(text) => setOriginalPrice(parseFloat(text))}
-                /> */}
-                {/* <TextInput
-                    style={styles.input}
-                    placeholder="Enter Discount Percentage"
-                    value={discountPercentage}
-                    onChangeText={(text) => setDiscountPercentage(text)}
-                /> */}
                 <TextInput
                     style={styles.input}
-                    placeholder="Owner Name"
-                    value={businessOwnerName}
-                    onChangeText={(text) => setBusinessOwnerName(text)}
+                    placeholder="Discount"
+                    value={discount}
+                    onChangeText={(text) => setDiscount(text)}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Store Name"
+                    value={storeName}
+                    onChangeText={(text) => setStoreName(text)}
                 />
                 <TextInput
                     style={styles.input}
@@ -119,48 +150,36 @@ function BusinessCreatePromotionAdd() {
                     onChangeText={(text) => setEndDate(text)}
                 />
 
+                <FlatList
+                    data={foodmenus}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.itemContainer}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.itemContent,
+                                    selectedItems.includes(item.id) ? styles.selectedItem : null
+                                ]}
+                                onPress={() => toggleItemSelection(item.id)}
+                            >
+                                <Text style={styles.itemName}>{item.foodName}</Text>
+                                <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+                                <Text style={styles.itemLocation}>Location: {item.location}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
                 <View>
-                    <TouchableOpacity style={styles.button} onPress={handleAddDiscount}>
-                        <Text style={styles.buttonText}>Add Discount</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={handleCalculateDaysDifference}
-                    >
-                        <Text style={styles.buttonText}>Total Days Left</Text>
+                    <TouchableOpacity style={styles.button} onPress={handleAddPromotionAndMainButton}>
+                        <Text style={styles.buttonText}>Add Promotion</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-            <FlatList
-                data={discounts}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.discountItem}>
-                        <View style={styles.discountItemContent}>
-                            <Text style={styles.discountItemText}>Name: {item.foodName}</Text>
-                            <Text style={styles.discountItemText}>
-                                Description: {item.foodDiscountDescription}
-                            </Text>
-                        </View>
-                        <Text style={styles.discountItemPrice}>{item.percentage}% off</Text>
-                        <Text style={styles.discountItemPrice}>Discount: {item.discountedPrice}</Text>
-                        <Text style={styles.discountItemPrice}>Owner Name: {item.businessOwnerName}</Text>
-                        <Text style={styles.discountItemPrice}>Location: {item.location}</Text>
-                    </View>
-                )}
-            />
-            {daysDifference !== null && (
-                <View>
-                    <Text style={styles.discountItemPrice}>
-                        Days Left: {daysDifference}
-                    </Text>
-                </View>
-            )}
         </ScrollView>
     );
 };
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
@@ -195,15 +214,11 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
     },
-    discountItemContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    discountItemPrice: {
+    discountItemText: {
         fontSize: 18,
         fontWeight: 'bold',
         color: 'white',
+        marginBottom: 10,
     },
     button: {
         width: 180,
@@ -225,6 +240,35 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center',
         textAlignVertical: 'center',
+    },
+    itemContainer: {
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        padding: 16,
+        marginVertical: 8,
+        borderRadius: 10,
+        backgroundColor: 'white',
+        elevation: 2,
+        marginBottom: 10,
+    },
+    itemName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    itemPrice: {
+        fontSize: 16,
+        color: '#555',
+    },
+    itemLocation: {
+        fontSize: 16,
+        color: '#555',
+    },
+    selectedItem: {
+        backgroundColor: '#e0f7fa',
+    },
+    itemContent: {
+        flex: 1,
     },
 });
 

@@ -11,7 +11,8 @@ import StudentEditScreen from './src/View/Student_Screens/StudentEditScreen';
 import ForgotPasswordScreen from './src/View/ForgotPasswordScreen';
 import StudentCartView from './src/View/Student_Screens/StudentCartView';
 import StudentReviewOrder from './src/View/Student_Screens/StudentReviewOrder';
-import StudentEmailScreen from './src/View/Student_Screens/StudentEmailScreen'
+import StudentEmailScreen from './src/View/Student_Screens/StudentEmailScreen';
+import StudentHomePromotion from './src/View/Student_Screens/StudentHomePromotion';
 import StudentSearchView from './src/View/Student_Screens/StudentSearchView';
 import BusinessCreateAdd from './src/View/Business_Screens/BusinessCreateAdd';
 import BusinessCreatePromotionAdd from './src/View/Business_Screens/BusinessCreatePromotionAdd';
@@ -31,6 +32,7 @@ function App() {
           <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
           <Stack.Screen name="StudentEmailScreen" component={StudentEmailScreen} />
           <Stack.Screen name="StudentHome" component={StudentHome} />
+          <Stack.Screen name="StudentHomePromotion" component={StudentHomePromotion} />
           <Stack.Screen name="BusinessHome" component={BusinessHome} />
           <Stack.Screen name="StudentSearchView" component={StudentSearchView} />
           <Stack.Screen name="StudentCartView" component={StudentCartView} />
