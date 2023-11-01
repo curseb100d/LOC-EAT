@@ -97,11 +97,11 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{marginBottom:150}}>
+      <Text style={{ marginBottom: 150 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
+      </Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -119,27 +119,27 @@ export default function LoginScreen({ navigation }) {
       />
 
       <TouchableOpacity onPress={navigateToForgotPassword}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom:20}}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom: 20 }}>
           Forgot password?
         </Text>
       </TouchableOpacity>
 
       <View>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={LoginIn}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={LoginIn}
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <TouchableOpacity onPress={navigateToSignUp}>
         <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 100, color: 'white', }}>
-        Sign up
+          Sign up
         </Text>
       </TouchableOpacity>
     </View>
@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:20,
-    marginBottom:5,
+    marginTop: 20,
+    marginBottom: 5,
   },
   buttonText: {
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: 'black',
     fontSize: 20,
   },

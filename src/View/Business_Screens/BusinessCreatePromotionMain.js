@@ -27,7 +27,7 @@ export default function BusinessCreatePromotionMain() {
   useEffect(() => {
     const promotionsRef = ref(db, 'promotions');
     const selectedFoodPromotionRef = ref(db, 'selectFoodPromotion');
-  
+
     const promotionsListener = onValue(promotionsRef, (snapshot) => {
       if (snapshot.exists()) {
         const promotionsData = snapshot.val();
@@ -35,20 +35,20 @@ export default function BusinessCreatePromotionMain() {
         setDataFetched(true); // Set dataFetched to true here
       }
     });
-  
+
     const selectedFoodPromotionListener = onValue(selectedFoodPromotionRef, (snapshot) => {
       if (snapshot.exists()) {
         const selectedFoodPromotionData = snapshot.val();
         setSelectedFoodPromotion(selectedFoodPromotionData);
       }
     });
-  
+
     return () => {
       promotionsListener();
       selectedFoodPromotionListener();
     };
   }, []);
-  
+
 
   const handleEditPromotionClick = () => {
     navigation.navigate('BusinessCreatePromotionAdd');

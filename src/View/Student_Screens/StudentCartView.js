@@ -24,6 +24,28 @@ const StudentCartView = () => {
       }
     });
 
+    const addToCart = (foodName, quantity) => {
+      const updatedCart = [...foodCart];
+      const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
+
+      if (foodmenuIndex !== -1) {
+        updatedCart[foodmenuIndex].quantity += quantity;
+        updatedCart[foodmenuIndex].totalPrice = updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
+        if (updatedCart[foodmenuIndex].quantity <= 0) {
+          // If quantity reaches 0 or less, remove the item from the cart
+          updatedCart.splice(foodmenuIndex, 1);
+        }
+      } else {
+        updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
+      }
+
+      setCart(updatedCart);
+
+      // Update the cart data in Realtime Firebase
+      const cartRef = ref(db, 'foodcart');
+      set(cartRef, updatedCart);
+    };
+
     // Clean up the listener when the component unmounts
     return () => {
       unsubscribe();
@@ -82,6 +104,15 @@ const StudentCartView = () => {
               <Text style={styles.itemPrice}>Price: ${item.price}</Text>
               <Text style={styles.itemLocation}>Location: {item.location}</Text>
               <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity onPress={() => addToCart(item, -1)}>
+                  <Text style={styles.quantityButton}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantity}>{item.quantity}</Text>
+                <TouchableOpacity onPress={() => addToCart(item, 1)}>
+                  <Text style={styles.quantityButton}>+</Text>
+                </TouchableOpacity>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
@@ -155,6 +186,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  quantityButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
+  },
+  quantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
   },
 });
 

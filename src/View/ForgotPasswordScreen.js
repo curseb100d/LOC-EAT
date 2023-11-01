@@ -49,30 +49,30 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{marginTop:-50, marginBottom:10}}>
+      <Text style={{ marginTop: -50, marginBottom: 10 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.whiteText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
-    <Text style={styles.title}>Password Reset. {'\n\n'} If you wish to reset your password, please enter your email account.</Text>
-    <TextInput
-      style={styles.input}
-      placeholder="Email"
-      value={email}
-      onChangeText={(text) => setEmail(text)}
-    />
+      </Text>
+      <Text style={styles.title}>Password Reset. {'\n\n'} If you wish to reset your password, please enter your email account.</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
 
-    {loading ? (
-      <ActivityIndicator size="large" color="#0000ff" />
-    ) : resetPasswordButton}
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : resetPasswordButton}
 
-    <TouchableOpacity onPress={handleLoginRedirect}>
+      <TouchableOpacity onPress={handleLoginRedirect}>
         <Text style={styles.redirect}>
           Back to Login
         </Text>
-    </TouchableOpacity>
-  </View>
-);
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -85,20 +85,20 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     color: 'white',
-    fontWeight:'bold',
-    justifyContent:'center',
-    textAlign:'center',
-    marginLeft:15,
-    marginRight:15,
-    marginBottom:100,
-    marginTop:15
+    fontWeight: 'bold',
+    justifyContent: 'center',
+    textAlign: 'center',
+    marginLeft: 15,
+    marginRight: 15,
+    marginBottom: 100,
+    marginTop: 15
   },
   input: {
     fontSize: 15,
     padding: 10,
     width: 300,
     marginBottom: 10,
-    backgroundColor:'white',
+    backgroundColor: 'white',
   },
   button: {
     width: 180,
@@ -107,10 +107,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:20,
+    marginTop: 20,
   },
   buttonText: {
-    fontSize:20,
+    fontSize: 20,
     color: 'black',
     fontWeight: 'bold',
   },
@@ -121,8 +121,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:20,
-    marginBottom:150,
+    marginTop: 20,
+    marginBottom: 150,
   },
   yellowText: {
     color: 'yellow',
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
     color: 'white',
-    fontWeight:'bold',
-    marginBottom:55,
+    fontWeight: 'bold',
+    marginBottom: 55,
   },
 });

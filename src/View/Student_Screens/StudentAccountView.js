@@ -58,7 +58,7 @@ export default function StudentAccountView() {
         <View style={styles.userData}>
           <Card style={styles.card}>
             <Card.Content>
-              <UserDetail value={`${user.firstName} ${user.lastName}`}fontSize={15} />
+              <UserDetail value={`${user.firstName} ${user.lastName}`} fontSize={15} />
               <CircularCard />
               <UserDetail label="Student ID" value={user.schoolId} fontSize={11} />
               <UserDetail label="Department" value={user.department} fontSize={11} />
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     width: 300,
     textAlign: 'center',
     marginBottom: -28, // Remove margin and set marginBottom to 0
-    bottom:-169,
+    bottom: -169,
   },
   card: {
     backgroundColor: 'yellow',

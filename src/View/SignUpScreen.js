@@ -61,7 +61,7 @@ export default function SignUpScreen({ navigation }) {
         setLoading(false);
         return;
       }
-      
+
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
       alert('Check your emails!');
@@ -84,19 +84,19 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{marginBottom:10, marginTop:55}}>
+      <Text style={{ marginBottom: 10, marginTop: 55 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
+      </Text>
       <ScrollView style={{
         flex: 1, // Take up remaining horizontal space
         borderWidth: 1,
         borderColor: 'maroon',
         borderRadius: 20,
         padding: 10,
-        paddingRight:15,
-        }}>
+        paddingRight: 15,
+      }}>
         <TextInput
           style={styles.input}
           placeholder="First Name"
@@ -134,34 +134,34 @@ export default function SignUpScreen({ navigation }) {
         {userType === 'business' && (
           <>
             <TextInput
-            style={styles.input}
-            placeholder="Business Name"
-            value={businessName}
-            onChangeText={(text) => setBusinessName(text)}
+              style={styles.input}
+              placeholder="Business Name"
+              value={businessName}
+              onChangeText={(text) => setBusinessName(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={location}
-            onChangeText={(text) => setLocation(text)}
+              style={styles.input}
+              placeholder="Location"
+              value={location}
+              onChangeText={(text) => setLocation(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Time Open"
-            value={timeOpen}
-            onChangeText={(text) => setTimeOpen(text)}
+              style={styles.input}
+              placeholder="Time Open"
+              value={timeOpen}
+              onChangeText={(text) => setTimeOpen(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Schedule"
-            value={schedule}
-            onChangeText={(text) => setSchedule(text)}
+              style={styles.input}
+              placeholder="Schedule"
+              value={schedule}
+              onChangeText={(text) => setSchedule(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Status"
-            value={status}
-            onChangeText={(text) => setStatus(text)}
+              style={styles.input}
+              placeholder="Status"
+              value={status}
+              onChangeText={(text) => setStatus(text)}
             />
           </>
         )}
@@ -186,14 +186,14 @@ export default function SignUpScreen({ navigation }) {
           onChangeText={(text) => setConfirmPassword(text)}
         />
 
-        <Text style={{ fontSize: 16, marginTop: 2, fontWeight: 'bold', color:"white" }}>Select User Type:</Text>
+        <Text style={{ fontSize: 16, marginTop: 2, fontWeight: 'bold', color: "white" }}>Select User Type:</Text>
         <Picker
           selectedValue={userType}
           onValueChange={(itemValue) => setUserType(itemValue)}
           style={styles.picker}
         >
-          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="User" value="user" />
-          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="Business User" value="business" />
+          <Picker.Item style={{ fontWeight: 'bold', fontSize: 16 }} label="User" value="user" />
+          <Picker.Item style={{ fontWeight: 'bold', fontSize: 16 }} label="Business User" value="business" />
         </Picker>
       </ScrollView>
 
@@ -201,22 +201,22 @@ export default function SignUpScreen({ navigation }) {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={signUp}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
-      )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={signUp}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+        )}
 
-      {/* Your other content here */}
-      <TouchableOpacity onPress={handleLoginRedirect}>
-        <Text style={styles.redirect}>
-          Already have an account? Log in
-        </Text>
-      </TouchableOpacity>
+        {/* Your other content here */}
+        <TouchableOpacity onPress={handleLoginRedirect}>
+          <Text style={styles.redirect}>
+            Already have an account? Log in
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
   );
 }
 
@@ -237,8 +237,8 @@ const styles = StyleSheet.create({
   },
   picker: {
     width: 300,
-    color:'white',
-    marginBottom:'35',
+    color: 'white',
+    marginBottom: '35',
   },
   yellowText: {
     color: 'yellow',
@@ -259,10 +259,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:25,
+    marginTop: 25,
   },
   buttonText: {
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: 'black',
     fontSize: 20,
   },
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
     color: 'white',
-    fontWeight:'bold',
-    marginBottom:55,
+    fontWeight: 'bold',
+    marginBottom: 55,
   },
 });

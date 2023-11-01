@@ -47,7 +47,7 @@ export default function BusinessFoodOrderView() {
               style={[styles.circularButton, { backgroundColor: status === 'open' ? 'green' : 'red' }]}
               onPress={toggleStatus}
             >
-            </TouchableOpacity> 
+            </TouchableOpacity>
           </View>
         ))
       ) : (

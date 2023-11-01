@@ -22,12 +22,12 @@ export default function BusinessProfileView() {
       console.log("Current User Email:", currentUser.email);
 
       const usersRef = ref(db, 'Business user');
-        const emailQuery = query(
+      const emailQuery = query(
         usersRef,
         orderByChild('email'),
         equalTo(currentUser.email.toLowerCase()) // Convert email to lowercase
       );
-      
+
       try {
         const snapshot = await get(emailQuery);
         console.log("Query Result:", snapshot.val());
