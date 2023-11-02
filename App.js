@@ -16,13 +16,11 @@ import StudentHomePromotion from './src/View/Student_Screens/StudentHomePromotio
 import StudentSearchView from './src/View/Student_Screens/StudentSearchView';
 import BusinessCreateAdd from './src/View/Business_Screens/BusinessCreateAdd';
 import BusinessCreatePromotionAdd from './src/View/Business_Screens/BusinessCreatePromotionAdd';
-import { CartProvider } from './src/Context/CartContext';
 
 const Stack = createStackNavigator();
 
 function App() {
   return (
-    <CartProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login">
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -42,7 +40,6 @@ function App() {
           <Stack.Screen name="BusinessCreatePromotionAdd" component={BusinessCreatePromotionAdd} />
         </Stack.Navigator>
       </NavigationContainer>
-    </CartProvider>
   );
 }
 
