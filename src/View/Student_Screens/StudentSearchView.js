@@ -20,6 +20,7 @@ const StudentSearchView = () => {
         const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
           id,
           ...foodmenusData[id],
+          quantity: 0,
           totalPrice: 0, // Initialize total price for each item
         }));
         setFoodMenu(foodmenusArray);
