@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { ref, set, onValue, remove } from "firebase/database";
 import { db } from '../../Components/config';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const StudentSearchView = () => {
   const [cart, setCart] = useState([]);
@@ -69,30 +70,51 @@ const StudentSearchView = () => {
     (!selectedLocation || item.location === selectedLocation)
   );
 
+  const data = [
+    { title: 'Front Gate', action: () => setSelectedLocation('Front Gate') },
+    { title: 'Back Gate', action: () => setSelectedLocation('Back Gate') },
+    { title: 'Canteen', action: () => setSelectedLocation('Canteen') },
+    { title: 'Clear', action: () => setSelectedLocation('') }, // Clear button
+  ];
+
+  const renderRowItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.button}
+      onPress={item.action}
+    >
+      <Text style={styles.buttonText}>{item.title}</Text>
+    </TouchableOpacity>
+  );
+
+  const row1Data = data.filter((item) => item.title !== 'Clear');
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Food Menu</Text>
-      <FlatList
-        data={[
-          { title: 'Front Gate', action: () => setSelectedLocation('Front Gate') },
-          { title: 'Back Gate', action: () => setSelectedLocation('Back Gate') },
-          { title: 'Canteen', action: () => setSelectedLocation('Canteen') },
-          { title: 'C', action: () => setSelectedLocation('') }, // Clear button
-        ]}
-        numColumns={2} // Organize in 2 columns
-        keyExtractor={(item) => item.title}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.button} onPress={item.action}>
-            <Text style={styles.buttonText}>{item.title}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View>
       <TextInput
         style={styles.searchInput}
         placeholder="Search"
         onChangeText={(text) => setSearchQuery(text)}
         value={searchQuery}
+        placeholderTextColor="black"
       />
+       <FlatList
+        data={row1Data}
+        numColumns={3}
+        keyExtractor={(item) => item.title}
+        renderItem={renderRowItem}
+      />
+       <View style={styles.centeredButtonContainer}>
+      <TouchableOpacity
+        style={styles.buttonC}
+        onPress={() => setSelectedLocation('')}
+      >
+        <Text style={styles.buttonText}>{'Clear'}</Text>
+      </TouchableOpacity>
+      </View>
+      </View>
+       <ScrollView style={{padding:15}}>
       <FlatList
         data={filteredFoodMenus}
         keyExtractor={(item) => item.id.toString()}
@@ -113,6 +135,7 @@ const StudentSearchView = () => {
           </View>
         )}
       />
+      </ScrollView>
       <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
       {/* <Text style={styles.totalQuantity}>Total Quantity: {calculateTotalQuantity()} items</Text> */}
     </View>
@@ -123,13 +146,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#800000',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color:'white',
   },
   locationButtons: {
     flexDirection: 'column', // Arrange buttons in a column
@@ -137,38 +161,45 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     margin: 5,
-    backgroundColor: 'lightblue',
-    borderRadius: 50, // Make the buttons circular
-    height: 50,
+    backgroundColor: 'maroon',
+    borderWidth:1,
+    borderColor:'white',
+    borderRadius: 18, // Make the buttons circular
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    color:'white',
   },
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
+    color:'white',
   },
   itemContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
     padding: 16,
     marginVertical: 8,
-    borderRadius: 10,
-    backgroundColor: 'white',
+    borderRadius: 30,
+    backgroundColor: '#FFA500',
     elevation: 2,
     marginBottom: 10,
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    color:'black',
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#555',
+    color:'black',
   },
   itemLocation: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#555',
+    color:'black',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -189,6 +220,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     textAlign: 'right',
+    color:'white',
   },
   totalQuantity: {
     fontSize: 18,
@@ -198,9 +230,27 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: 'black',
     padding: 10,
     marginBottom: 10,
+    color:'black',
+    borderRadius:18,
+    backgroundColor:'white',
+  },
+  buttonC: {
+    backgroundColor: 'maroon',
+    borderRadius: 18, // Make the button circular
+    height: 40,
+    width: 105,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 5,
+    display: 'flex', // Added to ensure proper alignment
+    borderColor:'white',
+    borderWidth:1,
+  },
+  centeredButtonContainer: {
+    alignItems: 'center',
   },
 });
 

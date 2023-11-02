@@ -124,7 +124,9 @@ const StudentCartView = () => {
         )}
       />
       <Text style={styles.total}>Total: P{calculateTotal().toFixed(2)}</Text>
-      <Button title="Review" onPress={handleReviewButtonPress} />
+      <TouchableOpacity style={styles.button} onPress={handleReviewButtonPress}>
+      <Text style={styles.review}>Review</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -133,11 +135,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor:'#800000',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:'white',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -145,32 +149,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     marginVertical: 5,
-    borderRadius: 10,
-    borderColor: '#ccc',
+    borderRadius: 18,
     borderWidth: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#FFA500',
   },
   selectedItem: {
-    backgroundColor: '#e0f7fa',
+    backgroundColor: 'white',
   },
   itemContent: {
     flex: 1,
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 5,
+    color:'black',
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#555',
+    color:'black',
   },
   itemLocation: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 18,
+    color: '#555',
+    color:'black',
   },
   itemQuantity: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 18,
+    color: '#555',
+    color:'black',
   },
   deleteButton: {
     backgroundColor: 'red',
@@ -181,11 +189,13 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'white',
+    fontWeight:'bold',
   },
   total: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+    color:'white',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -201,6 +211,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginHorizontal: 8,
   },
+  review: {
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'green', // Background color
+    padding: 10, // Padding around the text
+    borderRadius: 15, // Border radius for rounded corners
+    marginTop:5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
+  }
 });
 
 export default StudentCartView;

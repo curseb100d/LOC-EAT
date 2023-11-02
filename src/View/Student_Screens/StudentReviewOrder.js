@@ -42,22 +42,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'maroon',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color:'white',
   },
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 10,
-    backgroundColor: 'white',
-    elevation: 2,
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 18,
+    borderWidth: 1,
+    backgroundColor: '#FFA500',
   },
   itemName: {
     fontSize: 18,
@@ -65,19 +66,20 @@ const styles = StyleSheet.create({
   },
   itemPrice: {
     fontSize: 16,
-    color: '#555',
+    color: 'black',
   },
   quantityContainer: {
     alignItems: 'center',
   },
   quantity: {
     fontSize: 16,
-    color: '#777',
+    color: 'black',
   },
   total: {
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
+    color:'white',
   },
 });
 
