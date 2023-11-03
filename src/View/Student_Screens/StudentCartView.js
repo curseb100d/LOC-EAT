@@ -12,7 +12,6 @@ const StudentCartView = () => {
   useEffect(() => {
     const foodcartRef = ref(db, 'foodcart');
 
-    // Listen for changes in the database and update the state
     const unsubscribe = onValue(foodcartRef, (snapshot) => {
       if (snapshot.exists()) {
         const foodcartData = snapshot.val();
@@ -24,33 +23,10 @@ const StudentCartView = () => {
       }
     });
 
-    // Clean up the listener when the component unmounts
     return () => {
       unsubscribe();
     };
   }, []);
-
-  const addToCart = (foodName, quantity) => {
-    const updatedCart = [...foodCart];
-    const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
-
-    if (foodmenuIndex !== -1) {
-      updatedCart[foodmenuIndex].quantity += quantity;
-      updatedCart[foodmenuIndex].totalPrice = updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
-      if (updatedCart[foodmenuIndex].quantity <= 0) {
-        // If quantity reaches 0 or less, remove the item from the cart
-        updatedCart.splice(foodmenuIndex, 1);
-      }
-    } else {
-      updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
-    }
-
-    setFoodCart(updatedCart);
-
-    // Update the cart data in Realtime Firebase
-    const cartRef = ref(db, 'foodcart');
-    set(cartRef, updatedCart);
-  };
 
   const calculateTotal = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -78,11 +54,7 @@ const StudentCartView = () => {
   };
 
   const handleReviewButtonPress = () => {
-    const reviewedItems = foodCart.filter((item) => selectedItems.includes(item.id));
-    const cartRef = ref(db, 'reviewedorder');
-    set(cartRef, reviewedItems).then(() => {
-      navigation.navigate('StudentReviewOrder', { reviewedCart: reviewedItems });
-    });
+    navigation.navigate('StudentReviewOrder', { cartData: foodCart });
   };
 
   return (
@@ -103,29 +75,20 @@ const StudentCartView = () => {
               <Text style={styles.itemName}>{item.foodName}</Text>
               <Text style={styles.itemPrice}>Price: ${item.price}</Text>
               <Text style={styles.itemLocation}>Location: {item.location}</Text>
-              {/* <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text> */}
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity onPress={() => addToCart(item, -1)}>
-                  <Text style={styles.quantityButton}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.quantity}>{item.quantity}</Text>
-                <TouchableOpacity onPress={() => addToCart(item, 1)}>
-                  <Text style={styles.quantityButton}>+</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => handleDeleteItem(item.id)}
             >
-              <Text style={styles.deleteButtonText}>Delete</Text>
+              <Text style={[styles.deleteButtonText, { fontSize: 16 }]}>Delete</Text>
             </TouchableOpacity>
           </View>
         )}
       />
       <Text style={styles.total}>Total: P{calculateTotal().toFixed(2)}</Text>
       <TouchableOpacity style={styles.button} onPress={handleReviewButtonPress}>
-      <Text style={styles.review}>Review</Text>
+        <Text style={styles.review}>Review</Text>
       </TouchableOpacity>
     </View>
   );
@@ -135,13 +98,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor:'#800000',
+    backgroundColor: '#800000',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color:'white',
+    color: 'white',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -150,6 +113,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
     borderRadius: 18,
+    borderColor: '#ccc',
     borderWidth: 1,
     backgroundColor: '#FFA500',
   },
@@ -163,22 +127,22 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
-    color:'black',
+    color: 'black',
   },
   itemPrice: {
     fontSize: 18,
     color: '#555',
-    color:'black',
+    color: 'black',
   },
   itemLocation: {
     fontSize: 18,
     color: '#555',
-    color:'black',
+    color: 'black',
   },
   itemQuantity: {
     fontSize: 18,
     color: '#555',
-    color:'black',
+    color: 'black',
   },
   deleteButton: {
     backgroundColor: 'red',
@@ -189,27 +153,13 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: 'white',
-    fontWeight:'bold',
+    fontWeight: 'bold',
   },
   total: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
-    color:'white',
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityButton: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    paddingHorizontal: 8,
-  },
-  quantity: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginHorizontal: 8,
+    color: 'white',
   },
   review: {
     color: 'white', // Text color
@@ -218,7 +168,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'green', // Background color
     padding: 10, // Padding around the text
     borderRadius: 15, // Border radius for rounded corners
-    marginTop:5,
+    marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center', // Center text horizontally

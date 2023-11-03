@@ -11,7 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { storage } from '../../Components/config';
-import { getDownloadURL, uploadBytes, ref, listAll } from 'firebase/storage';
+import { getDownloadURL, uploadBytes, ref, listAll, deleteObject } from 'firebase/storage';
 
 export default function StudentEditScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -180,8 +180,8 @@ export default function StudentEditScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
-        {/* Circular card */}
         <View style={styles.circularCard}>
+          <Image source={{ uri: images[currentImageIndex] }} style={{ width: '100%', height: '100%' }} />
           {/* Add your circular card content here */}
         </View>
 
@@ -201,12 +201,11 @@ export default function StudentEditScreen() {
         ) : (
           <>
             {images[currentImageIndex] && (
-              <View style={styles.circularCard}>
-                <Image source={{ uri: images[currentImageIndex] }} style={{ width: '100%', height: '100%' }} />
+              <View>
+                <Button title="Change Image" onPress={changeImage} />
+           
               </View>
             )}
-            <Button title="Change Image" onPress={changeImage} />
-            <Button title="Delete Image" onPress={deleteImage} />
           </>
         )}
       </View>
@@ -290,9 +289,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   button1Container: {
-    height: 50,
+    height: 100,
     width: 100,
-    marginTop: 190,
+    marginTop: 150,
     marginLeft: -90,
   },
   input: {
