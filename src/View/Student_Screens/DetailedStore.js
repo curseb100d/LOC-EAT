@@ -70,6 +70,7 @@ const DetailedStore = ({ route }) => {
   };
 
   const navigateToReviewScreen = () => {
+    navigation.navigate('ReviewScreen', { storeData });
     // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
     // and then navigate to the review screen with the cart data.
   };
