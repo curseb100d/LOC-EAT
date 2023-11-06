@@ -4,11 +4,12 @@ import { useRoute } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../../Components/config';
-import { ref, set } from 'firebase/database';
+import { ref, set, push } from 'firebase/database';
+import axios from 'axios';
 
 const StudentReviewOrder = () => {
   const route = useRoute();
-  const foodCart = route.params?.cartData || [];
+  const [foodCart, setFoodCart] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [pickUpTime, setPickUpTime] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Reservation');
@@ -16,6 +17,27 @@ const StudentReviewOrder = () => {
   const calculateSubTotal = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
+
+  const fetchFoodCartData = () => {
+    const firebaseURL = 'https://loc-eat-ddb73-default-rtdb.firebaseio.com/foodcart.json';
+
+    axios.get(firebaseURL)
+      .then((response) => {
+        if (response.data) {
+          const foodCartData = response.data;
+          setFoodCart(foodCartData);
+        } else {
+          console.log('No data found in Firebase for foodcart.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching data: ', error);
+      });
+  };
+
+  useEffect(() => {
+    fetchFoodCartData();
+  }, []);
 
   const showOrderPrompt = () => {
     Alert.alert(
@@ -40,36 +62,45 @@ const StudentReviewOrder = () => {
   };
 
   const handleOrder = (pickupOption) => {
-    // Data to be saved
+    if (foodCart.length === 0) {
+      Alert.alert('Error', 'Your cart is empty. Add items to your cart before placing an order.');
+      return;
+    }
+
+    const foodDetails = foodCart.map((item) => ({
+      foodName: item.foodName,
+      price: item.totalPrice,
+      quantity: item.quantity,
+    }));
+
     const dataToSave = {
       pickUpTime: pickUpTime,
       paymentMethod: paymentMethod,
+      foodDetails: foodDetails,
     };
 
-    // Database reference
-    const dbRef = ref(db, '/review');
+    const dbRef = ref(db, '/orderedFood');
+    const newOrderRef = push(dbRef); // Generates a unique key for the order
 
-    set(dbRef, dataToSave)
+    set(newOrderRef, dataToSave)
       .then(() => {
-        // Data saved successfully
-        setModalVisible(false); // Close the modal or navigate to a success screen
+        setModalVisible(false);
       })
       .catch((error) => {
         console.error('Error saving data: ', error);
-        // Handle error as needed
       });
-};
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Reviewed Items</Text>
       <FlatList
-        data={foodCart} // Use the retrieved foodCart data
+        data={foodCart}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>Price: ${item.price}</Text>
+            <Text style={styles.itemPrice}>Price: ${item.totalPrice}</Text>
             <View style={styles.quantityContainer}>
               <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
             </View>
@@ -78,9 +109,9 @@ const StudentReviewOrder = () => {
       />
       <Text style={styles.total}>Total Cost: ${calculateSubTotal().toFixed(2)}</Text>
       <TouchableOpacity
-         style={styles.placeOrderButton}
-         onPress={handlePlaceOrder}
-        >
+        style={styles.placeOrderButton}
+        onPress={handlePlaceOrder}
+      >
         <Text style={styles.buttonOrder}>Place Order</Text>
       </TouchableOpacity>
 
@@ -90,32 +121,32 @@ const StudentReviewOrder = () => {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-         <View style={styles.modalContainer}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalLabel}>Choose Pick Up Time</Text>
-      <TextInput
-        style={styles.modalInput}
-        placeholder="Time"
-        value={pickUpTime}
-        onChangeText={(text) => setPickUpTime(text)}
-      />
-      <Text style={styles.modalLabel}>Payment Method</Text>
-      <Picker
-        selectedValue={paymentMethod}
-        onValueChange={(itemValue) => setPaymentMethod(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Reservation" value="Reservation" />
-      </Picker>
-      <TouchableOpacity
-        style={styles.buttonOrder}
-        onPress={handleOrder}
-        >
-      <Text style={styles.buttonOrderText}>Place Order</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalLabel}>Choose Pick Up Time</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Time"
+              value={pickUpTime}
+              onChangeText={(text) => setPickUpTime(text)}
+            />
+            <Text style={styles.modalLabel}>Payment Method</Text>
+            <Picker
+              selectedValue={paymentMethod}
+              onValueChange={(itemValue) => setPaymentMethod(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Reservation" value="Reservation" />
+            </Picker>
+            <TouchableOpacity
+              style={styles.buttonOrder}
+              onPress={handleOrder}
+            >
+              <Text style={styles.buttonOrderText}>Place Order</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -130,7 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color:'white',
+    color: 'white',
   },
   itemContainer: {
     flexDirection: 'row',
@@ -162,7 +193,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
-    color:'white',
+    color: 'white',
   },
   modalContainer: {
     justifyContent: 'center',
@@ -177,11 +208,11 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 10,
     backgroundColor: 'white',
-    borderColor:'black',
-    borderWidth:1,
+    borderColor: 'black',
+    borderWidth: 1,
     borderRadius: 5,
     marginBottom: 10,
-    marginTop:5,
+    marginTop: 5,
   },
   modalContent: {
     backgroundColor: '#FFEC64',
@@ -196,20 +227,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'green', // Background color
     padding: 10, // Padding around the text
     borderRadius: 15, // Border radius for rounded corners
-    marginTop:15,
+    marginTop: 15,
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center', // Center text horizontally
   },
   buttonOrderText: {
-    color:'white',
-    fontWeight:'bold'
+    color: 'white',
+    fontWeight: 'bold'
   },
   picker: {
     backgroundColor: 'white', // Set the background color to white
-    marginTop:5,
-    borderColor:'black',
-    borderWidth:1,
+    marginTop: 5,
+    borderColor: 'black',
+    borderWidth: 1,
   },
 });
 

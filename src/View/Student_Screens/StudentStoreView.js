@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
 const StudentStoreView = () => {
   const [storeData, setStoreData] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [searchInput, setSearchInput] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -20,7 +21,6 @@ const StudentStoreView = () => {
             storeName: store.businessName,
             status: store.status,
             timeOpen: store.timeOpen,
-            // Include all relevant fields for the detailed screen
             email: store.email,
             firstName: store.firstName,
             lastName: store.lastName,
@@ -45,9 +45,22 @@ const StudentStoreView = () => {
     setSelectedLocation(location);
   };
 
+  // Function to handle search input changes
+  const handleSearch = (text) => {
+    setSearchInput(text);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Store Information</Text>
+
+      {/* Search input field */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search"
+        value={searchInput}
+        onChangeText={handleSearch}
+      />
 
       {/* Buttons to filter by location */}
       <View style={styles.buttonContainer}>
@@ -60,23 +73,34 @@ const StudentStoreView = () => {
         <TouchableOpacity onPress={() => filterByLocation('Canteen')}>
           <Text style={styles.buttonText}>Canteen</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => filterByLocation('')}>
+          <Text style={styles.buttonText}>Clear</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView>
         {storeData
-          .filter((store) => !selectedLocation || store.location === selectedLocation)
+          .filter((store) => {
+            const storeName = (store.storeName || '').toLowerCase();
+            const location = (store.location || '').toLowerCase();
+            const search = searchInput.toLowerCase();
+
+            return (!selectedLocation || store.location === selectedLocation) &&
+              (storeName.includes(search) || location.includes(search));
+          })
           .map((store, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => {
                 // Navigate to the "DetailedStore" screen with the store data
-                navigation.navigate('DetailedStore', { storeData: store });
+                navigation.navigate('StudentDetailedStore', { storeData: store });
               }}
             >
               <View style={styles.storeContainer}>
                 <Text style={styles.storeName}>{store.storeName}</Text>
                 <Text>{`Status: ${store.status}`}</Text>
                 <Text>{`Time Open: ${store.timeOpen}`}</Text>
+                <Text>{`Time Open: ${store.location}`}</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -117,6 +141,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'blue',
+  },
+  searchInput: {
+    backgroundColor: 'white',
+    padding: 10,
+    marginBottom: 16,
+    borderRadius: 8,
   },
 });
 

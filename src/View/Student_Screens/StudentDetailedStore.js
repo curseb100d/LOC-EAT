@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { ref, set, onValue, remove } from "firebase/database";
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { ref, onValue, set } from 'firebase/database';
 import { db } from '../../Components/config';
+import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 
-const StudentSearchView = () => {
-  const [cart, setCart] = useState([]);
+const StudentDetailedStore = ({ route }) => {
+  const { storeData } = route.params;
   const [foodmenus, setFoodMenu] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [selectedLocation, setSelectedLocation] = useState(''); // State for selected location
+  const navigation = useNavigation();
+
+  const [menu, setMenu] = useState([]);
+  const [cart, setCart] = useState([]);
 
   // Fetch products from the database
   useEffect(() => {
@@ -75,7 +78,7 @@ const StudentSearchView = () => {
 
     setFoodMenu(updatedFoodMenus);
   };
-  
+
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + item.totalPrice, 0);
   };
@@ -84,59 +87,37 @@ const StudentSearchView = () => {
     return cart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
   };
 
-  const filteredFoodMenus = foodmenus.filter((item) =>
-    (item.foodName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.price.toString().includes(searchQuery)) &&
-    (!selectedLocation || item.location === selectedLocation)
-  );
+  const navigateToReviewScreen = () => {
+    // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
+    // and then navigate to the review screen with the cart data.
+    navigation.navigate('StudentReviewScreen', { storeData });
+  };
 
-  const data = [
-    { title: 'Front Gate', action: () => setSelectedLocation('Front Gate') },
-    { title: 'Back Gate', action: () => setSelectedLocation('Back Gate') },
-    { title: 'Canteen', action: () => setSelectedLocation('Canteen') },
-    { title: 'Clear', action: () => setSelectedLocation('') }, // Clear button
-  ];
-
-  const renderRowItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.button}
-      onPress={item.action}
-    >
-      <Text style={styles.buttonText}>{item.title}</Text>
-    </TouchableOpacity>
-  );
-
-  const row1Data = data.filter((item) => item.title !== 'Clear');
+  const navigateToCartScreen = () => {
+    // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
+    // and then navigate to the review screen with the cart data.
+    navigation.navigate('StudentCartView');
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Food Menu</Text>
-      <View>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search"
-          onChangeText={(text) => setSearchQuery(text)}
-          value={searchQuery}
-          placeholderTextColor="black"
-        />
-        <FlatList
-          data={row1Data}
-          numColumns={3}
-          keyExtractor={(item) => item.title}
-          renderItem={renderRowItem}
-        />
-        <View style={styles.centeredButtonContainer}>
-          <TouchableOpacity
-            style={styles.buttonC}
-            onPress={() => setSelectedLocation('')}
-          >
-            <Text style={styles.buttonText}>{'Clear'}</Text>
-          </TouchableOpacity>
-        </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.heading}>Store Details</Text>
+      <View style={styles.storeContainer}>
+        <Text style={styles.storeName}>{storeData.storeName}</Text>
+        <Text>{`Status: ${storeData.status}`}</Text>
+        <Text>{`Time Open: ${storeData.timeOpen}`}</Text>
+        <Text>{`Email: ${storeData.email}`}</Text>
+        <Text>{`First Name: ${storeData.firstName}`}</Text>
+        <Text>{`Last Name: ${storeData.lastName}`}</Text>
+        <Text>{`Location: ${storeData.location}`}</Text>
+        <Text>{`Schedule: ${storeData.schedule}`}</Text>
       </View>
+
+      <Text style={styles.menuHeading}>Store Menu</Text>
+
       <ScrollView style={{ padding: 15 }}>
         <FlatList
-          data={filteredFoodMenus}
+          data={foodmenus}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.itemContainer}>
@@ -156,8 +137,16 @@ const StudentSearchView = () => {
           )}
         />
       </ScrollView>
-      <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
-    </View>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity onPress={navigateToCartScreen}>
+          <Text style={styles.cartButtonText}>CART</Text>
+        </TouchableOpacity>
+        <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
+      </View>
+      <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
+        <Text style={styles.reviewButtonText}>View Reviews</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
@@ -167,32 +156,99 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#800000',
   },
-  header: {
+  heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 16,
     color: 'white',
   },
-  locationButtons: {
-    flexDirection: 'column', // Arrange buttons in a column
+  storeContainer: {
+    backgroundColor: '#FFA500',
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 3,
   },
-  button: {
-    flex: 1,
-    margin: 5,
-    backgroundColor: 'maroon',
+  storeName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  menuHeading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 16,
+    color: 'white',
+  },
+  menuItem: {
+    borderColor: 'gray',
     borderWidth: 1,
-    borderColor: 'white',
-    borderRadius: 18, // Make the buttons circular
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
+    borderRadius: 10,
+    marginBottom: 16,
+    padding: 16,
   },
-  buttonText: {
+  menuItemName: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  menuItemPrice: {
+    fontSize: 16,
+    color: 'maroon',
+  },
+  menuItemDescription: {
+    fontSize: 14,
+  },
+  addToCartContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addToCartButton: {
+    backgroundColor: 'blue',
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  addToCartButtonText: {
     color: 'white',
+    fontWeight: 'bold',
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  adjustQuantityButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
+  },
+  quantityText: {
+    fontSize: 16,
+  },
+  reviewButton: {
+    backgroundColor: 'blue',
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  cartButton: {
+    backgroundColor: 'orange',
+    padding: 10,
+    borderRadius: 40,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  reviewButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+    cartButtonText: {
+    color: 'orange',
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginTop: 20,
+    textAlign: 'right',
   },
   itemContainer: {
     flexDirection: 'column',
@@ -241,36 +297,11 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: 'white',
   },
-  totalQuantity: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 10,
-    textAlign: 'right',
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 10,
-    marginBottom: 10,
-    color: 'black',
-    borderRadius: 18,
-    backgroundColor: 'white',
-  },
-  buttonC: {
-    backgroundColor: 'maroon',
-    borderRadius: 18, // Make the button circular
-    height: 40,
-    width: 105,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 5,
-    display: 'flex', // Added to ensure proper alignment
-    borderColor: 'white',
-    borderWidth: 1,
-  },
-  centeredButtonContainer: {
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
 });
 
-export default StudentSearchView;
+export default StudentDetailedStore;

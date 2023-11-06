@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Image, ActivityIndicator, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Image } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
 import { ref, set, onValue, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
@@ -7,6 +7,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { storage } from '../../Components/config';
 import { getDownloadURL, uploadBytes, deleteObject, listAll } from 'firebase/storage';
+import Modal from 'react-native-modal';
+import { Picker } from '@react-native-picker/picker';
 
 export default function BusinessCreateMain() {
   const [foodmenus, setFoodMenu] = useState([]);
@@ -200,7 +202,7 @@ export default function BusinessCreateMain() {
             )}
             <Text style={styles.itemName}>{item.foodName}</Text>
             <Text style={styles.itemPrice}>Price: P{item.price}</Text>
-            <Text style={styles.itemPrice}>Discounted Price: P{item.discountedPrice}</Text>
+            <Text style={styles.itemPrice}>Location: {item.location}</Text>
             <View style={styles.quantityContainer}>
               <TouchableOpacity onPress={() => handleEditFoodItem(item)}>
                 <Text>Edit</Text>
@@ -212,8 +214,9 @@ export default function BusinessCreateMain() {
                 <Text style={styles.deleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
-            {selectedItemId === item.id && (
-              <View style={styles.updateForm}>
+
+            <Modal isVisible={selectedItemId === item.id}>
+              <View style={styles.modalContent}>
                 <TextInput
                   style={styles.input}
                   placeholder="Food Name"
@@ -243,23 +246,28 @@ export default function BusinessCreateMain() {
                   value={storeName}
                   onChangeText={(text) => setStoreName(text)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Location"
-                  value={location}
-                  onChangeText={(text) => setLocation(text)}
-                />
+                <Picker
+                  selectedValue={location}
+                  onValueChange={(itemValue, itemIndex) => setLocation(itemValue)}
+                >
+                  <Picker.Item label="Front Gate" value="Front Gate" />
+                  <Picker.Item label="Back Gate" value="Back Gate" />
+                </Picker>
                 <TouchableOpacity style={styles.button} onPress={updateDiscount}>
                   <Text style={styles.buttonText}>Update</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setSelectedItemId(null)}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
               </View>
-            )}
+            </Modal>
           </View>
         )}
       />
       <TouchableOpacity style={styles.addButton} onPress={handleEditFoodClick}>
         <Text style={styles.addButtonText}>Add Food</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -268,7 +276,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'maroon',
   },
   header: {
     fontSize: 24,
@@ -351,5 +359,29 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  updateButton: {
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 5,
+  },
+  cancelButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
   },
 });

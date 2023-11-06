@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Touchable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { db_auth } from '../Components/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Picker } from '@react-native-picker/picker';
 import { db } from '../Components/config';
 import { ref, set } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ModalSelector from 'react-native-modal-selector';
 
 export default function SignUpScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -25,28 +23,25 @@ export default function SignUpScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState(''); // New input field
   const auth = db_auth;
 
-  const data = [
-    { label: 'User', value: 'user' },
-    { label: 'Business User', value: 'business' },
-  ];
-
-  const handleUserTypeChange = (selectedUserType) => {
-    setUserType(selectedUserType);
-  };
-  
   const handleAddAccount = () => {
     const accountData = {
       firstName: firstName,
       lastName: lastName,
       email: email,
       userType: userType,
-      schoolId: userType === 'user' ? schoolId : '',
-      department: userType === 'user' ? department : '',
-      course: userType === 'user' ? course : '',
-      businessName: userType === 'business' ? businessName : '',
-      location: userType === 'business' ? location : '',
-      timeOpen: userType === 'business' ? timeOpen : '',
-      schedule: userType === 'business' ? schedule : '',
+      ...(userType === 'user' && {
+        schoolId: userType === 'user' ? schoolId : '',
+        department: userType === 'user' ? department : '',
+        course: userType === 'user' ? course : '',
+      }),
+
+      // Omit business-related fields if userType is 'user'
+      ...(userType === 'business' && {
+        businessName: businessName,
+        location: location,
+        timeOpen: timeOpen,
+        schedule: schedule,
+      }),
     };
 
     const userPath = userType === 'user' ? 'Users' : 'Business user';
@@ -69,7 +64,7 @@ export default function SignUpScreen({ navigation }) {
         setLoading(false);
         return;
       }
-      
+
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
       alert('Check your emails!');
@@ -97,40 +92,30 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{marginBottom:10, marginTop:55}}>
+      <Text style={{ marginBottom: 10, marginTop: 55 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
-        
-        <View style={{
-          flexDirection: 'row',     // Arrange the text and border in a row
-          justifyContent: 'center',  // Center the text horizontally
-          alignItems: 'center',      // Center the text vertically
-          borderColor: 'white',     // Set your desired border color
-          borderWidth: 1,           // You can adjust the border width
-          marginBottom: 15,        // Add margin to the bottom of the view
-          paddingVertical: 5,       // Add vertical padding to create space between the text and the border
-          paddingHorizontal: 18,     // Add horizontal padding to make left and right borders larger
-          borderRadius:25,
-          }}>
+      </Text>
+
+      <View style={{
+        flexDirection: 'row',     // Arrange the text and border in a row
+        justifyContent: 'center',  // Center the text horizontally
+        alignItems: 'center',      // Center the text vertically
+        borderColor: 'white',     // Set your desired border color
+        borderWidth: 1,           // You can adjust the border width
+        marginBottom: 15,        // Add margin to the bottom of the view
+        paddingVertical: 5,       // Add vertical padding to create space between the text and the border
+        paddingHorizontal: 18,     // Add horizontal padding to make left and right borders larger
+        borderRadius: 25,
+      }}>
         <TouchableOpacity onPress={toggleUserType}>
-        <Text style={{ fontSize: 25, marginTop: 2, fontWeight: 'bold', color: 'white', }}>
-          {userType === 'user' ? 'User' : 'Business User'}
-        </Text>
-      </TouchableOpacity>
-        {/* <ModalSelector
-          data={data.map(option => ({ key: option.value, label: option.label }))}
-          initValue={userType === 'user' ? 'User' : 'Business User'} // Set the initial value based on userType
-          initTextStyle={{ color: 'white', fontWeight: 'bold' }} // Change the text color and font weight of initValue
-          supportedOrientations={['portrait']}
-          accessible={true}
-          scrollViewAccessibilityLabel={'User Type Selector'}
-          selectTextStyle={{ color: 'white', fontWeight:'bold' }} // Change the text color of the selected option
-          onChange={(option) => handleUserTypeChange(option.key)}
-         /> */}
+          <Text style={{ fontSize: 25, marginTop: 2, fontWeight: 'bold', color: 'white', }}>
+            {userType === 'user' ? 'User' : 'Business User'}
+          </Text>
+        </TouchableOpacity>
       </View>
-        
+
 
       <ScrollView style={{
         flex: 1, // Take up remaining horizontal space
@@ -138,118 +123,118 @@ export default function SignUpScreen({ navigation }) {
         borderColor: 'maroon',
         borderRadius: 20,
         padding: 10,
-        paddingRight:15,
-        }}>
+        paddingRight: 15,
+      }}>
         <TextInput
-        style={styles.input}
-        placeholder="First Name"
-        value={firstName}
-        onChangeText={(text) => setFirstName(text)}
+          style={styles.input}
+          placeholder="First Name"
+          value={firstName}
+          onChangeText={(text) => setFirstName(text)}
         />
         <TextInput
-        style={styles.input}
-        placeholder="Last Name"
-        value={lastName}
-        onChangeText={(text) => setLastName(text)}
+          style={styles.input}
+          placeholder="Last Name"
+          value={lastName}
+          onChangeText={(text) => setLastName(text)}
         />
 
-{/* User-specific input fields */}
-{userType === 'user' && (
-  <>
-    <TextInput
-      style={styles.input}
-      placeholder="School ID"
-      value={schoolId}
-      onChangeText={(text) => setSchoolId(text)}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Department"
-      value={department}
-      onChangeText={(text) => setDepartment(text)}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Course"
-      value={course}
-      onChangeText={(text) => setCourse(text)}
-    />
-  </>
-)}
+        {/* User-specific input fields */}
+        {userType === 'user' && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="School ID"
+              value={schoolId}
+              onChangeText={(text) => setSchoolId(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Department"
+              value={department}
+              onChangeText={(text) => setDepartment(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Course"
+              value={course}
+              onChangeText={(text) => setCourse(text)}
+            />
+          </>
+        )}
 
-{/* Business-specific input fields */}
-{userType === 'business' && (
-  <>
-    <TextInput
-      style={styles.input}
-      placeholder="Business Name"
-      value={businessName}
-      onChangeText={(text) => setBusinessName(text)}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Location"
-      value={location}
-      onChangeText={(text) => setLocation(text)}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Time Open"
-      value={timeOpen}
-      onChangeText={(text) => setTimeOpen(text)}
-    />
-    <TextInput
-      style={styles.input}
-      placeholder="Schedule"
-      value={schedule}
-      onChangeText={(text) => setSchedule(text)}
-    />
-  </>
-)}
+        {/* Business-specific input fields */}
+        {userType === 'business' && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Business Name"
+              value={businessName}
+              onChangeText={(text) => setBusinessName(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Location"
+              value={location}
+              onChangeText={(text) => setLocation(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Time Open"
+              value={timeOpen}
+              onChangeText={(text) => setTimeOpen(text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Schedule"
+              value={schedule}
+              onChangeText={(text) => setSchedule(text)}
+            />
+          </>
+        )}
 
-{/* Common input fields */}
-<TextInput
-  style={styles.input}
-  placeholder="Email"
-  value={email}
-  onChangeText={(text) => setEmail(text)}
-/>
-<TextInput
-  style={styles.input}
-  placeholder="Password"
-  secureTextEntry={true}
-  value={password}
-  onChangeText={(text) => setPassword(text)}
-/>
-<TextInput
-  style={styles.input}
-  placeholder="Confirm Password"
-  secureTextEntry={true}
-  value={confirmPassword}
-  onChangeText={(text) => setConfirmPassword(text)}
-/>
+        {/* Common input fields */}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          secureTextEntry={true}
+          value={confirmPassword}
+          onChangeText={(text) => setConfirmPassword(text)}
+        />
       </ScrollView>
 
       <View style={{
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={signUp}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
-      )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={signUp}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+        )}
 
-      {/* Your other content here */}
-      <TouchableOpacity onPress={handleLoginRedirect}>
-        <Text style={styles.redirect}>
-          Already have an account? Log in
-        </Text>
-      </TouchableOpacity>
+        {/* Your other content here */}
+        <TouchableOpacity onPress={handleLoginRedirect}>
+          <Text style={styles.redirect}>
+            Already have an account? Log in
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
   );
 }
 
@@ -267,14 +252,14 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 300,
     marginBottom: 18,
-    borderRadius:18,
-    borderColor:'black',
-    borderWidth:1
+    borderRadius: 18,
+    borderColor: 'black',
+    borderWidth: 1
   },
   picker: {
     width: 300,
-    color:'white',
-    marginBottom:'35',
+    color: 'white',
+    marginBottom: '35',
   },
   yellowText: {
     color: 'yellow',
@@ -295,10 +280,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:25,
+    marginTop: 25,
   },
   buttonText: {
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: 'black',
     fontSize: 20,
   },
@@ -306,7 +291,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
     color: 'white',
-    fontWeight:'bold',
-    marginBottom:55,
+    fontWeight: 'bold',
+    marginBottom: 55,
   },
 });

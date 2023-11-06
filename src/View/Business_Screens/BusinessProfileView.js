@@ -57,33 +57,51 @@ export default function BusinessProfileView() {
     </View>
   );
 
+  const UserDetail = ({ value }) => (
+    <View style={styles.userDetailContainer}>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : user ? (
         <View style={styles.userData}>
-          <Card style={styles.card}>
-            <Card.Content>
-              <UserDetail value={`${user.firstName} ${user.lastName}`} />
-              <CircularCard />
-              <UserDetail value={user.businessName} />
-              <UserDetail value={user.location} />
-              <UserDetail value={user.schedule} />
-            </Card.Content>
-          </Card>
-          <TouchableOpacity onPress={handleEditAccountClick}>
-            <Text style={styles.linkText}>Edit Account</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogoutClick}>
-            <Text style={styles.linkText}>Logout</Text>
-          </TouchableOpacity>
+          <View style={styles.card}>
+            <UserDetail
+              value={`${user.firstName} ${user.lastName}`}
+            />
+            <CircularCard />
+            <UserDetail
+              value={user.businessName}
+            />
+            <UserDetail 
+              value={user.location}
+            />
+            <UserDetail
+              value={user.schedule}
+            />
+          </View>
+          <View style={styles.buttonsContainer}>
+          <View style={styles.buttonWrapper}>
+            <TouchableOpacity onPress={handleEditAccountClick}>
+              <Text style={styles.linkText}>Edit Account</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.buttonWrapper}>
+            <TouchableOpacity onPress={handleLogoutClick}>
+              <Text style={styles.linkText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      ) : (
-        <Text>No user data available</Text>
-      )}
-    </View>
-  );
+      </View>
+    ) : (
+      <Text>No user data available</Text>
+    )}
+  </View>
+);
 
   function handleEditAccountClick() {
     navigation.navigate('StudentEditScreen');
@@ -102,64 +120,56 @@ export default function BusinessProfileView() {
   }
 }
 
-const UserDetail = ({ value }) => (
-  <View style={styles.userDetailContainer}>
-    <Text style={styles.value}>{value}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    jjustifyContent: 'flex-start',
     backgroundColor: 'maroon',
   },
-  userData: {},
+  userData: {
+    marginTop:50,
+  },
   userDetailContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems:'center',
+    justifyContent:'center',
+    top:165,
+    marginTop:5,
   },
   value: {
-    fontSize: 20,
-    color: 'black',
     fontWeight: 'bold',
-    height: 50,
-    left: 20,
-    width: 300,
-    textAlign: 'center',
-    marginBottom: -28,
-    bottom: -169,
+    fontSize:18,
   },
 
   card: {
-    backgroundColor: 'yellow',
-    padding: 10,
-    width: 400,
-    height: 300,
+    padding: 15,
+    width: '100%',
+    height: '70%', // Adjust the height as needed
     borderWidth: 2,
     borderColor: 'transparent',
-    borderRadius: 51,
-    padding: 10,
-    margin: 10,
     backgroundColor: '#FFD700',
     elevation: 10,
-    marginTop: -350,
-    marginLeft: -3,
+    borderBottomLeftRadius:50,
+    borderBottomRightRadius:50,
+    top:-52,
   },
   circularCard: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     backgroundColor: 'white',
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 75,
+    borderColor:'white',
+    justifyContent: 'center', // Center the content vertically
+    alignItems: 'center', // Center the content horizontally
     position: 'absolute',
-    top: 70,
-    right: 135,
+    top: '32%', // Center vertically
+    left: '55%', // Center horizontally
+    marginLeft: -75, // Half of width
+    marginTop: -75, // Half of height
   },
   circularCardText: {
-    color: 'white',
+    color: 'black',
     fontSize: 16,
+    fontWeight:'black',
   },
   linkText: {
     color: 'white',
@@ -168,4 +178,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     fontWeight: 'bold',
   },
+  buttonWrapper: {
+    bottom:25,
+  }
 });

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { ref, set, onValue, remove } from 'firebase/database';
 import { db } from '../../Components/config';
 import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
 import { useNavigation } from '@react-navigation/native';
+import Carousel from 'react-native-snap-carousel'; // Import the Carousel component
+import DateTimePicker from '@react-native-community/datetimepicker'; // Import the DateTimePicker component
+import { Picker } from '@react-native-picker/picker';
 
 // Define the BusinessCreatePromotionAdd component
 const BusinessCreatePromotionAdd = () => {
@@ -15,10 +18,12 @@ const BusinessCreatePromotionAdd = () => {
     const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
     const [discount, setDiscount] = useState(0);
     const [storeName, setStoreName] = useState('');
-    const [location, setLocation] = useState('');
+    const [location, setLocation] = useState('Front Gate'); // Default value
     const [promotions, setPromotions] = useState([]);
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(new Date()); // Updated to use Date object
+    const [endDate, setEndDate] = useState(new Date()); // Updated to use Date object
+    const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
     // Function to add a promotion
     const handleAddPromotion = () => {
@@ -57,7 +62,6 @@ const BusinessCreatePromotionAdd = () => {
             setFoodDiscountDescription('');
             setDiscount('');
             setStoreName('');
-            setLocation('');
         }
     };
 
@@ -84,6 +88,24 @@ const BusinessCreatePromotionAdd = () => {
             unsubscribe();
         };
     }, []);
+
+    const renderCarouselItem = ({ item }) => {
+        return (
+            <View style={styles.itemContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.itemContent,
+                        selectedItems.includes(item.id) ? styles.selectedItem : null
+                    ]}
+                    onPress={() => toggleItemSelection(item.id)}
+                >
+                    <Text style={styles.itemName}>{item.foodName}</Text>
+                    <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+                    <Text style={styles.itemLocation}>Location: {item.location}</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     const toggleItemSelection = (itemId) => {
         setSelectedItems((prevSelectedItems) => {
@@ -131,43 +153,63 @@ const BusinessCreatePromotionAdd = () => {
                     value={storeName}
                     onChangeText={(text) => setStoreName(text)}
                 />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Location"
-                    value={location}
-                    onChangeText={(text) => setLocation(text)}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Start Date (YYYY-MM-DD)"
-                    value={startDate}
-                    onChangeText={(text) => setStartDate(text)}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="End Date (YYYY-MM-DD)"
-                    value={endDate}
-                    onChangeText={(text) => setEndDate(text)}
-                />
-
-                <FlatList
-                    data={foodmenus}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.itemContainer}>
-                            <TouchableOpacity
-                                style={[
-                                    styles.itemContent,
-                                    selectedItems.includes(item.id) ? styles.selectedItem : null
-                                ]}
-                                onPress={() => toggleItemSelection(item.id)}
-                            >
-                                <Text style={styles.itemName}>{item.foodName}</Text>
-                                <Text style={styles.itemPrice}>Price: P{item.price}</Text>
-                                <Text style={styles.itemLocation}>Location: {item.location}</Text>
-                            </TouchableOpacity>
-                        </View>
+                <View>
+                    <Picker
+                        style={styles.input}
+                        selectedValue={location}
+                        onValueChange={(value) => setLocation(value)}
+                    >
+                        <Picker.Item label="Front Gate" value="Front Gate" />
+                        <Picker.Item label="Back Gate" value="Back Gate" />
+                    </Picker>
+                </View>
+                <View>
+                    <TouchableOpacity
+                        style={styles.input}
+                        onPress={() => setShowStartDatePicker(true)}
+                    >
+                        <Text>{'Start Date: ' + startDate.toDateString()}</Text>
+                    </TouchableOpacity>
+                    {showStartDatePicker && (
+                        <DateTimePicker
+                            value={startDate}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                if (selectedDate) {
+                                    setShowStartDatePicker(false);
+                                    setStartDate(selectedDate);
+                                }
+                            }}
+                        />
                     )}
+                </View>
+                <View>
+                    <TouchableOpacity
+                        style={styles.input}
+                        onPress={() => setShowEndDatePicker(true)}
+                    >
+                        <Text>{'End Date: ' + endDate.toDateString()}</Text>
+                    </TouchableOpacity>
+                    {showEndDatePicker && (
+                        <DateTimePicker
+                            value={endDate}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                if (selectedDate) {
+                                    setShowEndDatePicker(false);
+                                    setEndDate(selectedDate);
+                                }
+                            }}
+                        />
+                    )}
+                </View>
+                <Carousel
+                    data={foodmenus}
+                    renderItem={renderCarouselItem}
+                    sliderWidth={300} // Customize the slider width
+                    itemWidth={300} // Customize the item width
                 />
                 <View>
                     <TouchableOpacity style={styles.button} onPress={handleAddPromotionAndMainButton}>
@@ -203,6 +245,11 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
+    },
+    label: {
+        fontSize: 16,
+        color: 'black',
+        marginBottom: 5,
     },
     discountItem: {
         backgroundColor: '#ffffff',

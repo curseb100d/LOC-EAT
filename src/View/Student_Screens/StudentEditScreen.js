@@ -190,14 +190,11 @@ export default function StudentEditScreen() {
 
         {/* Button 1 (Custom Style) */}
         {images.length === 0 ? (
-          <View style={styles.button1Container}>
-            <Button
-              title="Change"
-              color="grey" // Customize the color
-              textColor="white" // Customize the text color
-              onPress={changeImage}
-            />
-          </View>
+          <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
+              </View>
+          </TouchableOpacity>
         ) : (
           <>
             {images[currentImageIndex] && (
@@ -234,13 +231,12 @@ export default function StudentEditScreen() {
 
       <Text style={{ ...styles.message, color: 'white', marginTop: 10 }}>{message}</Text>
 
-      <View style={styles.button2Container}>
-        <Button
-          title="Save"
-          color="#FFED00"
-          textColor="black"
-          onPress={handleChangePassword}
-        />
+      <View>
+        <TouchableOpacity onPress={handleChangePassword}>
+          <View style={styles.customButton}>
+              <Text style={styles.customButtonText}>Save</Text>
+          </View>
+       </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -254,10 +250,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'maroon',
   },
   cardContainer: {
-    backgroundColor: 'yellow',
     padding: 10,
     width: 400,
-    height: 250,
+    height: 280,
     borderWidth: 2,
     borderColor: 'transparent',
     borderRadius: 51,
@@ -271,21 +266,21 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center elements vertically
   },
   circularCard: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: 'white', // Customize the color of the circular card
     margin: 10,
     bottom: -50,
     left: 20,
   },
   editProfileText: {
-    fontSize: 18,
+    fontSize: 20,
     color: 'black',
     fontWeight: 'bold',
     marginLeft: 10,
-    left: 20,
-    bottom: -40,
+    left: 30,
+    bottom: -30,
     fontSize: 22,
   },
   button1Container: {
@@ -303,18 +298,44 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     bottom: -50,
     left: 50,
+    borderRadius:35,
   },
   message: {
-    fontSize: 16,
-    marginTop: 200,
+    fontSize: 18,
+    top:110,
     bottom: -120,
     textAlign: 'center',
+    fontWeight:'bold',
   },
-  button2Container: {
-    height: 100,
-    marginTop: 40,
-    width: 200,
-    borderRadius: 30,
-    left: 75,
+  customButton: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: '#FFE135', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 35,
+    marginBottom: 5,
+    left:100,
   },
+  customButtonText: {
+    fontWeight:'bold',
+    fontSize:18,
+  },
+  customButton2: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: 'maroon', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 150,
+    marginBottom: 5,
+    right:110,
+  },
+  customButtonText2: {
+    color:'white',
+    fontWeight:'bold',
+    fontSize:18,
+  }
 });

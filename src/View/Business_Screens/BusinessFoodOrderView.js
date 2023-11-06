@@ -1,103 +1,201 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ref, set } from "firebase/database";
-import { db } from '../../Components/config';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
-export default function BusinessFoodOrderView() {
-  // const { cart, removeFromCart } = useCart();
-  // const [status, setStatus] = useState('Finish');
+function BusinessFoodOrderView() {
+  const [foodData, setFoodData] = useState([]);
+  const [expanded, setExpanded] = useState({});
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [acceptedOrders, setAcceptedOrders] = useState([]);
+  const [acceptedItems, setAcceptedItems] = React.useState([]);
 
-  // const handleCancelOrder = (itemId) => {
-  //   removeFromCart(itemId);
-  // };
+  const navigation = useNavigation();  
 
-  // const toggleStatus = () => {
-  //   const newStatus = status === 'Finish' ? 'Preparing' : 'Finish';
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json');
 
-  //   // Get a reference to the 'status' node in your database
-  //   const statusRef = ref(db, 'status');
+      if (response.status === 200) {
+        const data = response.data;
 
-  //   // Set the new status in the database
-  //   set(statusRef, newStatus)
-  //     .then(() => {
-  //       setStatus(newStatus);
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error updating status:', error);
-  //     });
-  // };
+        const foodArray = [];
 
-  // return (
-  //   <ScrollView contentContainerStyle={styles.container}>
-  //     {cart.length > 0 ? (
-  //       cart.map((item) => (
-  //         <View style={styles.cartItem} key={item.id}>
-  //           <Text style={styles.itemName}>Name: {item.name}</Text>
-  //           <Text style={styles.itemPrice}>Price: ${item.price}</Text>
-  //           <Text style={styles.itemType}>Type: {item.type}</Text>
-  //           <Text style={styles.statusText}>Status: {status}</Text>
-  //           <TouchableOpacity
-  //             style={styles.cancelButton}
-  //             onPress={() => handleCancelOrder(item.id)}
-  //           >
-  //             <Text style={styles.cancelButtonText}>Cancel Order</Text>
-  //           </TouchableOpacity>
-  //           <TouchableOpacity
-  //             style={[styles.circularButton, { backgroundColor: status === 'open' ? 'green' : 'red' }]}
-  //             onPress={toggleStatus}
-  //           >
-  //           </TouchableOpacity>
-  //         </View>
-  //       ))
-  //     ) : (
-  //       <Text style={styles.emptyCart}>No items in the order.</Text>
-  //     )}
-  //   </ScrollView>
-  // );
+        for (const orderId in data) {
+          const order = data[orderId];
+
+          if (order.foodDetails && order.paymentMethod && order.pickUpTime) {
+            const foodDetails = order.foodDetails;
+
+            const foodItems = foodDetails.map((foodItem) => ({
+              foodName: foodItem.foodName,
+              price: foodItem.price,
+              quantity: foodItem.quantity,
+            }));
+
+            const orderData = {
+              foodDetails: foodItems,
+              paymentMethod: order.paymentMethod,
+              pickUpTime: order.pickUpTime,
+            };
+
+            foodArray.push(orderData);
+          }
+        }
+
+        const initialExpanded = {};
+        foodArray.forEach((_, index) => {
+          initialExpanded[index] = false;
+        });
+        setExpanded(initialExpanded);
+
+        setFoodData(foodArray);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const toggleExpansion = (index) => {
+    setExpanded((prevState) => ({
+      ...prevState,
+      [index]: !prevState[index],
+    }));
+  };
+
+  const handleSelectItem = (index) => {
+    if (selectedItems.includes(index)) {
+      setSelectedItems(selectedItems.filter((item) => item !== index));
+    } else {
+      setSelectedItems([...selectedItems, index]);
+    }
+  };
+
+  const handleAcceptItems = () => {
+    const accepted = selectedItems.map((index) => foodData[index]);
+    setSelectedItems([]);
+
+    // Accumulate accepted items
+    setAcceptedItems((prevAccepted) => [...prevAccepted, ...accepted]);
+  };
+
+  const handleRejectItems = () => {
+    const itemsToReject = selectedItems.map((index) => foodData[index]);
+  
+    // Remove the rejected items from the Firebase database
+    itemsToReject.forEach(async (item) => {
+      try {
+        // Send a DELETE request to remove the item by its key
+        await axios.delete(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json`);
+      } catch (error) {
+        console.error('Error rejecting items:', error);
+      }
+    });
+  
+    setSelectedItems([]);
+  
+    // After removing the items, you might want to fetch the updated data to refresh the view.
+    fetchData();
+  };  
+
+  const navigateToAcceptedOrders = () => {
+    // Navigate to the BusinessAcceptedOrderScreen and pass acceptedItems as a route parameter
+    navigation.navigate('BusinessAcceptedOrderScreen', { accepted: acceptedItems });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Food Orders:</Text>
+      <FlatList
+        data={foodData}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>Food Details</Text>
+            {item.foodDetails.map((foodItem, foodIndex) => (
+              <View key={foodIndex} style={styles.foodItem}>
+                <Text style={styles.foodName}>{foodItem.foodName}</Text>
+                <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
+                <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
+              </View>
+            ))}
+
+            <Text style={styles.sectionTitle}>Payment Method</Text>
+            <Text style={styles.sectionText}>{item.paymentMethod}</Text>
+
+            <Text style={styles.sectionTitle}>Pick Up Time</Text>
+            <Text style={styles.sectionText}>{item.pickUpTime}</Text>
+
+            <Button
+              title={selectedItems.includes(index) ? 'Deselect' : 'Select'}
+              onPress={() => {
+                if (selectedItems.includes(index)) {
+                  setSelectedItems((prevSelected) => prevSelected.filter((itemIndex) => itemIndex !== index));
+                } else {
+                  setSelectedItems((prevSelected) => [...prevSelected, index]);
+                }
+              }}
+            />
+          </View>
+        )}
+      />
+      <Button title="Accept Selected" onPress={handleAcceptItems} />
+      <Button title="Not Accept Selected" onPress={handleRejectItems} />
+      <Button title="View Accepted Orders" onPress={navigateToAcceptedOrders} />
+    </View>
+  );
 }
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#fff',
-//   },
-//   cartItem: {
-//     backgroundColor: '#f0f0f0',
-//     borderRadius: 8,
-//     padding: 16,
-//     marginBottom: 8,
-//   },
-//   itemName: {
-//     fontWeight: 'bold',
-//     fontSize: 18,
-//     marginBottom: 4,
-//   },
-//   itemPrice: {
-//     fontSize: 16,
-//   },
-//   itemType: {
-//     fontSize: 16,
-//   },
-//   cancelButton: {
-//     backgroundColor: '#e74c3c',
-//     padding: 8,
-//     borderRadius: 4,
-//     marginTop: 8,
-//     alignItems: 'center',
-//   },
-//   cancelButtonText: {
-//     color: '#fff',
-//     fontWeight: 'bold',
-//   },
-//   emptyCart: {
-//     fontSize: 18,
-//     textAlign: 'center',
-//     marginTop: 20,
-//   },
-//   circularButton: {
-//     width: 30,
-//     height: 30,
-//     borderRadius: 50, // To make it circular
-//   },
-// });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: 'maroon',
+  },
+  card: {
+    backgroundColor: 'lightgray',
+    padding: 16,
+    margin: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'maroon',
+    marginTop: 10,
+  },
+  sectionText: {
+    fontSize: 16,
+    color: 'maroon',
+  },
+  foodItem: {
+    marginVertical: 10,
+  },
+  foodName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'maroon',
+  },
+  foodPrice: {
+    fontSize: 14,
+    color: 'maroon',
+  },
+  foodQuantity: {
+    fontSize: 14,
+    color: 'maroon',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+});
+
+export default BusinessFoodOrderView;

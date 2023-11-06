@@ -32,15 +32,15 @@ const StudentCartView = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  const toggleItemSelection = (itemId) => {
-    setSelectedItems((prevSelectedItems) => {
-      if (prevSelectedItems.includes(itemId)) {
-        return prevSelectedItems.filter((id) => id !== itemId);
-      } else {
-        return [...prevSelectedItems, itemId];
-      }
-    });
-  };
+  // const toggleItemSelection = (itemId) => {
+  //   setSelectedItems((prevSelectedItems) => {
+  //     if (prevSelectedItems.includes(itemId)) {
+  //       return prevSelectedItems.filter((id) => id !== itemId);
+  //     } else {
+  //       return [...prevSelectedItems, itemId];
+  //     }
+  //   });
+  // };
 
   const handleDeleteItem = (itemId) => {
     // Remove the item from Realtime Firebase and update the local state
@@ -54,7 +54,7 @@ const StudentCartView = () => {
   };
 
   const handleReviewButtonPress = () => {
-    navigation.navigate('StudentReviewOrder', { cartData: foodCart });
+    navigation.navigate('StudentReviewOrder');
   };
 
   return (
@@ -65,18 +65,18 @@ const StudentCartView = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={[
                 styles.itemContent,
                 selectedItems.includes(item.id) ? styles.selectedItem : null
               ]}
               onPress={() => toggleItemSelection(item.id)}
-            >
+            > */}
               <Text style={styles.itemName}>{item.foodName}</Text>
-              <Text style={styles.itemPrice}>Price: ${item.price}</Text>
+              <Text style={styles.itemPrice}>Price: ${item.totalPrice}</Text>
               <Text style={styles.itemLocation}>Location: {item.location}</Text>
               <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
-            </TouchableOpacity>
+            {/* </TouchableOpacity> */}
             <TouchableOpacity
               style={styles.deleteButton}
               onPress={() => handleDeleteItem(item.id)}

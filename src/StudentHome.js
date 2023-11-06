@@ -1,67 +1,42 @@
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Screens
 import StudentHomeView from './View/Student_Screens/StudentHomeView';
 import StudentStoreView from './View/Student_Screens/StudentStoreView';
-import StudentSearchView from './View/Student_Screens/StudentSearchView';
+// import StudentSearchView from './View/Student_Screens/StudentSearchView';
 import StudentCartView from './View/Student_Screens/StudentCartView';
 import StudentAccountView from './View/Student_Screens/StudentAccountView';
+// import StudentExample from './View/Student_Screens/StudentExample';
 
 //Screen names
 const homeName = "Home";
 const storeName = "Store";
-const searchName = "Search";
+// const searchName = "Search";
 const cartName = "Cart";
 const accountName = "Account";
+// const exampleName = "Example";
 
-const Tab = createBottomTabNavigator();
+const Tab = createMaterialBottomTabNavigator();
 
 function StudentHome() {
   return (
     <Tab.Navigator
-      initialRouteName={searchName}
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          let rn = route.name;
-
-          if (rn === homeName) {
-            iconName = focused ? 'Home' : 'home-outline';
-
-          } else if (rn === storeName) {
-            iconName = focused ? 'Store' : 'store-outline';
-
-          } else if (rn === searchName) {
-            iconName = focused ? 'search' : 'search-outline';
-
-          } else if (rn === cartName) {
-            iconName = focused ? 'cart' : 'cart-outline';
-
-          } else if (rn === accountName) {
-            iconName = focused ? 'Account' : 'account-outline';
-
-          }
-
-          // You can return any component that you like here!
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-      })}
-      screenOption={{
-        activeTintColor: 'tomato',
-        inactiveTintColor: 'grey',
-        labelStyle: { paddingBottom: 10, fontSize: 10 },
-        style: { padding: 10, height: 70 }
-      }}>
-
-      <Tab.Screen name={homeName} component={StudentHomeView} />
-      <Tab.Screen name={storeName} component={StudentStoreView} />
-      <Tab.Screen name={searchName} component={StudentSearchView} />
-      <Tab.Screen name={cartName} component={StudentCartView} />
-      <Tab.Screen name={accountName} component={StudentAccountView} />
-
+      initialRouteName={homeName}
+      activeColor="maroon"
+      inactiveColor="black"
+      barStyle={{
+        backgroundColor: '#FFD700',
+      }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+    >
+      <Tab.Screen name={homeName} component={StudentHomeView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="home" color={color} size={26} />) }} />
+      <Tab.Screen name={storeName} component={StudentStoreView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="store" color={color} size={26} />) }} />
+      {/* <Tab.Screen name={searchName} component={StudentSearchView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="card-search-outline" color={color} size={26} />) }} /> */}
+      <Tab.Screen name={cartName} component={StudentCartView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="cart" color={color} size={26} />) }} />
+      <Tab.Screen name={accountName} component={StudentAccountView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="account" color={color} size={26} />) }} />
+      {/* <Tab.Screen name={exampleName} component={StudentExample} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="account" color={color} size={26} />) }} /> */}
     </Tab.Navigator>
   );
 }

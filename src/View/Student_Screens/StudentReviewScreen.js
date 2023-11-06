@@ -4,7 +4,7 @@ import StarRating from 'react-native-star-rating';
 import { ref, onValue, push, set, remove } from 'firebase/database';
 import { db } from '../../Components/config';
 
-const ReviewScreen = ({ route }) => {
+const StudentReviewScreen = ({ route }) => {
   const { storeData, user } = route.params;
 
   const [reviews, setReviews] = useState([]);
@@ -297,4 +297,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReviewScreen;
+export default StudentReviewScreen;
