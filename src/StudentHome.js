@@ -7,16 +7,16 @@ import StudentHomeView from './View/Student_Screens/StudentHomeView';
 import StudentStoreView from './View/Student_Screens/StudentStoreView';
 // import StudentSearchView from './View/Student_Screens/StudentSearchView';
 import StudentCartView from './View/Student_Screens/StudentCartView';
+import StudentOrderedList from './View/Student_Screens/StudentOrderedList';
 import StudentAccountView from './View/Student_Screens/StudentAccountView';
-// import StudentExample from './View/Student_Screens/StudentExample';
 
 //Screen names
 const homeName = "Home";
 const storeName = "Store";
 // const searchName = "Search";
 const cartName = "Cart";
+const listName = "List";
 const accountName = "Account";
-// const exampleName = "Example";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -35,8 +35,8 @@ function StudentHome() {
       <Tab.Screen name={storeName} component={StudentStoreView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="store" color={color} size={26} />) }} />
       {/* <Tab.Screen name={searchName} component={StudentSearchView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="card-search-outline" color={color} size={26} />) }} /> */}
       <Tab.Screen name={cartName} component={StudentCartView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="cart" color={color} size={26} />) }} />
+      <Tab.Screen name={listName} component={StudentOrderedList} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="format-list-bulleted" color={color} size={26} />) }} />
       <Tab.Screen name={accountName} component={StudentAccountView} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="account" color={color} size={26} />) }} />
-      {/* <Tab.Screen name={exampleName} component={StudentExample} options={{ tabBarIcon: ({ color }) => (<MaterialCommunityIcons name="account" color={color} size={26} />) }} /> */}
     </Tab.Navigator>
   );
 }

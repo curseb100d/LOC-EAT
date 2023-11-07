@@ -1,18 +1,95 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
 
 function BusinessAcceptedOrderScreen({ route }) {
-  const { accepted } = route.params;
+  const { acceptedOrders } = route.params;
+  const [ordersWithStatus, setOrdersWithStatus] = useState(acceptedOrders);
+
+  useEffect(() => {
+    // Fetch the latest status for each order from Firebase (e.g., when the screen loads)
+    fetchStatusFromFirebase();
+  }, []);
+
+  const fetchStatusFromFirebase = async () => {
+    try {
+      const response = await axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json');
+
+      if (response.status === 200) {
+        const statusData = response.data;
+
+        // Update the status for each order
+        const updatedOrders = ordersWithStatus.map((order) => {
+          if (statusData[order.key]) {
+            order.status = statusData[order.key];
+          }
+          return order;
+        });
+
+        setOrdersWithStatus(updatedOrders);
+      }
+    } catch (error) {
+      console.error('Error fetching status data from Firebase:', error);
+    }
+  };
+
+  const updateStatusOnFirebase = async (order) => {
+    try {
+      // Update the status for a specific order in Firebase
+      await axios.patch(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json`, {
+        status: order.status,
+      });
+
+      // Update the local state with the updated status
+      const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? order : o));
+      setOrdersWithStatus(updatedOrders);
+    } catch (error) {
+      console.error('Error updating status on Firebase:', error);
+    }
+  };
+
+  const handleStatusChange = (order, newStatus) => {
+    // Update the status locally first
+    const updatedOrder = { ...order, status: newStatus };
+    const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? updatedOrder : o));
+    setOrdersWithStatus(updatedOrders);
+
+    // Update the status on Firebase
+    updateStatusOnFirebase(updatedOrder);
+  };
+
+  const handleDeleteItem = (itemToDelete) => {
+    // Create a new array of items excluding the item to delete
+    const updatedOrders = ordersWithStatus.filter((item) => item.key !== itemToDelete.key);
+  
+    // Update the state with the new array
+    setOrdersWithStatus(updatedOrders);
+  
+    // Delete the item from Firebase
+    deleteItemFromFirebase(itemToDelete.key);
+  };
+  
+  const deleteItemFromFirebase = async (itemKey) => {
+    try {
+      // Send a DELETE request to remove the item from Firebase
+      await axios.delete(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json`);
+    } catch (error) {
+      console.error('Error deleting item from Firebase:', error);
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Accepted Orders</Text>
+      <Text style={styles.sectionTitle}>Accepted Orders</Text>
       <FlatList
-        data={accepted}
+        data={ordersWithStatus}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Food Details</Text>
+            <Text style={styles.acceptedOrderText}>Accepted Order Details:</Text>
+            <Text style={styles.acceptedOrderText}>{`Payment Method: ${item.paymentMethod}`}</Text>
+            <Text style={styles.acceptedOrderText}>{`Pick Up Time: ${item.pickUpTime}`}</Text>
             {item.foodDetails.map((foodItem, foodIndex) => (
               <View key={foodIndex} style={styles.foodItem}>
                 <Text style={styles.foodName}>{foodItem.foodName}</Text>
@@ -20,12 +97,27 @@ function BusinessAcceptedOrderScreen({ route }) {
                 <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
               </View>
             ))}
-
-            <Text style={styles.sectionTitle}>Payment Method</Text>
-            <Text style={styles.sectionText}>{item.paymentMethod}</Text>
-
-            <Text style={styles.sectionTitle}>Pick Up Time</Text>
-            <Text style={styles.sectionText}>{item.pickUpTime}</Text>
+            <View style={styles.statusContainer}>
+              <Text style={styles.acceptedOrderText}>Status:</Text>
+              <TouchableOpacity
+                style={[styles.statusButton, { backgroundColor: item.status === 'preparing' ? 'red' : 'lightgray' }]}
+                onPress={() => handleStatusChange(item, 'preparing')}
+              >
+                <Text style={styles.statusButtonText}>Preparing</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.statusButton, { backgroundColor: item.status === 'finished' ? 'green' : 'lightgray' }]}
+                onPress={() => handleStatusChange(item, 'finished')}
+              >
+                <Text style={styles.statusButtonText}>Finished</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeleteItem(item)}
+            >
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -54,10 +146,6 @@ const styles = StyleSheet.create({
     color: 'maroon',
     marginTop: 10,
   },
-  sectionText: {
-    fontSize: 16,
-    color: 'maroon',
-  },
   foodItem: {
     marginVertical: 10,
   },
@@ -74,10 +162,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'maroon',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
+  acceptedOrderText: {
+    fontSize: 16,
+    color: 'maroon',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statusButton: {
+    padding: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  statusButtonText: {
+    fontSize: 14,
+    color: 'white',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    color: 'white',
   },
 });
 
