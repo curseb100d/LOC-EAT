@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Touchable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import { db_auth } from '../Components/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { Picker } from '@react-native-picker/picker';
 import { db } from '../Components/config';
 import { ref, set } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,7 +18,6 @@ export default function SignUpScreen({ navigation }) {
   const [location, setLocation] = useState('');
   const [timeOpen, setTimeOpen] = useState('');
   const [schedule, setSchedule] = useState('');
-  const [status, setStatus] = useState('');
   const [department, setDepartment] = useState(''); // New input field
   const [course, setCourse] = useState(''); // New input field
   const [confirmPassword, setConfirmPassword] = useState(''); // New input field
@@ -31,14 +29,19 @@ export default function SignUpScreen({ navigation }) {
       lastName: lastName,
       email: email,
       userType: userType,
-      schoolId: userType === 'user' ? schoolId : '',
-      department: userType === 'user' ? department : '',
-      course: userType === 'user' ? course : '',
-      businessName: userType === 'business' ? businessName : '',
-      location: userType === 'business' ? location : '',
-      timeOpen: userType === 'business' ? timeOpen : '',
-      schedule: userType === 'business' ? schedule : '',
-      status: userType === 'business' ? status : '',
+      ...(userType === 'user' && {
+        schoolId: userType === 'user' ? schoolId : '',
+        department: userType === 'user' ? department : '',
+        course: userType === 'user' ? course : '',
+      }),
+
+      // Omit business-related fields if userType is 'user'
+      ...(userType === 'business' && {
+        businessName: businessName,
+        location: location,
+        timeOpen: timeOpen,
+        schedule: schedule,
+      }),
     };
 
     const userPath = userType === 'user' ? 'Users' : 'Business user';
@@ -61,7 +64,7 @@ export default function SignUpScreen({ navigation }) {
         setLoading(false);
         return;
       }
-      
+
       const response = await createUserWithEmailAndPassword(auth, email, password);
       console.log(response);
       alert('Check your emails!');
@@ -82,21 +85,46 @@ export default function SignUpScreen({ navigation }) {
     navigation.navigate('Login'); // Replace 'Login' with the name of your login screen in your navigation stack.
   }
 
+  const toggleUserType = () => {
+    // Toggle between 'user' and 'business' when the button is pressed
+    setUserType(userType === 'user' ? 'business' : 'user');
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={{marginBottom:10, marginTop:55}}>
+      <Text style={{ marginBottom: 10, marginTop: 55 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
+      </Text>
+
+      <View style={{
+        flexDirection: 'row',     // Arrange the text and border in a row
+        justifyContent: 'center',  // Center the text horizontally
+        alignItems: 'center',      // Center the text vertically
+        borderColor: 'white',     // Set your desired border color
+        borderWidth: 1,           // You can adjust the border width
+        marginBottom: 15,        // Add margin to the bottom of the view
+        paddingVertical: 5,       // Add vertical padding to create space between the text and the border
+        paddingHorizontal: 18,     // Add horizontal padding to make left and right borders larger
+        borderRadius: 25,
+      }}>
+        <TouchableOpacity onPress={toggleUserType}>
+          <Text style={{ fontSize: 25, marginTop: 2, fontWeight: 'bold', color: 'white', }}>
+            {userType === 'user' ? 'User' : 'Business User'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+
       <ScrollView style={{
         flex: 1, // Take up remaining horizontal space
         borderWidth: 1,
         borderColor: 'maroon',
         borderRadius: 20,
         padding: 10,
-        paddingRight:15,
-        }}>
+        paddingRight: 15,
+      }}>
         <TextInput
           style={styles.input}
           placeholder="First Name"
@@ -109,6 +137,8 @@ export default function SignUpScreen({ navigation }) {
           value={lastName}
           onChangeText={(text) => setLastName(text)}
         />
+
+        {/* User-specific input fields */}
         {userType === 'user' && (
           <>
             <TextInput
@@ -131,40 +161,38 @@ export default function SignUpScreen({ navigation }) {
             />
           </>
         )}
+
+        {/* Business-specific input fields */}
         {userType === 'business' && (
           <>
             <TextInput
-            style={styles.input}
-            placeholder="Business Name"
-            value={businessName}
-            onChangeText={(text) => setBusinessName(text)}
+              style={styles.input}
+              placeholder="Business Name"
+              value={businessName}
+              onChangeText={(text) => setBusinessName(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={location}
-            onChangeText={(text) => setLocation(text)}
+              style={styles.input}
+              placeholder="Location"
+              value={location}
+              onChangeText={(text) => setLocation(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Time Open"
-            value={timeOpen}
-            onChangeText={(text) => setTimeOpen(text)}
+              style={styles.input}
+              placeholder="Time Open"
+              value={timeOpen}
+              onChangeText={(text) => setTimeOpen(text)}
             />
             <TextInput
-            style={styles.input}
-            placeholder="Schedule"
-            value={schedule}
-            onChangeText={(text) => setSchedule(text)}
-            />
-            <TextInput
-            style={styles.input}
-            placeholder="Status"
-            value={status}
-            onChangeText={(text) => setStatus(text)}
+              style={styles.input}
+              placeholder="Schedule"
+              value={schedule}
+              onChangeText={(text) => setSchedule(text)}
             />
           </>
         )}
+
+        {/* Common input fields */}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -185,38 +213,28 @@ export default function SignUpScreen({ navigation }) {
           value={confirmPassword}
           onChangeText={(text) => setConfirmPassword(text)}
         />
-
-        <Text style={{ fontSize: 16, marginTop: 2, fontWeight: 'bold', color:"white" }}>Select User Type:</Text>
-        <Picker
-          selectedValue={userType}
-          onValueChange={(itemValue) => setUserType(itemValue)}
-          style={styles.picker}
-        >
-          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="User" value="user" />
-          <Picker.Item style={{fontWeight:'bold', fontSize:16}} label="Business User" value="business" />
-        </Picker>
       </ScrollView>
 
       <View style={{
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity style={styles.button} onPress={signUp}>
-          <Text style={styles.buttonText}>Create Account</Text>
-        </TouchableOpacity>
-      )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <TouchableOpacity style={styles.button} onPress={signUp}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+        )}
 
-      {/* Your other content here */}
-      <TouchableOpacity onPress={handleLoginRedirect}>
-        <Text style={styles.redirect}>
-          Already have an account? Log in
-        </Text>
-      </TouchableOpacity>
+        {/* Your other content here */}
+        <TouchableOpacity onPress={handleLoginRedirect}>
+          <Text style={styles.redirect}>
+            Already have an account? Log in
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
   );
 }
 
@@ -234,23 +252,26 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 300,
     marginBottom: 18,
+    borderRadius: 18,
+    borderColor: 'black',
+    borderWidth: 1
   },
   picker: {
     width: 300,
-    color:'white',
-    marginBottom:'35',
+    color: 'white',
+    marginBottom: '35',
   },
   yellowText: {
     color: 'yellow',
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
-    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+    fontFamily: 'sans-serif', // Set a custom font family if desired
   },
   whiteText: {
     color: 'white',
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
-    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+    fontFamily: 'sans-serif', // Set a custom font family if desired
   },
   button: {
     width: 180,
@@ -259,10 +280,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:25,
+    marginTop: 25,
   },
   buttonText: {
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: 'black',
     fontSize: 20,
   },
@@ -270,7 +291,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
     color: 'white',
-    fontWeight:'bold',
-    marginBottom:55,
+    fontWeight: 'bold',
+    marginBottom: 55,
   },
 });

@@ -159,6 +159,9 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 300,
     marginBottom: 15,
+    borderRadius:18,
+    borderColor:'black',
+    borderWidth:1
   },
   button: {
     width: 150,
@@ -179,12 +182,12 @@ const styles = StyleSheet.create({
     color: 'yellow',
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
-    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+    fontFamily: 'sans-serif', // Set a custom font family if desired
   },
   whiteText: {
     color: 'white',
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
-    fontFamily: 'YourFontFamily', // Set a custom font family if desired
+    fontFamily: 'sans-serif', // Set a custom font family if desired
   },
 });
