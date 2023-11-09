@@ -64,6 +64,9 @@ const StudentStoreView = () => {
 
       {/* Buttons to filter by location */}
       <View style={styles.buttonContainer}>
+      <TouchableOpacity onPress={() => filterByLocation('')}>
+          <Text style={styles.buttonText}>Home</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => filterByLocation('Back Gate')}>
           <Text style={styles.buttonText}>Back Gate</Text>
         </TouchableOpacity>
@@ -72,9 +75,6 @@ const StudentStoreView = () => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => filterByLocation('Canteen')}>
           <Text style={styles.buttonText}>Canteen</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => filterByLocation('')}>
-          <Text style={styles.buttonText}>Clear</Text>
         </TouchableOpacity>
       </View>
 
@@ -112,20 +112,25 @@ const StudentStoreView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'maroon',
     padding: 16,
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color:'white',
   },
   storeContainer: {
-    backgroundColor: 'white',
-    padding: 16,
-    marginBottom: 16,
-    borderRadius: 8,
-    elevation: 3,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: 15,
+    marginVertical: 8,
+    borderRadius: 30,
+    backgroundColor: '#FFA500',
+    elevation: 2,
+    marginBottom: 10,
+    paddingRight:10,
   },
   storeName: {
     fontSize: 20,
@@ -135,18 +140,22 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 16,
+    marginTop: 15,
+    marginBottom:15,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: 'blue',
+    color: 'white',
   },
   searchInput: {
-    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: 'black',
     padding: 10,
-    marginBottom: 16,
-    borderRadius: 8,
+    marginBottom: 10,
+    color:'black',
+    borderRadius:18,
+    backgroundColor:'white',
   },
 });
 

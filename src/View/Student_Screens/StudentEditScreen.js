@@ -181,7 +181,7 @@ export default function StudentEditScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.cardContainer}>
         <View style={styles.circularCard}>
-          <Image source={{ uri: images[currentImageIndex] }} style={{ width: '100%', height: '100%' }} />
+          <Image source={{ uri: images[currentImageIndex] }} style={{ width: 120, height: 120, borderRadius:60 }} />
           {/* Add your circular card content here */}
         </View>
 
@@ -198,10 +198,11 @@ export default function StudentEditScreen() {
         ) : (
           <>
             {images[currentImageIndex] && (
-              <View>
-                <Button title="Change Image" onPress={changeImage} />
-           
+              <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
               </View>
+          </TouchableOpacity>
             )}
           </>
         )}

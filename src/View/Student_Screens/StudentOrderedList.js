@@ -1,110 +1,135 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import { ref, onValue } from 'firebase/database';
-import { db } from '../../Components/config';
 
 function StudentOrderedList() {
-//   const [ordersWithStatus, setOrdersWithStatus] = useState([]);
+  const [ordersWithStatus, setOrdersWithStatus] = useState([]);
 
-//   useEffect(() => {
-//     // Fetch the orders with status from Firebase when the component loads
-//     fetchOrdersFromFirebase();
-//   }, []);
+  useEffect(() => {
+    // Fetch the latest status for each order from Firebase (e.g., when the screen loads)
+    fetchStatusFromFirebase();
+  }, []);
 
-//   const fetchOrdersFromFirebase = async () => {
-//     const ordersRef = ref(db, 'orderedFood'); // Update the path to match your data structure
+  const fetchStatusFromFirebase = async () => {
+    try {
+      // Fetch data from your Realtime Firebase database using axios
+      const response = await axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json');
 
-//     onValue(ordersRef, (snapshot) => {
-//       if (snapshot.exists()) {
-//         const data = snapshot.val();
+      if (response.status === 200) {
+        const data = response.data;
 
-//         // Convert the data object into an array with keys
-//         const ordersArray = Object.keys(data).map((key) => ({
-//           key,
-//           ...data[key],
-//         }));
+        // Convert the data object into an array of order items
+        const orders = Object.values(data);
 
-//         setOrdersWithStatus(ordersArray);
-//       }
-//     });
-//   };
+        // Update the local state with the fetched orders
+        setOrdersWithStatus(orders);
+      }
+    } catch (error) {
+      console.error('Error fetching data from Firebase:', error);
+    }
+  };
 
-//   const updateStatusOnFirebase = async (order) => {
-//     try {
-//       // Update the status for a specific order in Firebase
-//       const orderRef = ref(db, `orderedFood/${order.key}`); // Update the path to match your data structure
-
-//       // Assuming you have a 'status' field in your Firebase data
-//       // Update it with the new status
-//       await set(orderRef, {
-//         ...order,
-//         status: order.status,
-//       });
-
-//       // Update the local state with the updated status
-//       const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? order : o));
-//       setOrdersWithStatus(updatedOrders);
-//     } catch (error) {
-//       console.error('Error updating status on Firebase:', error);
-//     }
-//   };
-
-//   const handleStatusChange = (order, newStatus) => {
-//     // Update the status locally first
-//     const updatedOrder = { ...order, status: newStatus };
-//     const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? updatedOrder : o));
-//     setOrdersWithStatus(updatedOrders);
-
-//     // Update the status on Firebase
-//     updateStatusOnFirebase(updatedOrder);
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.sectionTitle}>Accepted Orders</Text>
-//       <FlatList
-//         data={ordersWithStatus}
-//         keyExtractor={(item) => item.key}
-//         renderItem={({ item }) => (
-//           <View style={styles.card}>
-//             <Text style={styles.acceptedOrderText}>Accepted Order Details:</Text>
-//             <Text style={styles.acceptedOrderText}>{`Payment Method: ${item.paymentMethod}`}</Text>
-//             <Text style={styles.acceptedOrderText}>{`Pick Up Time: ${item.pickUpTime}`}</Text>
-//             {item.foodDetails ? (
-//               item.foodDetails.map((foodItem, foodIndex) => (
-//                 <View key={foodIndex} style={styles.foodItem}>
-//                   <Text style={styles.foodName}>{foodItem.foodName}</Text>
-//                   <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
-//                   <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
-//                 </View>
-//               ))
-//             ) : null}
-//             <View style={styles.statusContainer}>
-//               <Text style={styles.acceptedOrderText}>Status:</Text>
-//               <TouchableOpacity
-//                 style={[styles.statusButton, { backgroundColor: item.status === 'preparing' ? 'red' : 'lightgray' }]}
-//                 onPress={() => handleStatusChange(item, 'preparing')}
-//               >
-//                 <Text style={styles.statusButtonText}>Preparing</Text>
-//               </TouchableOpacity>
-//               <TouchableOpacity
-//                 style={[styles.statusButton, { backgroundColor: item.status === 'finished' ? 'green' : 'lightgray' }]}
-//                 onPress={() => handleStatusChange(item, 'finished')}
-//               >
-//                 <Text style={styles.statusButtonText}>Finished</Text>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-//         )}
-//       />
-//     </View>
-//   );
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Ordered List</Text>
+      <Text style={styles.sectionTitle}>Accepted Orders</Text>
+      <FlatList
+        data={ordersWithStatus}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.card}>
+            <Text style={styles.acceptedOrderText}>Accepted Order Details:</Text>
+            <Text style={styles.acceptedOrderText}>{`Payment Method: ${item.paymentMethod}`}</Text>
+            <Text style={styles.acceptedOrderText}>{`Pick Up Time: ${item.pickUpTime}`}</Text>
+            {item.foodDetails && item.foodDetails.map((foodItem, foodIndex) => (
+              <View key={foodIndex} style={styles.foodItem}>
+                <Text style={styles.foodName}>{foodItem.foodName}</Text>
+                <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
+                <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
+              </View>
+            ))}
+            <View style={styles.statusContainer}>
+              <Text style={styles.acceptedOrderText}>Status: {item.status}</Text>
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  // Your styles remain the same
-  // ...
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: 'maroon',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'white',
+  },
+  card: {
+    backgroundColor: 'lightgray',
+    padding: 16,
+    margin: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    elevation: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'maroon',
+    marginTop: 10,
+  },
+  foodItem: {
+    marginVertical: 10,
+  },
+  foodName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'maroon',
+  },
+  foodPrice: {
+    fontSize: 14,
+    color: 'maroon',
+  },
+  foodQuantity: {
+    fontSize: 14,
+    color: 'maroon',
+  },
+  acceptedOrderText: {
+    fontSize: 16,
+    color: 'maroon',
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  statusButton: {
+    padding: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  statusButtonText: {
+    fontSize: 14,
+    color: 'white',
+  },
+  deleteButton: {
+    backgroundColor: 'red',
+    padding: 8,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    color: 'white',
+  },
 });
 
 export default StudentOrderedList;

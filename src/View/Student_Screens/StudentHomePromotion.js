@@ -52,16 +52,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'maroon',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color:'white',
   },
   dataContainer: {
     // Styles for data container
+    width:'90%',
+    left:18
   },
   dataTitle: {
     fontSize: 18,
@@ -71,21 +74,22 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    padding: 16,
+    padding: 20,
     marginVertical: 8,
-    borderRadius: 10,
-    backgroundColor: 'white',
+    borderRadius: 15,
+    backgroundColor: '#FFA500',
     elevation: 2,
-    marginBottom: 10,
+    marginTop:15,
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    color:'black',
   },
   itemPrice: {
-    fontSize: 16,
-    color: '#555',
+    fontSize: 18,
+    color:'black',
   },
   button: {
     backgroundColor: 'blue',

@@ -164,15 +164,18 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   itemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'left',
     padding: 10,
     marginVertical: 5,
     borderRadius: 18,
     borderColor: '#ccc',
     borderWidth: 1,
     backgroundColor: '#FFA500',
+    width:'90%',
+    left:18,
+    marginTop:18,
   },
   itemName: {
     fontSize: 18,
@@ -183,7 +186,8 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   quantityContainer: {
-    alignItems: 'center',
+    justifyContent: 'center',
+    alignItems: 'left',
   },
   quantity: {
     fontSize: 16,

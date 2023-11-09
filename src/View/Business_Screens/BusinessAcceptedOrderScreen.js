@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 
 function BusinessAcceptedOrderScreen({ route }) {
@@ -21,7 +21,7 @@ function BusinessAcceptedOrderScreen({ route }) {
         // Update the status for each order
         const updatedOrders = ordersWithStatus.map((order) => {
           if (statusData[order.key]) {
-            order.status = statusData[order.key];
+            order.status = statusData[order.key].status;
           }
           return order;
         });
@@ -33,29 +33,29 @@ function BusinessAcceptedOrderScreen({ route }) {
     }
   };
 
-  const updateStatusOnFirebase = async (order) => {
+  const updateStatusOnFirebase = async (orderKey, newStatus) => {
     try {
       // Update the status for a specific order in Firebase
-      await axios.patch(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json`, {
-        status: order.status,
+      await axios.patch(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood/${orderKey}.json`, {
+        status: newStatus,
       });
-
+  
       // Update the local state with the updated status
-      const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? order : o));
+      const updatedOrders = ordersWithStatus.map((o) => (o.key === orderKey ? { ...o, status: newStatus } : o));
       setOrdersWithStatus(updatedOrders);
     } catch (error) {
       console.error('Error updating status on Firebase:', error);
     }
   };
-
+  
   const handleStatusChange = (order, newStatus) => {
     // Update the status locally first
     const updatedOrder = { ...order, status: newStatus };
     const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? updatedOrder : o));
     setOrdersWithStatus(updatedOrders);
-
+  
     // Update the status on Firebase
-    updateStatusOnFirebase(updatedOrder);
+    updateStatusOnFirebase(order.key, newStatus);
   };
 
   const handleDeleteItem = (itemToDelete) => {
@@ -72,12 +72,42 @@ function BusinessAcceptedOrderScreen({ route }) {
   const deleteItemFromFirebase = async (itemKey) => {
     try {
       // Send a DELETE request to remove the item from Firebase
-      await axios.delete(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json`);
+      await axios.delete(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood/${itemKey}.json`);
     } catch (error) {
       console.error('Error deleting item from Firebase:', error);
     }
   };
-  
+
+  const handleOrder = (pickupOption) => {
+    if (foodCart.length === 0) {
+      Alert.alert('Error', 'Your cart is empty. Add items to your cart before placing an order.');
+      return;
+    }
+
+    const foodDetails = foodCart.map((item) => ({
+      foodName: item.foodName,
+      price: item.totalPrice,
+      quantity: item.quantity,
+    }));
+
+    const dataToSave = {
+      foodDetails: foodDetails,
+      paymentMethod: paymentMethod,
+      pickUpTime: pickUpTime,
+      status: 'Preparing', // Set the initial status here
+    };
+
+    const dbRef = ref(db, '/orderedFood');
+    const newOrderRef = push(dbRef); // Generates a unique key for the order
+
+    set(newOrderRef, dataToSave)
+      .then(() => {
+        setModalVisible(false);
+      })
+      .catch((error) => {
+        console.error('Error saving data: ', error);
+      });
+  };
 
   return (
     <View style={styles.container}>

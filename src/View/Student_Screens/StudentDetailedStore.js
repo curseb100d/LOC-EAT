@@ -106,9 +106,6 @@ const StudentDetailedStore = ({ route }) => {
         <Text style={styles.storeName}>{storeData.storeName}</Text>
         <Text>{`Status: ${storeData.status}`}</Text>
         <Text>{`Time Open: ${storeData.timeOpen}`}</Text>
-        <Text>{`Email: ${storeData.email}`}</Text>
-        <Text>{`First Name: ${storeData.firstName}`}</Text>
-        <Text>{`Last Name: ${storeData.lastName}`}</Text>
         <Text>{`Location: ${storeData.location}`}</Text>
         <Text>{`Schedule: ${storeData.schedule}`}</Text>
       </View>
@@ -226,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   reviewButton: {
-    backgroundColor: 'blue',
+    backgroundColor: 'green',
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',

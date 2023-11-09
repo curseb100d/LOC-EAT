@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../../Components/config';
@@ -7,10 +7,12 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function StudentHomeView() {
   const [promotions, setPromotions] = useState([]);
+  const [foodmenus, setFoodMenu] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
 
   useEffect(() => {
     const promotionsRef = ref(db, 'promotions');
+    const foodmenuRef = ref(db, 'foodmenu');
 
     const promotionsListener = onValue(promotionsRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -20,8 +22,20 @@ export default function StudentHomeView() {
       }
     });
 
+    const foodmenuListener = onValue(foodmenuRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const foodmenusData = snapshot.val();
+        const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
+          id,
+          ...foodmenusData[id],
+        }));
+        setFoodMenu(foodmenusArray);
+      }
+    });
+
     return () => {
-      promotionsListener(); // Clean up the listener when the component unmounts
+      promotionsListener(); // Clean up the promotions listener when the component unmounts
+      foodmenuListener(); // Clean up the foodmenu listener when the component unmounts
     };
   }, []);
 
@@ -30,7 +44,7 @@ export default function StudentHomeView() {
       style={styles.itemContainer}
       onPress={() => {
         // Navigate to 'StudentHomePromotion' when an item is pressed
-        navigation.navigate('StudentHomePromotion', { /* pass any params you need */ });
+        navigation.navigate('StudentHomePromotion', { selectedItem: item });
       }}
     >
       <Text style={styles.itemName}>{`${item.discount}% off for ${item.daysDifference} days`}</Text>
@@ -56,9 +70,28 @@ export default function StudentHomeView() {
         </View>
       )}
       <Text style={styles.header}>Recommendations</Text>
+      {dataFetched && (
+        <View style={styles.dataContainer}>
+          <FlatList
+            data={foodmenus}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.itemContainer}>
+                <Text style={styles.itemName}>{item.foodName}</Text>
+                <Text style={styles.itemPrice}>{`Price: $${item.price}`}</Text>
+                <Text style={styles.itemPrice}>{item.location}</Text>
+                {/* Add more details as needed */}
+              </View>
+            )}
+            // Sort the recommendations by discount in descending order
+            // Adjust the sorting logic based on your data structure
+            // sortBy={(item) => -item.discount}
+          />
+        </View>
+      )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

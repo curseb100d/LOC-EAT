@@ -6,11 +6,26 @@ import { db } from '../../Components/config';
 
 const StudentCartView = () => {
   const [foodCart, setFoodCart] = useState([]);
+  const [foodmenus, setFoodMenu] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const navigation = useNavigation();
 
   useEffect(() => {
+    const foodmenuRef = ref(db, 'foodmenu');
     const foodcartRef = ref(db, 'foodcart');
+
+    const unsubscribeFoodmenu = onValue(foodmenuRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const foodmenusData = snapshot.val();
+        const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
+          id,
+          ...foodmenusData[id],
+          quantity: 0,
+          totalPrice: 0,
+        }));
+        setFoodMenu(foodmenusArray);
+      }
+    });
 
     const unsubscribe = onValue(foodcartRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -24,35 +39,49 @@ const StudentCartView = () => {
     });
 
     return () => {
+      unsubscribeFoodmenu();
       unsubscribe();
     };
   }, []);
 
+  const addToCart = (foodName, quantity) => {
+    const updatedCart = [...foodCart];
+    const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
+
+    if (foodmenuIndex !== -1) {
+      updatedCart[foodmenuIndex].quantity += quantity;
+      if (updatedCart[foodmenuIndex].quantity <= 0) {
+        // If quantity reaches 0, remove the item from the cart
+        updatedCart.splice(foodmenuIndex, 1);
+      } else {
+        updatedCart[foodmenuIndex].totalPrice =
+          updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
+      }
+    } else if (quantity > 0) {
+      updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
+    }
+
+    setFoodCart(updatedCart);
+
+    // Update the cart data in Realtime Firebase
+    const foodcartRef = ref(db, 'foodcart');
+    set(foodcartRef, updatedCart);
+
+    // Calculate the total quantity from the updatedCart and set it to the item.quantity
+    const updatedFoodMenus = [...foodmenus];
+    updatedFoodMenus.forEach((item) => {
+      const cartItem = updatedCart.find((cartItem) => cartItem.id === item.id);
+      item.quantity = cartItem ? cartItem.quantity : 0;
+    });
+
+    setFoodMenu(updatedFoodMenus);
+  };
+
   const calculateTotal = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
+    // return foodCart.reduce((total, item) => total + item.totalPrice, 0);
   };
-
-  // const toggleItemSelection = (itemId) => {
-  //   setSelectedItems((prevSelectedItems) => {
-  //     if (prevSelectedItems.includes(itemId)) {
-  //       return prevSelectedItems.filter((id) => id !== itemId);
-  //     } else {
-  //       return [...prevSelectedItems, itemId];
-  //     }
-  //   });
-  // };
-
-  const handleDeleteItem = (itemId) => {
-    // Remove the item from Realtime Firebase and update the local state
-    const cartRef = ref(db, 'foodcart/');
-    remove(cartRef).then(() => {
-      // Remove the item from the local state
-      setFoodCart((prevFoodCart) => prevFoodCart.filter((item) => item.id !== itemId));
-      // Deselect the item
-      setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => id !== itemId));
-    });
-  };
-
+  
   const handleReviewButtonPress = () => {
     navigation.navigate('StudentReviewOrder');
   };
@@ -65,24 +94,25 @@ const StudentCartView = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            {/* <TouchableOpacity
+            <View
               style={[
-                styles.itemContent,
-                selectedItems.includes(item.id) ? styles.selectedItem : null
+                styles.itemContent
               ]}
-              onPress={() => toggleItemSelection(item.id)}
-            > */}
+            >
               <Text style={styles.itemName}>{item.foodName}</Text>
               <Text style={styles.itemPrice}>Price: ${item.totalPrice}</Text>
               <Text style={styles.itemLocation}>Location: {item.location}</Text>
               <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
-            {/* </TouchableOpacity> */}
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => handleDeleteItem(item.id)}
-            >
-              <Text style={[styles.deleteButtonText, { fontSize: 16 }]}>Delete</Text>
-            </TouchableOpacity>
+            </View>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={() => addToCart(item, -1)}>
+                <Text style={styles.quantityButton}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.quantity}>{item.quantity}</Text>
+              <TouchableOpacity onPress={() => addToCart(item, 1)}>
+                <Text style={styles.quantityButton}>+</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -112,10 +142,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     marginVertical: 5,
-    borderRadius: 18,
+    borderRadius: 15,
     borderColor: '#ccc',
     borderWidth: 1,
     backgroundColor: '#FFA500',
+    marginTop:15,
   },
   selectedItem: {
     backgroundColor: 'white',
@@ -172,7 +203,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center', // Center text horizontally
-  }
+  },
+  quantityButton: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    paddingHorizontal: 8,
+  },
+  quantity: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 8,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
 
 export default StudentCartView;

@@ -5,7 +5,7 @@ import { db } from '../../Components/config';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const StudentSearchView = () => {
-  const [cart, setCart] = useState([]);
+  const [foodCart, setFoodCart] = useState([]);
   const [foodmenus, setFoodMenu] = useState([]);
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
   const [selectedLocation, setSelectedLocation] = useState(''); // State for selected location
@@ -13,7 +13,7 @@ const StudentSearchView = () => {
   // Fetch products from the database
   useEffect(() => {
     const foodmenuRef = ref(db, 'foodmenu');
-    const cartRef = ref(db, 'foodcart');
+    const foodcartRef = ref(db, 'foodcart');
 
     // Listen for changes in the database and update the state
     const unsubscribeFoodmenu = onValue(foodmenuRef, (snapshot) => {
@@ -29,10 +29,10 @@ const StudentSearchView = () => {
       }
     });
 
-    const unsubscribeCart = onValue(cartRef, (snapshot) => {
+    const unsubscribeCart = onValue(foodcartRef, (snapshot) => {
       if (snapshot.exists()) {
         const cartData = snapshot.val();
-        setCart(cartData || []);
+        setFoodCart(cartData || []);
       }
     });
 
@@ -44,7 +44,7 @@ const StudentSearchView = () => {
   }, []);
 
   const addToCart = (foodName, quantity) => {
-    const updatedCart = [...cart];
+    const updatedCart = [...foodCart];
     const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
 
     if (foodmenuIndex !== -1) {
@@ -60,11 +60,11 @@ const StudentSearchView = () => {
       updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
     }
 
-    setCart(updatedCart);
+    setFoodCart(updatedCart);
 
     // Update the cart data in Realtime Firebase
-    const cartRef = ref(db, 'foodcart');
-    set(cartRef, updatedCart);
+    const foodcartRef = ref(db, 'foodcart');
+    set(foodcartRef, updatedCart);
 
     // Calculate the total quantity from the updatedCart and set it to the item.quantity
     const updatedFoodMenus = [...foodmenus];
@@ -77,11 +77,11 @@ const StudentSearchView = () => {
   };
   
   const calculateTotal = () => {
-    return cart.reduce((total, item) => total + item.totalPrice, 0);
+    return foodCart.reduce((total, item) => total + item.totalPrice, 0);
   };
 
   const calculateTotalQuantity = () => {
-    return cart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
+    return foodCart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
   };
 
   const filteredFoodMenus = foodmenus.filter((item) =>
