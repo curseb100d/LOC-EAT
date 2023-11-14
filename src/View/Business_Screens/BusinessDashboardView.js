@@ -100,7 +100,7 @@ function BusinessDashboardView() {
           data={state.popularOrders}
           keyExtractor={(item) => item.foodName}
           renderItem={({ item }) => (
-            <Text style={styles.text}>{item.foodName}: {item.quantity}</Text>
+            <Text style={styles.text2}>{item.foodName}: {item.quantity}</Text>
           )}
         />
       </View>
@@ -117,21 +117,27 @@ const styles = {
   card: {
     backgroundColor: 'white',
     padding: 10,
-    margin: 10,
-    borderRadius: 5,
+    margin: 5,
+    borderRadius: 15,
     alignItems: 'center',
+    justifyContent:'center',
+    marginTop:20,
   },
   text: {
-    fontSize: 16,
+    fontSize: 24,
+    color: 'maroon',
+    fontWeight:'bold',
+  },
+  text2: {
+    fontSize: 18,
     color: 'maroon',
   },
   value: {
     fontSize: 18,
-    fontWeight: 'bold',
     color: 'maroon',
   },
   heading: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'maroon',
   },

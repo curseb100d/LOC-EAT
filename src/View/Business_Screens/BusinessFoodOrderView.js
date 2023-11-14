@@ -119,11 +119,11 @@ function BusinessFoodOrderView() {
               ))
             )}
 
-            <Text style={styles.sectionTitle}>Payment Method</Text>
-            <Text style={styles.sectionText}>{item.paymentMethod}</Text>
+            <Text style={styles.paymentTitle}>Payment Method:</Text>
+            <Text style={styles.paymentValue}>{item.paymentMethod}</Text>
 
-            <Text style={styles.sectionTitle}>Pick Up Time</Text>
-            <Text style={styles.sectionText}>{item.pickUpTime}</Text>
+            <Text style={styles.pickTitle}>Pick Up Time:</Text>
+            <Text style={styles.pickValue}>{item.pickUpTime}</Text>
 
             <TouchableOpacity onPress={() => handleSelectItem(index)}>
               <Text style={styles.selectButton}>{selectedItems.includes(index) ? 'Deselect' : 'Select'}</Text>
@@ -133,8 +133,19 @@ function BusinessFoodOrderView() {
       />
       {selectedItems.length > 0 && (
         <View style={styles.buttonContainer}>
-          <Button title="Accept" onPress={handleAcceptItems} />
-          <Button title="Not Accept" onPress={handleRejectItems} />
+          <TouchableOpacity
+          style={styles.acceptButton}
+          onPress={handleAcceptItems}
+            >
+        <Text style={styles.buttonText}>Accept</Text>
+          </TouchableOpacity>
+      
+          <TouchableOpacity
+          style={styles.rejectButton}
+          onPress={handleRejectItems}
+             >
+        <Text style={styles.buttonText}>Reject</Text>
+          </TouchableOpacity>
         </View>
       )}
     </ScrollView>
@@ -148,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'maroon',
   },
   card: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#ffbf00',
     padding: 16,
     margin: 10,
     borderRadius: 10,
@@ -157,10 +168,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'maroon',
-    marginTop: 10,
+    textAlign:'center',
+    marginTop: 10, 
+    marginBottom:15,
   },
   sectionText: {
     fontSize: 16,
@@ -183,20 +196,74 @@ const styles = StyleSheet.create({
     color: 'maroon',
   },
   selectButton: {
-    fontSize: 16,
-    color: 'blue',
-    marginTop: 10,
+    fontSize: 20,
+    color: 'maroon',
+    fontWeight:'bold',
     textDecorationLine: 'underline',
+    textAlign:'center',
+    bottom:15,
+    height:25,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 10,
+    borderColor: 'white',
+    borderWidth: 1,
+    borderRadius:15,
+    backgroundColor: '#ffbf00',
+    padding: 20,
   },
   acceptedOrderText: {
     fontSize: 16,
     color: 'maroon',
   },
+  paymentTitle: {
+    fontSize: 18,
+    color: 'maroon',
+    fontWeight:'bold',
+    left:25,
+  },
+  paymentValue: {
+    fontSize: 18,
+    color: 'maroon',
+    bottom:25,
+    left:175,
+  },
+  pickTitle: {
+    fontSize: 18,
+    color: 'maroon',
+    fontWeight:'bold',
+    left:25,
+    bottom:20,
+  },
+  pickValue: {
+    fontSize: 18,
+    color: 'maroon',
+    bottom:44,
+    left:150,
+  },
+  acceptButton: {
+    backgroundColor: 'green',
+    borderRadius: 25,
+    width: 100,
+    height: 40,
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rejectButton: {
+    backgroundColor: 'red',
+    borderRadius: 25,
+    width: 100,
+    height: 40,
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color:'white',
+    fontWeight:'bold',
+  }
 });
 
 export default BusinessFoodOrderView;

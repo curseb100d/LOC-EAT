@@ -23,6 +23,13 @@ export default function BusinessCreateMain() {
   const [discountPercentage, setDiscountPercentage] = useState('');
   const [storeName, setStoreName] = useState('');
   const [location, setLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('Front Gate');
+
+  const toggleLocation = () => {
+    setSelectedLocation((prevLocation) =>
+      prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
+    );
+  };
 
   function handleEditFoodItem(item) {
     setSelectedItemId(item.id);
@@ -205,7 +212,7 @@ export default function BusinessCreateMain() {
             <Text style={styles.itemPrice}>Location: {item.location}</Text>
             <View style={styles.quantityContainer}>
               <TouchableOpacity onPress={() => handleEditFoodItem(item)}>
-                <Text>Edit</Text>
+                <Text style={styles.Edit}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.deleteButton}
@@ -246,13 +253,12 @@ export default function BusinessCreateMain() {
                   value={storeName}
                   onChangeText={(text) => setStoreName(text)}
                 />
-                <Picker
-                  selectedValue={location}
-                  onValueChange={(itemValue, itemIndex) => setLocation(itemValue)}
-                >
-                  <Picker.Item label="Front Gate" value="Front Gate" />
-                  <Picker.Item label="Back Gate" value="Back Gate" />
-                </Picker>
+                <TouchableOpacity
+                    style={styles.toggleContainer}
+                    onPress={toggleLocation}
+                    >
+                <Text style={styles.toggleLabel}>{selectedLocation}</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={updateDiscount}>
                   <Text style={styles.buttonText}>Update</Text>
                 </TouchableOpacity>
@@ -282,6 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color:'white',
   },
   itemContainer: {
     flexDirection: 'column',
@@ -289,7 +296,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
-    backgroundColor: 'white',
+    backgroundColor: '#ffbf00',
     elevation: 2,
   },
   imageContainer: {
@@ -305,25 +312,33 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    color:'black',
   },
   itemPrice: {
-    fontSize: 16,
-    color: '#555',
+    fontSize: 18,
+    color:'black',
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 5,
-    marginLeft: 10,
   },
   deleteButtonText: {
-    color: 'white',
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'red', // Background color
+    padding: 8, // Padding around the text
+    borderRadius: 18, // Border radius for rounded corners
+    marginTop: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
+    width:80,
+    left:10
   },
   updateForm: {
     marginTop: 10,
@@ -332,15 +347,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     backgroundColor: 'white',
-    borderRadius: 5,
+    borderRadius: 18,
     padding: 10,
     marginBottom: 10,
+    marginTop:5,
   },
   button: {
-    backgroundColor: 'green',
-    padding: 10,
-    borderRadius: 5,
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'green', // Background color
+    padding: 10, // Padding around the text
+    borderRadius: 15, // Border radius for rounded corners
+    marginTop: 15,
     alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
   },
   buttonText: {
     color: 'white',
@@ -361,7 +383,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffbf00',
     padding: 20,
     borderRadius: 10,
   },
@@ -376,12 +398,42 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   cancelButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 5,
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'red', // Background color
+    padding: 10, // Padding around the text
+    borderRadius: 15, // Border radius for rounded corners
+    marginTop: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
   },
   buttonText: {
     color: 'white',
     textAlign: 'center',
   },
+  Edit: {
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'green', // Background color
+    padding: 8, // Padding around the text
+    borderRadius: 18, // Border radius for rounded corners
+    marginTop: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
+    width:80,
+    right:5,
+  },
+  toggleContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'white',
+    borderRadius: 18,
+    padding: 10,
+    marginBottom: 10,
+    marginTop:5,
+},
 });

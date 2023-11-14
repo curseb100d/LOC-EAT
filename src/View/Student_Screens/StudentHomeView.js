@@ -71,7 +71,7 @@ export default function StudentHomeView() {
       )}
       <Text style={styles.header}>Recommendations</Text>
       {dataFetched && (
-        <View style={styles.dataContainer}>
+        <View style={styles.dataContainer2}>
           <FlatList
             data={foodmenus}
             keyExtractor={(item) => item.id.toString()}
@@ -107,7 +107,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   dataContainer: {
-    // Styles for data container
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dataContainer2: {
   },
   itemContainer: {
     flexDirection: 'column',
