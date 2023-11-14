@@ -16,6 +16,7 @@ import StudentEmailScreen from './src/View/Student_Screens/StudentEmailScreen';
 import StudentHomePromotion from './src/View/Student_Screens/StudentHomePromotion';
 import StudentSearchView from './src/View/Student_Screens/StudentSearchView';
 import BusinessCalendarScreen from './src/View/Business_Screens/BusinessCalendarScreen';
+import BusinessEditScreen from './src/View/Business_Screens/BusinessEditScreen';
 import BusinessCreateAdd from './src/View/Business_Screens/BusinessCreateAdd';
 import BusinessCreatePromotionAdd from './src/View/Business_Screens/BusinessCreatePromotionAdd';
 import StudentDetailedStore from './src/View/Student_Screens/StudentDetailedStore';
@@ -59,6 +60,7 @@ function App() {
         <Stack.Screen name="StudentReviewOrder" component={StudentReviewOrder} />
         <Stack.Screen name="Cart" component={StudentCartView} />
         <Stack.Screen name="BusinessCalendarScreen" component={BusinessCalendarScreen} />
+        <Stack.Screen name="BusinessEditScreen" component={BusinessEditScreen} />
         <Stack.Screen name="BusinessCreateAdd" component={BusinessCreateAdd} />
         <Stack.Screen name="BusinessCreatePromotionAdd" component={BusinessCreatePromotionAdd}/>
         <Stack.Screen name="StudentDetailedStore" component={StudentDetailedStore} />

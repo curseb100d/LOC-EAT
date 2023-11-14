@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, } from 'react-native';
 import { db_auth } from '../../Components/config';
 import { ref, get, onValue, query, orderByChild, equalTo } from 'firebase/database';
 import { db } from '../../Components/config';
@@ -54,7 +54,6 @@ export default function BusinessProfileView() {
 
   const CircularCard = () => (
     <View style={styles.circularCard}>
-      <Text style={styles.circularCardText}>CIRCULAR CARD</Text>
     </View>
   );
 
@@ -107,7 +106,6 @@ export default function BusinessProfileView() {
           <View style={styles.buttonsContainer}>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity onPress={handleEditAccountClick}>
-                <UserDetail value={`Status for Today: ${currentDayStatus || 'N/A'}`} />
                 <Text style={styles.linkText}>Edit Account</Text>
               </TouchableOpacity>
             </View>
@@ -115,6 +113,9 @@ export default function BusinessProfileView() {
               <TouchableOpacity onPress={handleLogoutClick}>
                 <Text style={styles.linkText}>Logout</Text>
               </TouchableOpacity>
+              <Text style={styles.userDetail}>
+                Status for Today: {currentDayStatus || 'N/A'}
+              </Text>
             </View>
           </View>
         </View>
@@ -125,7 +126,7 @@ export default function BusinessProfileView() {
   );
 
   function handleEditAccountClick() {
-    navigation.navigate('StudentEditScreen');
+    navigation.navigate('BusinessEditScreen');
   }
 
   function handleLogoutClick() {
@@ -153,18 +154,17 @@ const styles = StyleSheet.create({
   userDetailContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    top: 165,
+    top: 180,
     marginTop: 5,
   },
   value: {
     fontWeight: 'bold',
     fontSize: 18,
   },
-
   card: {
     padding: 15,
     width: '100%',
-    height: '70%', // Adjust the height as needed
+    height: '68%', // Adjust the height as needed
     borderWidth: 2,
     borderColor: 'transparent',
     backgroundColor: '#FFD700',
@@ -200,6 +200,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonWrapper: {
-    bottom: 25,
-  }
+    bottom: 50,
+  },
+  userDetail: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    justifyContent: 'center',
+    alignItems: "center",
+    textAlign: 'center',
+    top: 120,
+  },
 });

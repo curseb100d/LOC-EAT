@@ -52,7 +52,7 @@ export default function CalendarScreen() {
   }, [selectedDay]);
 
   const toggleStatus = (day) => {
-    const newStatus = status[day] === 'open' ? 'close' : 'open';
+    const newStatus = status[day] === 'Open' ? 'Close' : 'Open';
 
     // Get a reference to the 'status' node in your database
     const statusRef = ref(db, `Business user/${currentUser.uid}/${day}`);
@@ -73,10 +73,10 @@ export default function CalendarScreen() {
         <View style={styles.statusButtonContainer}>
           <Text style={styles.statusText}>Status: {status[selectedDay]}</Text>
           <TouchableOpacity
-            style={[styles.circularButton, { backgroundColor: status[selectedDay] === 'open' ? 'green' : 'red' }]}
+            style={[styles.circularButton, { backgroundColor: status[selectedDay] === 'Open' ? 'green' : 'red' }]}
             onPress={() => toggleStatus(selectedDay)}
           >
-            <Text>Toggle Status</Text>
+            <Text style={styles.calendarText}>Toggle Status</Text>
           </TouchableOpacity>
         </View>
       );
@@ -123,4 +123,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  calendarText: {
+    color:'white',
+    fontWeight:'bold',
+  }
 });

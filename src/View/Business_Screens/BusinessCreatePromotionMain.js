@@ -104,16 +104,20 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
     textAlign: 'center',
+    color:'white',
   },
   dataContainer: {
     // Styles for data container
+    padding:10,
   },
   dataTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:'white',
+    marginTop:15,
   },
   itemContainer: {
     flexDirection: 'column',
@@ -121,24 +125,31 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
-    backgroundColor: 'white',
+    backgroundColor: '#FFA500',
     elevation: 2,
     marginBottom: 10,
   },
   itemName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
+    color:'black',
   },
   itemPrice: {
-    fontSize: 16,
-    color: '#555',
+    fontSize: 18,
+    color:'black',
   },
   button: {
-    backgroundColor: 'blue',
-    padding: 10,
+    color: 'white', // Text color
+    fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
+    backgroundColor: 'green', // Background color
+    padding: 10, // Padding around the text
+    borderRadius: 15, // Border radius for rounded corners
+    marginTop: 15,
     alignItems: 'center',
-    borderRadius: 5,
+    justifyContent: 'center',
+    textAlign: 'center', // Center text horizontally
   },
   buttonText: {
     color: 'white',

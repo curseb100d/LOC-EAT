@@ -38,9 +38,11 @@ function StudentOrderedList() {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.card}>
-            <Text style={styles.acceptedOrderText}>Accepted Order Details:</Text>
-            <Text style={styles.acceptedOrderText}>{`Payment Method: ${item.paymentMethod}`}</Text>
-            <Text style={styles.acceptedOrderText}>{`Pick Up Time: ${item.pickUpTime}`}</Text>
+            <Text style={styles.acceptedOrderText}>Accepted Order Details</Text>
+            <Text style={styles.paymentLabel}>Payment Method:</Text>
+            <Text style={styles.paymentMethodValue}>{item.paymentMethod}</Text>
+            <Text style={styles.pickLabel}>Pick Up Time:</Text>
+            <Text style={styles.pickValue}>{item.pickUpTime}</Text>      
             {item.foodDetails && item.foodDetails.map((foodItem, foodIndex) => (
               <View key={foodIndex} style={styles.foodItem}>
                 <Text style={styles.foodName}>{foodItem.foodName}</Text>
@@ -71,13 +73,14 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   card: {
-    backgroundColor: 'lightgray',
+    backgroundColor: '#ffbf00',
     padding: 16,
     margin: 10,
-    borderRadius: 10,
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: 'white',
     elevation: 2,
+    height:390,
   },
   sectionTitle: {
     fontSize: 18,
@@ -87,28 +90,40 @@ const styles = StyleSheet.create({
   },
   foodItem: {
     marginVertical: 10,
+    bottom:35,
+    justifyContent:'center',
+    alignItems:'center',
+    marginBottom:20,
   },
   foodName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'maroon',
   },
   foodPrice: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'maroon',
   },
   foodQuantity: {
-    fontSize: 14,
+    fontSize: 16,
     color: 'maroon',
   },
   acceptedOrderText: {
-    fontSize: 16,
+    fontSize: 24,
     color: 'maroon',
+    fontWeight: 'bold',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'center',
+    textAlign:'center',
+    marginBottom:35,
   },
   statusContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    bottom:35,
+    left:25,
   },
   statusButton: {
     padding: 8,
@@ -129,6 +144,31 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     fontSize: 14,
     color: 'white',
+  },
+  paymentMethodValue: {
+    fontSize: 18,
+    color: 'maroon',
+    bottom:25,
+    left:175,
+  },
+  paymentLabel: {
+    fontSize: 18,
+    color: 'maroon',
+    fontWeight:'bold',
+    left:25,
+  },
+  pickLabel: {
+    fontSize: 18,
+    color: 'maroon',
+    fontWeight:'bold',
+    left:25,
+    bottom:20,
+  },
+  pickValue: {
+    fontSize: 18,
+    color: 'maroon',
+    bottom:44,
+    left:150,
   },
 });
 

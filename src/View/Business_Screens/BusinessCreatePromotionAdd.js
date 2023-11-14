@@ -18,12 +18,18 @@ const BusinessCreatePromotionAdd = () => {
     const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
     const [discount, setDiscount] = useState(0);
     const [storeName, setStoreName] = useState('');
-    const [location, setLocation] = useState('Front Gate'); // Default value
+    const [selectedLocation, setSelectedLocation] = useState('Front Gate');
     const [promotions, setPromotions] = useState([]);
     const [startDate, setStartDate] = useState(new Date()); // Updated to use Date object
     const [endDate, setEndDate] = useState(new Date()); // Updated to use Date object
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+    const toggleLocation = () => {
+        setSelectedLocation((prevLocation) =>
+          prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
+        );
+      };
 
     // Function to add a promotion
     const handleAddPromotion = () => {
@@ -153,15 +159,14 @@ const BusinessCreatePromotionAdd = () => {
                     value={storeName}
                     onChangeText={(text) => setStoreName(text)}
                 />
+
                 <View>
-                    <Picker
-                        style={styles.input}
-                        selectedValue={location}
-                        onValueChange={(value) => setLocation(value)}
+                <TouchableOpacity
+                    style={styles.toggleContainer}
+                    onPress={toggleLocation}
                     >
-                        <Picker.Item label="Front Gate" value="Front Gate" />
-                        <Picker.Item label="Back Gate" value="Back Gate" />
-                    </Picker>
+                <Text style={styles.toggleLabel}>{selectedLocation}</Text>
+                </TouchableOpacity>
                 </View>
                 <View>
                     <TouchableOpacity
@@ -208,8 +213,9 @@ const BusinessCreatePromotionAdd = () => {
                 <Carousel
                     data={foodmenus}
                     renderItem={renderCarouselItem}
-                    sliderWidth={300} // Customize the slider width
-                    itemWidth={300} // Customize the item width
+                    sliderWidth={320} // Customize the slider width
+                    itemWidth={320} // Customize the item width
+                    left={5}
                 />
                 <View>
                     <TouchableOpacity style={styles.button} onPress={handleAddPromotionAndMainButton}>
@@ -229,7 +235,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'maroon',
     },
     inputContainer: {
-        backgroundColor: '#FFD68A',
+        backgroundColor: '#ffbf00',
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
@@ -242,9 +248,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 18,
         padding: 10,
         marginBottom: 10,
+        marginTop:5,
     },
     label: {
         fontSize: 16,
@@ -268,18 +275,16 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     button: {
-        width: 180,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: 'green',
-        marginTop: 10,
-        marginBottom: 5,
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        color: 'white',
-        marginLeft: 80,
+        color: 'white', // Text color
+        fontSize: 20, // Text font size
+        fontWeight: 'bold', // Text font weight
+        backgroundColor: 'green', // Background color
+        padding: 10, // Padding around the text
+        borderRadius: 15, // Border radius for rounded corners
+        marginTop: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center', // Center text horizontally
     },
     buttonText: {
         fontSize: 20,
@@ -294,28 +299,37 @@ const styles = StyleSheet.create({
         padding: 16,
         marginVertical: 8,
         borderRadius: 10,
-        backgroundColor: 'white',
+        backgroundColor: '#ffa700',
         elevation: 2,
         marginBottom: 10,
     },
     itemName: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 5,
+        color: 'black',
     },
     itemPrice: {
-        fontSize: 16,
-        color: '#555',
+        fontSize: 18,
+        color: 'black',
     },
     itemLocation: {
-        fontSize: 16,
-        color: '#555',
+        fontSize: 18,
+        color: 'black',
     },
     selectedItem: {
         backgroundColor: '#e0f7fa',
     },
     itemContent: {
         flex: 1,
+    },
+    toggleContainer: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        backgroundColor: 'white',
+        borderRadius: 18,
+        padding: 10,
+        marginBottom: 10,
+        marginTop:5,
     },
 });
 

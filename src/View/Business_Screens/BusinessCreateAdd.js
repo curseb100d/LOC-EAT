@@ -96,13 +96,14 @@ function BusinessCreateAdd() {
                 >
                     <Picker.Item label="Front Gate" value="Front Gate" />
                     <Picker.Item label="Back Gate" value="Back Gate" />
+                    <Picker.Item label="Canteen" value="Canteen" />
                 </Picker>
                 <View>
                     <TouchableOpacity
                         style={styles.button}
                         onPress={handleAddFoodMenu}
                     >
-                        <Text style={styles.buttonText}>Add Discount</Text>
+                        <Text style={styles.buttonText}>Add Food</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'maroon',
     },
     inputContainer: {
-        backgroundColor: '#FFD68A',
+        backgroundColor: '#ffbf00',
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
@@ -130,23 +131,22 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 18,
         padding: 10,
         marginBottom: 10,
+        marginTop:5,
     },
     button: {
-        width: 180,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: 'green',
-        marginTop: 10,
-        marginBottom: 5,
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        color: 'white',
-        marginLeft: 80,
+        color: 'white', // Text color
+        fontSize: 20, // Text font size
+        fontWeight: 'bold', // Text font weight
+        backgroundColor: 'green', // Background color
+        padding: 10, // Padding around the text
+        borderRadius: 15, // Border radius for rounded corners
+        marginTop: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center', // Center text horizontally
     },
     buttonText: {
         fontSize: 20,
@@ -154,6 +154,15 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center',
         textAlignVertical: 'center',
+    },
+    toggleContainer: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        backgroundColor: 'white',
+        borderRadius: 18,
+        padding: 10,
+        marginBottom: 10,
+        marginTop:5,
     },
 });
 
