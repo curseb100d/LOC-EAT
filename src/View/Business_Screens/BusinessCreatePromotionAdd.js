@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ref, set, onValue, remove } from 'firebase/database';
+import { ref, set, onValue } from 'firebase/database';
 import { db } from '../../Components/config';
 import BusinessPromotionController from '../../Controller/Business_Controller/BusinessPromotionController';
 import { useNavigation } from '@react-navigation/native';
 import Carousel from 'react-native-snap-carousel'; // Import the Carousel component
 import DateTimePicker from '@react-native-community/datetimepicker'; // Import the DateTimePicker component
-import { Picker } from '@react-native-picker/picker';
 
 // Define the BusinessCreatePromotionAdd component
 const BusinessCreatePromotionAdd = () => {
@@ -18,6 +17,7 @@ const BusinessCreatePromotionAdd = () => {
     const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
     const [discount, setDiscount] = useState(0);
     const [storeName, setStoreName] = useState('');
+    const [location, setLocation] = useState('');
     const [selectedLocation, setSelectedLocation] = useState('Front Gate');
     const [promotions, setPromotions] = useState([]);
     const [startDate, setStartDate] = useState(new Date()); // Updated to use Date object
@@ -27,9 +27,9 @@ const BusinessCreatePromotionAdd = () => {
 
     const toggleLocation = () => {
         setSelectedLocation((prevLocation) =>
-          prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
+            prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
         );
-      };
+    };
 
     // Function to add a promotion
     const handleAddPromotion = () => {
@@ -150,9 +150,10 @@ const BusinessCreatePromotionAdd = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Discount"
-                    value={discount}
-                    onChangeText={(text) => setDiscount(text)}
+                    value={discount.toString()} // Convert the number to a string
+                    onChangeText={(text) => setDiscount(Number(text))} // Convert the input to a number
                 />
+
                 <TextInput
                     style={styles.input}
                     placeholder="Store Name"
@@ -161,12 +162,12 @@ const BusinessCreatePromotionAdd = () => {
                 />
 
                 <View>
-                <TouchableOpacity
-                    style={styles.toggleContainer}
-                    onPress={toggleLocation}
+                    <TouchableOpacity
+                        style={styles.toggleContainer}
+                        onPress={toggleLocation}
                     >
-                <Text style={styles.toggleLabel}>{selectedLocation}</Text>
-                </TouchableOpacity>
+                        <Text style={styles.toggleLabel}>{selectedLocation}</Text>
+                    </TouchableOpacity>
                 </View>
                 <View>
                     <TouchableOpacity
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         marginBottom: 10,
-        marginTop:5,
+        marginTop: 5,
     },
     label: {
         fontSize: 16,
@@ -329,7 +330,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         marginBottom: 10,
-        marginTop:5,
+        marginTop: 5,
     },
 });
 

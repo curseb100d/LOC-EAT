@@ -92,17 +92,11 @@ function BusinessDashboardView() {
         <Text style={styles.text}>Total Orders</Text>
         <Text style={styles.value}>{state.orders}</Text>
       </View>
-      {/* <Text style={styles.text}>Total Customers: {state.customers}</Text>
-      <Text style={styles.text}>Total Revenue: {state.revenue}</Text> */}
       <View style={styles.card}>
         <Text style={styles.heading}>Popular Orders</Text>
-        <FlatList
-          data={state.popularOrders}
-          keyExtractor={(item) => item.foodName}
-          renderItem={({ item }) => (
-            <Text style={styles.text2}>{item.foodName}: {item.quantity}</Text>
-          )}
-        />
+        {state.popularOrders.map((item) => (
+          <Text key={item.foodName} style={styles.text2}>{item.foodName}: {item.quantity}</Text>
+        ))}
       </View>
     </ScrollView>
   );
@@ -120,13 +114,13 @@ const styles = {
     margin: 5,
     borderRadius: 15,
     alignItems: 'center',
-    justifyContent:'center',
-    marginTop:20,
+    justifyContent: 'center',
+    marginTop: 20,
   },
   text: {
     fontSize: 24,
     color: 'maroon',
-    fontWeight:'bold',
+    fontWeight: 'bold',
   },
   text2: {
     fontSize: 18,

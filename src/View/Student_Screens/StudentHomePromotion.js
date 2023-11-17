@@ -30,18 +30,14 @@ const StudentHomePromotion = () => {
       <Text style={styles.header}>Food Promotions</Text>
       {dataFetched && (
         <ScrollView style={styles.dataContainer}>
-          <FlatList
-            data={selectedFoodPromotion}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
-                <Text style={styles.itemName}>{item.foodName}</Text>
-                <Text style={styles.itemPrice}>{`Original Price: ${item.price}`}</Text>
-                <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}`}</Text>
-                <Text style={styles.itemPrice}>{`Discount Price: ${item.discountedPrice}`}</Text>
-              </View>
-            )}
-          />
+          {selectedFoodPromotion.map((item, index) => (
+            <View key={index} style={styles.itemContainer}>
+              <Text style={styles.itemName}>{item.foodName}</Text>
+              <Text style={styles.itemPrice}>{`Original Price: ${item.price}`}</Text>
+              <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}`}</Text>
+              <Text style={styles.itemPrice}>{`Discount Price: ${item.discountedPrice}`}</Text>
+            </View>
+          ))}
         </ScrollView>
       )}
     </View>

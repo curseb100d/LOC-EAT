@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Image } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
-import { ref, set, onValue, update, remove } from "firebase/database";
+import { ref, onValue, update, remove } from "firebase/database";
 import { db } from '../../Components/config';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { storage } from '../../Components/config';
 import { getDownloadURL, uploadBytes, deleteObject, listAll } from 'firebase/storage';
 import Modal from 'react-native-modal';
-import { Picker } from '@react-native-picker/picker';
 
 export default function BusinessCreateMain() {
   const [foodmenus, setFoodMenu] = useState([]);
@@ -69,79 +68,79 @@ export default function BusinessCreateMain() {
     };
   }, []);
 
-  const pickImage = async () => {
-    setIsLoading(true);
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  // const pickImage = async () => {
+  //   setIsLoading(true);
+  //   let result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
+  //     allowsEditing: true,
+  //     aspect: [4, 3],
+  //     quality: 1,
+  //   });
 
-    if (!result.canceled) {
-      const uploadURL = await uploadImageAsync(result.assets[0].uri);
-      setImage(uploadURL);
-      setIsLoading(false);
-    } else {
-      setImage(null);
-      setIsLoading(false);
-    }
-  };
+  //   if (!result.canceled) {
+  //     const uploadURL = await uploadImageAsync(result.assets[0].uri);
+  //     setImage(uploadURL);
+  //     setIsLoading(false);
+  //   } else {
+  //     setImage(null);
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  const uploadImageAsync = async (uri) => {
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
+  // const uploadImageAsync = async (uri) => {
+  //   const blob = await new Promise((resolve, reject) => {
+  //     const xhr = new XMLHttpRequest();
+  //     xhr.onload = function () {
+  //       resolve(xhr.response);
+  //     };
+  //     xhr.onerror = function (e) {
+  //       console.log(e);
+  //       reject(new TypeError('Network request failed'));
+  //     };
+  //     xhr.responseType = 'blob';
+  //     xhr.open('GET', uri, true);
+  //     xhr.send(null);
+  //   });
 
-    try {
-      const storageRef = ref(storage, `Images/image-${Date.now()}`);
-      const result = await uploadBytes(storageRef, blob);
+  //   try {
+  //     const storageRef = ref(storage, `Images/image-${Date.now()}`);
+  //     const result = await uploadBytes(storageRef, blob);
 
-      blob.close();
-      return await getDownloadURL(storageRef);
-    } catch (error) {
-      alert(`Error: ${error}`);
-    }
-  };
+  //     blob.close();
+  //     return await getDownloadURL(storageRef);
+  //   } catch (error) {
+  //     alert(`Error: ${error}`);
+  //   }
+  // };
 
-  const deleteImage = async () => {
-    setIsLoading(true);
-    const deleteRef = ref(storage, image);
-    try {
-      deleteObject(deleteRef).then(() => {
-        setImage(null);
-        setIsLoading(false);
-      });
-    } catch (error) {
-      alert(`Error: ${error}`);
-    }
-  };
+  // const deleteImage = async () => {
+  //   setIsLoading(true);
+  //   const deleteRef = ref(storage, image);
+  //   try {
+  //     deleteObject(deleteRef).then(() => {
+  //       setImage(null);
+  //       setIsLoading(false);
+  //     });
+  //   } catch (error) {
+  //     alert(`Error: ${error}`);
+  //   }
+  // };
 
-  useEffect(() => {
-    // Function to fetch an image from Firebase Storage
-    const fetchImage = async () => {
-      const listRef = ref(storage, 'Images'); // Change 'Images' to your folder name
-      const images = await listAll(listRef);
+  // useEffect(() => {
+  //   // Function to fetch an image from Firebase Storage
+  //   const fetchImage = async () => {
+  //     const listRef = ref(storage, 'Images'); // Change 'Images' to your folder name
+  //     const images = await listAll(listRef);
 
-      if (images.items.length > 0) {
-        const imageRef = images.items[0]; // Fetch the first image, change as needed
-        const downloadURL = await getDownloadURL(imageRef);
-        setImage(downloadURL);
-      }
-    };
+  //     if (images.items.length > 0) {
+  //       const imageRef = images.items[0]; // Fetch the first image, change as needed
+  //       const downloadURL = await getDownloadURL(imageRef);
+  //       setImage(downloadURL);
+  //     }
+  //   };
 
-    fetchImage();
-  }, []); // Fetch the image when the component mounts
+  //   fetchImage();
+  // }, []); // Fetch the image when the component mounts
 
   const updateDiscount = async () => {
     if (selectedItemId) {
@@ -254,10 +253,10 @@ export default function BusinessCreateMain() {
                   onChangeText={(text) => setStoreName(text)}
                 />
                 <TouchableOpacity
-                    style={styles.toggleContainer}
-                    onPress={toggleLocation}
-                    >
-                <Text style={styles.toggleLabel}>{selectedLocation}</Text>
+                  style={styles.toggleContainer}
+                  onPress={toggleLocation}
+                >
+                  <Text style={styles.toggleLabel}>{selectedLocation}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={updateDiscount}>
                   <Text style={styles.buttonText}>Update</Text>
@@ -288,7 +287,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color:'white',
+    color: 'white',
   },
   itemContainer: {
     flexDirection: 'column',
@@ -314,11 +313,11 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color:'black',
+    color: 'black',
   },
   itemPrice: {
     fontSize: 18,
-    color:'black',
+    color: 'black',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -337,8 +336,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center', // Center text horizontally
-    width:80,
-    left:10
+    width: 80,
+    left: 10
   },
   updateForm: {
     marginTop: 10,
@@ -350,7 +349,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 10,
     marginBottom: 10,
-    marginTop:5,
+    marginTop: 5,
   },
   button: {
     color: 'white', // Text color
@@ -424,8 +423,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center', // Center text horizontally
-    width:80,
-    right:5,
+    width: 80,
+    right: 5,
   },
   toggleContainer: {
     borderWidth: 1,
@@ -434,6 +433,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 10,
     marginBottom: 10,
-    marginTop:5,
-},
+    marginTop: 5,
+  },
 });

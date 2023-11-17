@@ -109,30 +109,26 @@ const StudentDetailedStore = ({ route }) => {
         <Text>{`Location: ${storeData.location}`}</Text>
         <Text>{`Schedule: ${storeData.schedule}`}</Text>
       </View>
-
+  
       <Text style={styles.menuHeading}>Store Menu</Text>
-
+  
       <ScrollView style={{ padding: 15 }}>
-        <FlatList
-          data={foodmenus}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Text style={styles.itemName}>{item.foodName}</Text>
-              <Text style={styles.itemPrice}>Price: P{item.price}</Text>
-              <Text style={styles.itemLocation}>Location: {item.location}</Text>
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity onPress={() => addToCart(item, -1)}>
-                  <Text style={styles.quantityButton}>-</Text>
-                </TouchableOpacity>
-                <Text style={styles.quantity}>{item.quantity}</Text>
-                <TouchableOpacity onPress={() => addToCart(item, 1)}>
-                  <Text style={styles.quantityButton}>+</Text>
-                </TouchableOpacity>
-              </View>
+        {foodmenus.map((item, index) => (
+          <View key={index} style={styles.itemContainer}>
+            <Text style={styles.itemName}>{item.foodName}</Text>
+            <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+            <Text style={styles.itemLocation}>Location: {item.location}</Text>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={() => addToCart(item, -1)}>
+                <Text style={styles.quantityButton}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.quantity}>{item.quantity}</Text>
+              <TouchableOpacity onPress={() => addToCart(item, 1)}>
+                <Text style={styles.quantityButton}>+</Text>
+              </TouchableOpacity>
             </View>
-          )}
-        />
+          </View>
+        ))}
       </ScrollView>
       <View style={styles.buttonsContainer}>
         <TouchableOpacity onPress={navigateToCartScreen}>

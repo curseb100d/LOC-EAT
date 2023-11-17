@@ -12,17 +12,7 @@ export default function BusinessCreatePromotionMain() {
   const [selectedFoodPromotion, setSelectedFoodPromotion] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
 
-  const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
-  const [discount, setDiscount] = useState(0);
-  const [storeName, setStoreName] = useState('');
-  const [location, setLocation] = useState('');
   const [promotions, setPromotions] = useState([]);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
-  const [foodName, setFoodName] = useState('');
-  const [price, setPrice] = useState(0);
-  const [discountPercentage, setDiscountPercentage] = useState('');
 
   useEffect(() => {
     const promotionsRef = ref(db, 'promotions');
@@ -60,32 +50,28 @@ export default function BusinessCreatePromotionMain() {
       {dataFetched && (
         <ScrollView style={styles.dataContainer}>
           <Text style={styles.dataTitle}>Promotions:</Text>
-          <FlatList
-            data={promotions}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
+          <View>
+            {promotions.map((item, index) => (
+              <View key={index} style={styles.itemContainer}>
                 <Text style={styles.itemName}>{`${item.discount}% off for ${item.daysDifference} days`}</Text>
                 <Text style={styles.itemPrice}>{item.foodDiscountDescription}</Text>
                 <Text style={styles.itemPrice}>{item.storeName}</Text>
                 <Text style={styles.itemPrice}>{item.location}</Text>
               </View>
-            )}
-          />
+            ))}
+          </View>
 
           <Text style={styles.dataTitle}>Selected Food Promotions:</Text>
-          <FlatList
-            data={selectedFoodPromotion}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
+          <View>
+            {selectedFoodPromotion.map((item, index) => (
+              <View key={index} style={styles.itemContainer}>
                 <Text style={styles.itemName}>{item.foodName}</Text>
                 <Text style={styles.itemPrice}>{`Original Price: ${item.price}`}</Text>
                 <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}`}</Text>
                 <Text style={styles.itemPrice}>{`Discount Price: ${item.discountedPrice}`}</Text>
               </View>
-            )}
-          />
+            ))}
+          </View>
         </ScrollView>
       )}
       <TouchableOpacity style={styles.button} onPress={handleEditPromotionClick}>

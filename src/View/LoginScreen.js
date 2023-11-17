@@ -71,7 +71,7 @@ export default function LoginScreen({ navigation }) {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
 
-      // Check if userType is seta
+      // Check if userType is set
       if (userType) {
         // Now, navigate based on userType
         navigateBasedOnUserType();

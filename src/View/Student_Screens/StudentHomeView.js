@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../../Components/config';
@@ -71,23 +71,16 @@ export default function StudentHomeView() {
       )}
       <Text style={styles.header}>Recommendations</Text>
       {dataFetched && (
-        <View style={styles.dataContainer2}>
-          <FlatList
-            data={foodmenus}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
+        <ScrollView style={styles.dataContainer2}>
+          {dataFetched &&
+            foodmenus.map((item) => (
+              <View key={item.id} style={styles.itemContainer}>
                 <Text style={styles.itemName}>{item.foodName}</Text>
                 <Text style={styles.itemPrice}>{`Price: $${item.price}`}</Text>
                 <Text style={styles.itemPrice}>{item.location}</Text>
-                {/* Add more details as needed */}
               </View>
-            )}
-            // Sort the recommendations by discount in descending order
-            // Adjust the sorting logic based on your data structure
-            // sortBy={(item) => -item.discount}
-          />
-        </View>
+            ))}
+        </ScrollView>
       )}
     </View>
   );

@@ -100,12 +100,10 @@ function BusinessFoodOrderView() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <FlatList
-        data={foodData}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View style={styles.card}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        {foodData.map((item, index) => (
+          <View key={index} style={styles.card}>
             <TouchableOpacity onPress={() => toggleExpansion(index)}>
               <Text style={styles.sectionTitle}>Food Details</Text>
             </TouchableOpacity>
@@ -129,26 +127,20 @@ function BusinessFoodOrderView() {
               <Text style={styles.selectButton}>{selectedItems.includes(index) ? 'Deselect' : 'Select'}</Text>
             </TouchableOpacity>
           </View>
-        )}
-      />
+        ))}
+      </ScrollView>
       {selectedItems.length > 0 && (
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-          style={styles.acceptButton}
-          onPress={handleAcceptItems}
-            >
-        <Text style={styles.buttonText}>Accept</Text>
+          <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptItems}>
+            <Text style={styles.buttonText}>Accept</Text>
           </TouchableOpacity>
-      
-          <TouchableOpacity
-          style={styles.rejectButton}
-          onPress={handleRejectItems}
-             >
-        <Text style={styles.buttonText}>Reject</Text>
+
+          <TouchableOpacity style={styles.rejectButton} onPress={handleRejectItems}>
+            <Text style={styles.buttonText}>Reject</Text>
           </TouchableOpacity>
         </View>
       )}
-    </ScrollView>
+    </View>
   );
 }
 
@@ -171,9 +163,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'maroon',
-    textAlign:'center',
-    marginTop: 10, 
-    marginBottom:15,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 15,
   },
   sectionText: {
     fontSize: 16,
@@ -198,11 +190,11 @@ const styles = StyleSheet.create({
   selectButton: {
     fontSize: 20,
     color: 'maroon',
-    fontWeight:'bold',
+    fontWeight: 'bold',
     textDecorationLine: 'underline',
-    textAlign:'center',
-    bottom:15,
-    height:25,
+    textAlign: 'center',
+    bottom: 15,
+    height: 25,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -220,27 +212,27 @@ const styles = StyleSheet.create({
   paymentTitle: {
     fontSize: 18,
     color: 'maroon',
-    fontWeight:'bold',
-    left:25,
+    fontWeight: 'bold',
+    left: 25,
   },
   paymentValue: {
     fontSize: 18,
     color: 'maroon',
-    bottom:25,
-    left:175,
+    bottom: 25,
+    left: 175,
   },
   pickTitle: {
     fontSize: 18,
     color: 'maroon',
-    fontWeight:'bold',
-    left:25,
-    bottom:20,
+    fontWeight: 'bold',
+    left: 25,
+    bottom: 20,
   },
   pickValue: {
     fontSize: 18,
     color: 'maroon',
-    bottom:44,
-    left:150,
+    bottom: 44,
+    left: 150,
   },
   acceptButton: {
     backgroundColor: 'green',
@@ -261,8 +253,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    color:'white',
-    fontWeight:'bold',
+    color: 'white',
+    fontWeight: 'bold',
   }
 });
 
