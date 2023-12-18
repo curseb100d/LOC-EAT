@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
 import { ref, push, set } from "firebase/database";
 import { db } from '../../Components/config';
@@ -13,9 +13,23 @@ function BusinessCreateAdd() {
     const [price, setPrice] = useState(0);
     const [discountPercentage, setDiscountPercentage] = useState('');
     const [storeName, setStoreName] = useState('');
-    const [location, setLocation] = useState('Front Gate'); // Default to Front Gate
+    const [location, setLocation] = useState('Front Gate');
+    const [image, setImage] = useState(null);
 
-    const handleAddFoodMenu = () => {
+    const pickImage = async () => {
+        const result = await launchImageLibraryAsync({
+            mediaTypes: 'Images',
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImage(result.uri);
+        }
+    };
+
+    const handleAddFoodMenu = async () => {
         if (
             discountPercentage !== '' &&
             !isNaN(discountPercentage) &&
@@ -98,14 +112,9 @@ function BusinessCreateAdd() {
                     <Picker.Item label="Back Gate" value="Back Gate" />
                     <Picker.Item label="Canteen" value="Canteen" />
                 </Picker>
-                <View>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={handleAddFoodMenu}
-                    >
-                        <Text style={styles.buttonText}>Add Food</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={styles.button} onPress={handleAddFoodMenu}>
+                    <Text style={styles.buttonText}>Add Food</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );
@@ -134,7 +143,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         marginBottom: 10,
-        marginTop:5,
+        marginTop: 5,
     },
     button: {
         color: 'white', // Text color
@@ -162,7 +171,7 @@ const styles = StyleSheet.create({
         borderRadius: 18,
         padding: 10,
         marginBottom: 10,
-        marginTop:5,
+        marginTop: 5,
     },
 });
 

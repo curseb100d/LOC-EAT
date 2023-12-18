@@ -78,35 +78,51 @@ function BusinessDashboardView() {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <TouchableOpacity onPress={() => navigation.navigate('BusinessCalendarScreen')}>
-          <FontAwesome name="calendar" size={30} color="black" />
+    <View style={styles.container}>
+      <Text style={styles.header}>Dashboard</Text>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.card}>
+          <Text style={styles.text}>Total Sales</Text>
+          <Text style={styles.value}>{state.sales}</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.text}>Total Orders</Text>
+          <Text style={styles.value}>{state.orders}</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.heading}>Popular Orders</Text>
+          {state.popularOrders.map((item) => (
+            <Text key={item.foodName} style={styles.text2}>{item.foodName}: {item.quantity}</Text>
+          ))}
+        </View>
+      </ScrollView>
+      <View style={styles.bottomLeft}>
+        <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('BusinessCalendarScreen')}>
+          <View style={styles.rowContainer}>
+            <FontAwesome name="calendar" size={30} color="black" style={styles.icon} />
+            <Text style={styles.buttonText}>Calendar</Text>
+          </View>
         </TouchableOpacity>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.text}>Total Sales</Text>
-        <Text style={styles.value}>{state.sales}</Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.text}>Total Orders</Text>
-        <Text style={styles.value}>{state.orders}</Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.heading}>Popular Orders</Text>
-        {state.popularOrders.map((item) => (
-          <Text key={item.foodName} style={styles.text2}>{item.foodName}: {item.quantity}</Text>
-        ))}
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = {
   container: {
     flex: 1,
-    padding: 8,
     backgroundColor: 'maroon',
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'left',
+    color: 'white',
+    marginLeft: 20,
+  },
+  scrollViewContent: {
+    padding: 8,
   },
   card: {
     backgroundColor: 'white',
@@ -115,7 +131,7 @@ const styles = {
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 10,
   },
   text: {
     fontSize: 24,
@@ -135,6 +151,34 @@ const styles = {
     fontWeight: 'bold',
     color: 'maroon',
   },
+  bottomLeft: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    padding: 10,
+  },
+  calendarButton: {
+    backgroundColor: 'maroon',
+    borderRadius: 15,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    marginLeft: 8,
+    fontSize: 18,
+    color: 'maroon',
+    fontWeight: 'bold',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
 };
 
 export default BusinessDashboardView;

@@ -101,6 +101,7 @@ function BusinessFoodOrderView() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Order List</Text>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         {foodData.map((item, index) => (
           <View key={index} style={styles.card}>
@@ -149,6 +150,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: 'maroon',
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'left',
+    color: 'white',
+    marginLeft: 20,
   },
   card: {
     backgroundColor: '#ffbf00',
@@ -201,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     borderColor: 'white',
     borderWidth: 1,
-    borderRadius:15,
+    borderRadius: 15,
     backgroundColor: '#ffbf00',
     padding: 20,
   },

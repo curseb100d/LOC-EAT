@@ -2,14 +2,6 @@
   "expo": {
     "name": "LOCEAT",
     "slug": "LOCEAT",
-    "plugins": [
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ]
-    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,10 +21,17 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.group15.LOCEAT"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "af9f6d34-63e0-4eca-9c0c-0d53671db4d9"
+      }
+    },
+    "owner": "curseb100d"
   }
 }

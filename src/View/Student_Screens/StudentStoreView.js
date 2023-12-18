@@ -98,9 +98,9 @@ const StudentStoreView = () => {
             >
               <View style={styles.storeContainer}>
                 <Text style={styles.storeName}>{store.storeName}</Text>
-                <Text>{`Status: ${store.status}`}</Text>
+                {/* <Text>{`Status: ${store.status}`}</Text> */}
                 <Text>{`Time Open: ${store.timeOpen}`}</Text>
-                <Text>{`Time Open: ${store.location}`}</Text>
+                <Text>{`Location: ${store.location}`}</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -116,17 +116,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 16,
     color:'white',
   },
   storeContainer: {
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 15,
     marginVertical: 8,
-    borderRadius: 30,
+    borderRadius: 10,
     backgroundColor: '#FFA500',
     elevation: 2,
     marginBottom: 10,

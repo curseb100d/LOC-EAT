@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { db_auth } from '../../Components/config';
-import { ref, get, onValue, query, orderByChild, equalTo } from 'firebase/database';
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { ref, get, onValue, query, orderByChild, equalTo} from 'firebase/database';
+import { getDownloadURL, uploadBytes, listAll, ref as ref1} from 'firebase/storage';
 import { db } from '../../Components/config';
-import { Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
+import { storage } from '../../Components/config';
 
 export default function BusinessProfileView() {
+  const [userEmail, setUserEmail] = useState('');
+  const navigation = useNavigation();
+  const [images, setImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userUID, setUserUID] = useState(null);
+  const [imageRefs, setImageRefs] = useState([]); 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const auth = getAuth();
   const [currentDayStatus, setCurrentDayStatus] = useState(null);
 
   useEffect(() => {
@@ -20,18 +33,11 @@ export default function BusinessProfileView() {
         return;
       }
 
-      console.log("Current User Email:", currentUser.email);
-
       const usersRef = ref(db, 'Business user');
-      const emailQuery = query(
-        usersRef,
-        orderByChild('email'),
-        equalTo(currentUser.email.toLowerCase()) // Convert email to lowercase
-      );
+      const emailQuery = query(usersRef, orderByChild('email'), equalTo(currentUser.email));
 
       try {
         const snapshot = await get(emailQuery);
-        console.log("Query Result:", snapshot.val());
         if (snapshot.exists()) {
           const userData = snapshot.val();
           const userKey = Object.keys(userData)[0];
@@ -52,6 +58,97 @@ export default function BusinessProfileView() {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserUID(user.uid);
+        setUserEmail(user.email);
+      } else {
+        setUserUID(null);
+        setUserEmail(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth]);
+
+const pickImage = async () => {
+    setIsLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uploadURL = await uploadImageAsync(result.assets[0].uri, userUID);
+      setImages([...images, uploadURL]);
+      setImageRefs([...imageRefs, `image-${Date.now()}`]);
+      setCurrentImageIndex(images.length);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadImageAsync = async (uri, userUID) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    try {
+      const imageName = `image-${Date.now()}`;
+      const storageRef = ref1(storage, `Images/${userUID}/${imageName}`);
+      await uploadBytes(storageRef, blob);
+      blob.close();
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      alert(`Error: ${error}`);
+      return null;
+    }
+  };
+
+  const changeImage = () => {
+    // When the "Change Image" button is pressed, allow the user to select a new image.
+    pickImage();
+  };
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (userUID) {
+        const listRef = ref1(storage, `Images/${userUID}`);
+        const imageList = await listAll(listRef);
+        const downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+        setImages(downloadURLs);
+
+        const imageFileNames = imageList.items.map((imageRef) => imageRef.name);
+
+        if (imageFileNames.length > 0) {
+          // Set the initial value of currentImageIndex to the last index in the database
+          setCurrentImageIndex(imageFileNames.length - 1);
+        } else {
+          // No images in the database, set currentImageIndex to null
+          setCurrentImageIndex(null);
+        }
+
+        setImageRefs(imageFileNames);
+      }
+    };
+
+    fetchImages();
+  }, [userUID]);
+
   const CircularCard = () => (
     <View style={styles.circularCard}>
     </View>
@@ -62,6 +159,22 @@ export default function BusinessProfileView() {
       <Text style={styles.value}>{value}</Text>
     </View>
   );
+
+  function handleEditAccountClick() {
+    navigation.navigate('BusinessEditScreen');
+  }
+
+  function handleLogoutClick() {
+    db_auth
+      .signOut()
+      .then(() => {
+        console.log('User signed out');
+        navigation.navigate('Login');
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
+  }
 
   useEffect(() => {
     const currentUser = db_auth.currentUser;
@@ -87,12 +200,35 @@ export default function BusinessProfileView() {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : user ? (
+        
         <View style={styles.userData}>
           <View style={styles.card}>
+          <View style={styles.circularCard}>
+          <Image source={{ uri: images[currentImageIndex] }} style={{ width: 120, height: 120, borderRadius:60 }} />
+          </View>
+          
+          {images.length === 0 ? (
+          <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
+              </View>
+              
+          </TouchableOpacity>
+          
+        ) : (
+          <>
+            {images[currentImageIndex] && (
+              <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
+              </View>
+          </TouchableOpacity>
+            )}
+          </>
+        )}
             <UserDetail
               value={`${user.firstName} ${user.lastName}`}
             />
-            <CircularCard />
             <UserDetail
               value={user.businessName}
             />
@@ -124,22 +260,6 @@ export default function BusinessProfileView() {
       )}
     </View>
   );
-
-  function handleEditAccountClick() {
-    navigation.navigate('BusinessEditScreen');
-  }
-
-  function handleLogoutClick() {
-    db_auth
-      .signOut()
-      .then(() => {
-        console.log('User signed out');
-        navigation.navigate('Login');
-      })
-      .catch((error) => {
-        console.error('Error signing out:', error);
-      });
-  }
 }
 
 const styles = StyleSheet.create({
@@ -154,7 +274,7 @@ const styles = StyleSheet.create({
   userDetailContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    top: 180,
+    top: -10,
     marginTop: 5,
   },
   value: {
@@ -173,9 +293,9 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 50,
     top: -52,
   },
-  circularCard: {
-    width: 150,
-    height: 150,
+    circularCard: {
+    width: 100,
+    height: 100,
     backgroundColor: 'white',
     borderRadius: 75,
     borderColor: 'white',
@@ -183,9 +303,26 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center the content horizontally
     position: 'absolute',
     top: '32%', // Center vertically
-    left: '55%', // Center horizontally
-    marginLeft: -75, // Half of width
+    left: '30%', // Center horizontally
+    marginLeft: 38, // Half of width
     marginTop: -75, // Half of height
+  },
+  customButton2: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: 'maroon', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 150,
+    marginBottom: 5,
+    right:-110,
+    top: -20,
+  },
+  customButtonText2: {
+    color:'white',
+    fontWeight:'bold',
+    fontSize:18,
   },
   circularCardText: {
     color: 'black',

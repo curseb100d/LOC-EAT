@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import Carousel from 'react-native-snap-carousel';
 
 function StudentOrderedList() {
   const [ordersWithStatus, setOrdersWithStatus] = useState([]);
@@ -29,29 +30,39 @@ function StudentOrderedList() {
     }
   };
 
+  const renderFoodItem = ({ item }) => (
+    <View style={styles.foodItem}>
+      <Text style={styles.foodName}>{item.foodName}</Text>
+      <Text style={styles.foodPrice}>Price: ${item.price}</Text>
+      <Text style={styles.foodQuantity}>Quantity: {item.quantity}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Ordered List</Text>
-      <Text style={styles.sectionTitle}>Accepted Orders</Text>
+      <Text style={styles.header}>Your Orders</Text>
       <FlatList
         data={ordersWithStatus}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.acceptedOrderText}>Accepted Order Details</Text>
-            <Text style={styles.paymentLabel}>Payment Method:</Text>
-            <Text style={styles.paymentMethodValue}>{item.paymentMethod}</Text>
-            <Text style={styles.pickLabel}>Pick Up Time:</Text>
-            <Text style={styles.pickValue}>{item.pickUpTime}</Text>      
-            {item.foodDetails && item.foodDetails.map((foodItem, foodIndex) => (
-              <View key={foodIndex} style={styles.foodItem}>
-                <Text style={styles.foodName}>{foodItem.foodName}</Text>
-                <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
-                <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
-              </View>
-            ))}
+            <Text style={styles.orderDetails}>Order Details</Text>
+            <Text style={styles.label}>Payment Method:</Text>
+            <Text style={styles.value}>{item.paymentMethod}</Text>
+            <Text style={styles.label}>Pick Up Time:</Text>
+            <Text style={styles.value}>{item.pickUpTime}</Text>
+            <View style={styles.foodCarouselContainer}>
+              <Carousel
+                data={item.foodDetails || []}
+                renderItem={renderFoodItem}
+                sliderWidth={300}
+                itemWidth={300}
+                layout={'default'}
+                layoutCardOffset={18}
+              />
+            </View>
             <View style={styles.statusContainer}>
-              <Text style={styles.acceptedOrderText}>Status: {item.status}</Text>
+              <Text style={styles.orderDetails}>Status: {item.status}</Text>
             </View>
           </View>
         )}
@@ -64,111 +75,71 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'maroon',
+    backgroundColor: 'maroon', // Attractive color
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: 'white',
+    color: '#FFF', // White text
+    textAlign: 'center',
   },
   card: {
-    backgroundColor: '#ffbf00',
+    backgroundColor: '#FFD700', // Golden color
     padding: 16,
     margin: 10,
     borderRadius: 15,
-    borderWidth: 1,
-    borderColor: 'white',
     elevation: 2,
-    height:390,
+    height: 390,
   },
-  sectionTitle: {
-    fontSize: 18,
+  orderDetails: {
+    fontSize: 24,
+    color: 'black', // Dark text
     fontWeight: 'bold',
-    color: 'maroon',
-    marginTop: 10,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 18,
+    color: 'black',
+    fontWeight: 'bold',
+    marginVertical: 5,
+  },
+  value: {
+    fontSize: 18,
+    color: 'black',
+    marginBottom: 10,
   },
   foodItem: {
     marginVertical: 10,
-    bottom:35,
-    justifyContent:'center',
-    alignItems:'center',
-    marginBottom:20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   foodName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'maroon',
+    color: 'black',
   },
   foodPrice: {
     fontSize: 16,
-    color: 'maroon',
+    color: 'black',
   },
   foodQuantity: {
     fontSize: 16,
-    color: 'maroon',
+    color: 'black',
   },
-  acceptedOrderText: {
-    fontSize: 24,
-    color: 'maroon',
-    fontWeight: 'bold',
+  foodCarouselContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent:'center',
-    textAlign:'center',
-    marginBottom:35,
+    justifyContent: 'center',
   },
   statusContainer: {
+    marginTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    bottom:35,
-    left:25,
-  },
-  statusButton: {
-    padding: 8,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  statusButtonText: {
-    fontSize: 14,
-    color: 'white',
-  },
-  deleteButton: {
-    backgroundColor: 'red',
-    padding: 8,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  deleteButtonText: {
-    fontSize: 14,
-    color: 'white',
-  },
-  paymentMethodValue: {
-    fontSize: 18,
-    color: 'maroon',
-    bottom:25,
-    left:175,
-  },
-  paymentLabel: {
-    fontSize: 18,
-    color: 'maroon',
-    fontWeight:'bold',
-    left:25,
-  },
-  pickLabel: {
-    fontSize: 18,
-    color: 'maroon',
-    fontWeight:'bold',
-    left:25,
-    bottom:20,
-  },
-  pickValue: {
-    fontSize: 18,
-    color: 'maroon',
-    bottom:44,
-    left:150,
+    bottom: 35,
+    left: 25,
   },
 });
 

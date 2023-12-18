@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { db_auth } from '../../Components/config';
-import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { ref, get, query, orderByChild, equalTo} from 'firebase/database';
+import { getDownloadURL, uploadBytes, listAll, ref as ref1} from 'firebase/storage';
 import { db } from '../../Components/config';
-import { Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import * as ImagePicker from 'expo-image-picker';
+import { storage } from '../../Components/config';
 
 export default function StudentAccountView() {
+  const [userEmail, setUserEmail] = useState('');
+  const navigation = useNavigation();
+  const [images, setImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userUID, setUserUID] = useState(null);
+  const [imageRefs, setImageRefs] = useState([]); 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const auth = getAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,56 +57,102 @@ export default function StudentAccountView() {
     fetchUserData();
   }, []);
 
-  const CircularCard = () => (
-    <View style={styles.circularCard}>
-    </View>
-  );
-  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserUID(user.uid);
+        setUserEmail(user.email);
+      } else {
+        setUserUID(null);
+        setUserEmail(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth]);
+
+const pickImage = async () => {
+    setIsLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uploadURL = await uploadImageAsync(result.assets[0].uri, userUID);
+      setImages([...images, uploadURL]);
+      setImageRefs([...imageRefs, `image-${Date.now()}`]);
+      setCurrentImageIndex(images.length);
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadImageAsync = async (uri, userUID) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    try {
+      const imageName = `image-${Date.now()}`;
+      const storageRef = ref1(storage, `Images/${userUID}/${imageName}`);
+      await uploadBytes(storageRef, blob);
+      blob.close();
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      alert(`Error: ${error}`);
+      return null;
+    }
+  };
+
+  const changeImage = () => {
+    // When the "Change Image" button is pressed, allow the user to select a new image.
+    pickImage();
+  };
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      if (userUID) {
+        const listRef = ref1(storage, `Images/${userUID}`);
+        const imageList = await listAll(listRef);
+        const downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+        setImages(downloadURLs);
+
+        const imageFileNames = imageList.items.map((imageRef) => imageRef.name);
+
+        if (imageFileNames.length > 0) {
+          // Set the initial value of currentImageIndex to the last index in the database
+          setCurrentImageIndex(imageFileNames.length - 1);
+        } else {
+          // No images in the database, set currentImageIndex to null
+          setCurrentImageIndex(null);
+        }
+
+        setImageRefs(imageFileNames);
+      }
+    };
+
+    fetchImages();
+  }, [userUID]);
+
   const UserDetail = ({ value }) => (
     <View style={styles.userDetailContainer}>
       <Text style={styles.value}>{value}</Text>
     </View>
   );
-  
-  return (
-    <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : user ? (
-        <View style={styles.userData}>
-          <View style={styles.card}>
-            <UserDetail
-              value={`${user.firstName} ${user.lastName}`}
-            />
-            <CircularCard />
-            <UserDetail
-              value={user.schoolId}
-            />
-            <UserDetail 
-              value={user.department}
-            />
-            <UserDetail
-              value={user.course}
-            />
-          </View>
-          <View style={styles.buttonsContainer}>
-          <View style={styles.buttonWrapper}>
-            <TouchableOpacity onPress={handleEditAccountClick}>
-              <Text style={styles.linkText}>Edit Account</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.buttonWrapper}>
-            <TouchableOpacity onPress={handleLogoutClick}>
-              <Text style={styles.linkText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    ) : (
-      <Text>No user data available</Text>
-    )}
-  </View>
-);
 
   function handleEditAccountClick() {
     navigation.navigate('StudentEditScreen');
@@ -111,6 +169,74 @@ export default function StudentAccountView() {
         console.error('Error signing out:', error);
       });
   }
+
+  return (
+    <View style={styles.container}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : user ? (
+        <View style={styles.userData}>
+          <View style={styles.card}>
+          <View style={styles.circularCard}>
+          <Image source={{ uri: images[currentImageIndex] }} style={{ width: 120, height: 120, borderRadius:60 }} />
+          {/* Add your circular card content here */}
+        </View>
+
+        {/* Button 1 (Custom Style) */}
+        {images.length === 0 ? (
+          <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
+              </View>
+              
+          </TouchableOpacity>
+          
+        ) : (
+          <>
+            {images[currentImageIndex] && (
+              <TouchableOpacity onPress={changeImage}>
+              <View style={styles.customButton2}>
+                  <Text style={styles.customButtonText2}>Change</Text>
+              </View>
+          </TouchableOpacity>
+            )}
+          </>
+        )}
+            <UserDetail
+              value={`${user.firstName} ${user.lastName}`}
+            />
+            
+            
+            <UserDetail
+              value={user.schoolId}
+            />
+            <UserDetail
+              value={user.department}
+            />
+            <UserDetail
+              value={user.course}
+            />
+          </View>
+
+         
+          <View style={styles.buttonsContainer}>
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity onPress={handleEditAccountClick}>
+                <Text style={styles.linkText}>Edit Account</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity onPress={handleLogoutClick}>
+                <Text style={styles.linkText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      ) : (
+        <Text>No user data available</Text>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -120,13 +246,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'maroon',
   },
   userData: {
-    marginTop:50,
+    marginTop: 50,
   },
   userDetailContainer: {
-    alignItems:'center',
-    justifyContent:'center',
-    top:165,
-    marginTop:5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: -10,
+    marginTop: 5,
   },
   labelText: {
     fontSize: 20,
@@ -135,7 +261,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontWeight: 'bold',
-    fontSize:18,
+    fontSize: 18,
   },
   card: {
     padding: 15,
@@ -145,28 +271,28 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     backgroundColor: '#FFD700',
     elevation: 10,
-    borderBottomLeftRadius:50,
-    borderBottomRightRadius:50,
-    top:-52,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
+    top: -52,
   },
   circularCard: {
-    width: 150,
-    height: 150,
+    width: 100,
+    height: 100,
     backgroundColor: 'white',
     borderRadius: 75,
-    borderColor:'white',
+    borderColor: 'white',
     justifyContent: 'center', // Center the content vertically
     alignItems: 'center', // Center the content horizontally
     position: 'absolute',
     top: '32%', // Center vertically
-    left: '55%', // Center horizontally
-    marginLeft: -75, // Half of width
+    left: '30%', // Center horizontally
+    marginLeft: 38, // Half of width
     marginTop: -75, // Half of height
   },
   circularCardText: {
     color: 'black',
     fontSize: 16,
-    fontWeight:'black',
+    fontWeight: 'black',
   },
   linkText: {
     color: 'white',
@@ -176,6 +302,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonWrapper: {
-    bottom:25,
+    bottom: 25,
+  },
+  customButtonText: {
+    fontWeight:'bold',
+    fontSize:18,
+  },
+  customButton2: {
+    width: 150,
+    height: 40,
+    borderRadius: 25, // Set the borderRadius to half of the width/height to make it circular
+    backgroundColor: 'maroon', // Button background color
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 150,
+    marginBottom: 5,
+    right:-110,
+    top: -20,
+  },
+  customButtonText2: {
+    color:'white',
+    fontWeight:'bold',
+    fontSize:18,
   }
 });

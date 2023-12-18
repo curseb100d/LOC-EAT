@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#800000',
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 10,
     color: 'white',
@@ -140,11 +140,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+    padding: 15,
     marginVertical: 5,
     borderRadius: 15,
-    borderColor: '#ccc',
-    borderWidth: 1,
     backgroundColor: '#FFA500',
     marginTop:15,
   },
@@ -167,12 +165,10 @@ const styles = StyleSheet.create({
   },
   itemLocation: {
     fontSize: 18,
-    color: '#555',
     color: 'black',
   },
   itemQuantity: {
     fontSize: 18,
-    color: '#555',
     color: 'black',
   },
   deleteButton: {
@@ -187,10 +183,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   total: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
     color: 'white',
+    marginBottom: 10,
   },
   review: {
     color: 'white', // Text color
@@ -198,7 +195,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // Text font weight
     backgroundColor: 'green', // Background color
     padding: 10, // Padding around the text
-    borderRadius: 15, // Border radius for rounded corners
+    borderRadius: 30, // Border radius for rounded corners
     marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',

@@ -140,7 +140,7 @@ const StudentReviewScreen = ({ route }) => {
         keyExtractor={(item) => item.id}
       />
 
-      <Modal animationType="slide" transparent={true} visible={isModalVisible}>
+      <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setModalVisible(false)}>
         {/* Add Review Modal */}
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -167,7 +167,7 @@ const StudentReviewScreen = ({ route }) => {
         </View>
       </Modal>
 
-      <Modal animationType="slide" transparent={true} visible={isEditModalVisible}>
+      <Modal animationType="slide" transparent={true} visible={isEditModalVisible} onRequestClose={() => setModalVisible(false)}>
         {/* Edit Review Modal */}
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -200,30 +200,31 @@ const StudentReviewScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'maroon',
     padding: 16,
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: 'white',
   },
   addReviewButton: {
-    backgroundColor: 'maroon',
+    backgroundColor: 'orange',
     padding: 12,
-    borderRadius: 5,
+    borderRadius: 30,
     alignItems: 'center',
     marginBottom: 16,
   },
   addReviewButtonText: {
-    color: 'white',
+    color: 'black',
+    fontWeight: 'bold',
   },
   reviewItem: {
-    borderColor: 'gray',
-    borderWidth: 1,
     borderRadius: 10,
     marginBottom: 16,
     padding: 16,
+    backgroundColor: 'gold'
   },
   reviewText: {
     fontSize: 16,

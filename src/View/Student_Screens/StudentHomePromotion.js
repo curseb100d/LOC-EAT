@@ -1,13 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../../Components/config';
 import { useNavigation } from '@react-navigation/native';
+import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
+import { storage } from '../../Components/config';
 
 const StudentHomePromotion = () => {
   const navigation = useNavigation();
   const [selectedFoodPromotion, setSelectedFoodPromotion] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
+  const [images, setImages] = useState({});
+
+  const fetchImages = async (foodmenus) => {
+    for (let food of foodmenus) {
+      const listRef = ref1(storage, `food/${food.id}`);
+      const imageList = await listAll(listRef);
+      let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+      if (downloadURLs.length > 0) {
+        downloadURLs = downloadURLs.pop();
+      }
+      setImages((prevImages) => ({
+        ...prevImages,
+        [food.id]: downloadURLs,
+      }));
+    }
+  }
 
   useEffect(() => {
     const selectedFoodPromotionRef = ref(db, 'selectFoodPromotion');
@@ -17,6 +35,11 @@ const StudentHomePromotion = () => {
         const selectedFoodPromotionData = snapshot.val();
         setSelectedFoodPromotion(selectedFoodPromotionData);
         setDataFetched(true); // Set dataFetched to true here
+        const foodmenusArray = Object.keys(selectedFoodPromotionData).map((id) => ({
+          id,
+          ...selectedFoodPromotionData[id],
+        }));
+        fetchImages(foodmenusArray);
       }
     });
 
@@ -32,6 +55,9 @@ const StudentHomePromotion = () => {
         <ScrollView style={styles.dataContainer}>
           {selectedFoodPromotion.map((item, index) => (
             <View key={index} style={styles.itemContainer}>
+              <View style={styles.circularCard}>
+                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              </View>
               <Text style={styles.itemName}>{item.foodName}</Text>
               <Text style={styles.itemPrice}>{`Original Price: ${item.price}`}</Text>
               <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}`}</Text>
@@ -55,12 +81,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color:'white',
+    color: 'white',
   },
   dataContainer: {
     // Styles for data container
-    width:'90%',
-    left:18
+    width: '90%',
+    left: 18
   },
   dataTitle: {
     fontSize: 18,
@@ -69,23 +95,23 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 20,
     marginVertical: 8,
     borderRadius: 15,
     backgroundColor: '#FFA500',
     elevation: 2,
-    marginTop:15,
+    marginTop: 15,
   },
   itemName: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 5,
-    color:'black',
+    color: 'black',
   },
   itemPrice: {
     fontSize: 18,
-    color:'black',
+    color: 'black',
   },
   button: {
     backgroundColor: 'blue',
@@ -96,6 +122,16 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
+  },
+  circularCard: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'white', // Customize the color of the circular card
+    margin: 10,
+  },
+  contentContainer: {
+    alignItems: 'center',
   },
 });
 

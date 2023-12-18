@@ -1,17 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image } from 'react-native';
 import { ref, onValue, set } from 'firebase/database';
 import { db } from '../../Components/config';
 import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
+import { storage } from '../../Components/config';
 
 const StudentDetailedStore = ({ route }) => {
   const { storeData } = route.params;
   const [foodmenus, setFoodMenu] = useState([]);
   const navigation = useNavigation();
-
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState([]);
+  const [images, setImages] = useState({});
+
+  const fetchImages = async (foodmenus) => {
+    for (let food of foodmenus) {
+      const listRef = ref1(storage, `food/${food.id}`);
+      const imageList = await listAll(listRef);
+      let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+      if (downloadURLs.length > 0) {
+        downloadURLs = downloadURLs.pop();
+      }
+      setImages((prevImages) => ({
+        ...prevImages,
+        [food.id]: downloadURLs,
+      }));
+    }
+  }
 
   // Fetch products from the database
   useEffect(() => {
@@ -29,6 +46,7 @@ const StudentDetailedStore = ({ route }) => {
           totalPrice: 0,
         }));
         setFoodMenu(foodmenusArray);
+        fetchImages(foodmenusArray);
       }
     });
 
@@ -96,25 +114,31 @@ const StudentDetailedStore = ({ route }) => {
   const navigateToCartScreen = () => {
     // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
     // and then navigate to the review screen with the cart data.
-    navigation.navigate('StudentCartView');
+    navigation.replace('StudentCartView');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.heading}>Store Details</Text>
       <View style={styles.storeContainer}>
-        <Text style={styles.storeName}>{storeData.storeName}</Text>
+        <Text style={[styles.storeName, styles.centeredText]}>{storeData.storeName}</Text>
         <Text>{`Status: ${storeData.status}`}</Text>
         <Text>{`Time Open: ${storeData.timeOpen}`}</Text>
         <Text>{`Location: ${storeData.location}`}</Text>
         <Text>{`Schedule: ${storeData.schedule}`}</Text>
+        <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
+        <Text style={styles.reviewButtonText}>View Reviews</Text>
+      </TouchableOpacity>
       </View>
-  
+
       <Text style={styles.menuHeading}>Store Menu</Text>
-  
-      <ScrollView style={{ padding: 15 }}>
+
+      <ScrollView>
         {foodmenus.map((item, index) => (
           <View key={index} style={styles.itemContainer}>
+            <View style={styles.circularCard}>
+              <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+            </View>
             <Text style={styles.itemName}>{item.foodName}</Text>
             <Text style={styles.itemPrice}>Price: P{item.price}</Text>
             <Text style={styles.itemLocation}>Location: {item.location}</Text>
@@ -136,9 +160,9 @@ const StudentDetailedStore = ({ route }) => {
         </TouchableOpacity>
         <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
       </View>
-      <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
+      {/* <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
         <Text style={styles.reviewButtonText}>View Reviews</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </SafeAreaView>
   );
 };
@@ -150,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#800000',
   },
   heading: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 16,
     color: 'white',
@@ -170,7 +194,8 @@ const styles = StyleSheet.create({
   menuHeading: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 16,
+    marginTop: 10,
+    textAlign: 'center',
     color: 'white',
   },
   menuItem: {
@@ -221,7 +246,7 @@ const styles = StyleSheet.create({
   reviewButton: {
     backgroundColor: 'green',
     padding: 12,
-    borderRadius: 5,
+    borderRadius: 30,
     alignItems: 'center',
     marginTop: 16,
   },
@@ -236,7 +261,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
   },
-    cartButtonText: {
+  cartButtonText: {
     color: 'orange',
     fontWeight: 'bold',
     fontSize: 20,
@@ -245,7 +270,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     flexDirection: 'column',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 16,
     marginVertical: 8,
     borderRadius: 30,
@@ -294,6 +319,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  centeredText: {
+    textAlign: 'center',
   },
 });
 

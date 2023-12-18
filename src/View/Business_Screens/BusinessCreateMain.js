@@ -6,13 +6,12 @@ import { db } from '../../Components/config';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { storage } from '../../Components/config';
-import { getDownloadURL, uploadBytes, deleteObject, listAll } from 'firebase/storage';
+import { getDownloadURL, uploadBytes, ref as ref1, listAll } from 'firebase/storage';
 import Modal from 'react-native-modal';
 
 export default function BusinessCreateMain() {
   const [foodmenus, setFoodMenu] = useState([]);
   const navigation = useNavigation();
-  const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
 
@@ -23,6 +22,73 @@ export default function BusinessCreateMain() {
   const [storeName, setStoreName] = useState('');
   const [location, setLocation] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Front Gate');
+
+  const [images, setImages] = useState({});
+
+  const pickImage = async (item) => {
+    setIsLoading(true);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uploadURL = await uploadImageAsync(result.assets[0].uri, item.id);
+      setImages((prevImages) => ({ ...prevImages, [item.id]: uploadURL }));
+      setCurrentImageIndex(item.id);
+    }
+
+    setIsLoading(false);
+  };
+
+  const uploadImageAsync = async (uri, itemId) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    try {
+      const imageName = `image-${Date.now()}`;
+      const storageRef = ref1(storage, `food/${itemId}/${imageName}`);
+      await uploadBytes(storageRef, blob);
+      blob.close();
+      return await getDownloadURL(storageRef);
+    } catch (error) {
+      alert(`Error: ${error}`);
+      return null;
+    }
+  };
+
+  const changeImage = () => {
+    // When the "Change Image" button is pressed, allow the user to select a new image.
+    pickImage();
+  };
+
+  const fetchImages = async (foodmenus) => {
+    for (let food of foodmenus) {
+      const listRef = ref1(storage, `food/${food.id}`);
+      const imageList = await listAll(listRef);
+      let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+      if (downloadURLs.length > 0) {
+        downloadURLs = downloadURLs.pop();
+      }
+      setImages((prevImages) => ({
+        ...prevImages,
+        [food.id]: downloadURLs,
+      }));
+    }
+  }
 
   const toggleLocation = () => {
     setSelectedLocation((prevLocation) =>
@@ -59,88 +125,14 @@ export default function BusinessCreateMain() {
           totalPrice: 0, // Initialize total price for each item
         }));
         setFoodMenu(foodmenusArray);
+        fetchImages(foodmenusArray);
       }
     });
-
     // Clean up the listener when the component unmounts
     return () => {
       unsubscribe();
     };
   }, []);
-
-  // const pickImage = async () => {
-  //   setIsLoading(true);
-  //   let result = await ImagePicker.launchImageLibraryAsync({
-  //     mediaTypes: ImagePicker.MediaTypeOptions.All,
-  //     allowsEditing: true,
-  //     aspect: [4, 3],
-  //     quality: 1,
-  //   });
-
-  //   if (!result.canceled) {
-  //     const uploadURL = await uploadImageAsync(result.assets[0].uri);
-  //     setImage(uploadURL);
-  //     setIsLoading(false);
-  //   } else {
-  //     setImage(null);
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const uploadImageAsync = async (uri) => {
-  //   const blob = await new Promise((resolve, reject) => {
-  //     const xhr = new XMLHttpRequest();
-  //     xhr.onload = function () {
-  //       resolve(xhr.response);
-  //     };
-  //     xhr.onerror = function (e) {
-  //       console.log(e);
-  //       reject(new TypeError('Network request failed'));
-  //     };
-  //     xhr.responseType = 'blob';
-  //     xhr.open('GET', uri, true);
-  //     xhr.send(null);
-  //   });
-
-  //   try {
-  //     const storageRef = ref(storage, `Images/image-${Date.now()}`);
-  //     const result = await uploadBytes(storageRef, blob);
-
-  //     blob.close();
-  //     return await getDownloadURL(storageRef);
-  //   } catch (error) {
-  //     alert(`Error: ${error}`);
-  //   }
-  // };
-
-  // const deleteImage = async () => {
-  //   setIsLoading(true);
-  //   const deleteRef = ref(storage, image);
-  //   try {
-  //     deleteObject(deleteRef).then(() => {
-  //       setImage(null);
-  //       setIsLoading(false);
-  //     });
-  //   } catch (error) {
-  //     alert(`Error: ${error}`);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   // Function to fetch an image from Firebase Storage
-  //   const fetchImage = async () => {
-  //     const listRef = ref(storage, 'Images'); // Change 'Images' to your folder name
-  //     const images = await listAll(listRef);
-
-  //     if (images.items.length > 0) {
-  //       const imageRef = images.items[0]; // Fetch the first image, change as needed
-  //       const downloadURL = await getDownloadURL(imageRef);
-  //       setImage(downloadURL);
-  //     }
-  //   };
-
-  //   fetchImage();
-  // }, []); // Fetch the image when the component mounts
 
   const updateDiscount = async () => {
     if (selectedItemId) {
@@ -192,7 +184,7 @@ export default function BusinessCreateMain() {
       setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => id !== itemId));
     });
   };
-
+  console.log("IMAGESS", images);
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Food Menu</Text>
@@ -201,11 +193,11 @@ export default function BusinessCreateMain() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            {image && (
-              <View style={styles.imageContainer}>
-                <Image source={{ uri: image }} style={styles.image} />
+            <TouchableOpacity onPress={() => pickImage(item)}>
+              <View style={styles.circularCard}>
+                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
               </View>
-            )}
+            </TouchableOpacity>
             <Text style={styles.itemName}>{item.foodName}</Text>
             <Text style={styles.itemPrice}>Price: P{item.price}</Text>
             <Text style={styles.itemPrice}>Location: {item.location}</Text>
@@ -284,7 +276,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'maroon',
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
     color: 'white',
@@ -323,15 +315,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  deleteButton: {
-  },
   deleteButtonText: {
     color: 'white', // Text color
     fontSize: 20, // Text font size
-    fontWeight: 'bold', // Text font weight
     backgroundColor: 'red', // Background color
     padding: 8, // Padding around the text
-    borderRadius: 18, // Border radius for rounded corners
+    borderRadius: 30, // Border radius for rounded corners
     marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -415,10 +404,9 @@ const styles = StyleSheet.create({
   Edit: {
     color: 'white', // Text color
     fontSize: 20, // Text font size
-    fontWeight: 'bold', // Text font weight
     backgroundColor: 'green', // Background color
     padding: 8, // Padding around the text
-    borderRadius: 18, // Border radius for rounded corners
+    borderRadius: 30, // Border radius for rounded corners
     marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -434,5 +422,12 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     marginTop: 5,
+  },
+  circularCard: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'white', // Customize the color of the circular card
+    margin: 10,
   },
 });

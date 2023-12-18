@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Touchable } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
 import { db_auth } from '../Components/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { ref, get } from 'firebase/database';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../Components/config';
 
 export default function LoginScreen({ navigation }) {
@@ -57,9 +56,9 @@ export default function LoginScreen({ navigation }) {
 
   const navigateBasedOnUserType = () => {
     if (userType === 'user') {
-      navigation.navigate('StudentHome');
+      navigation.replace('StudentHome');
     } else if (userType === 'business') {
-      navigation.navigate('BusinessHome');
+      navigation.replace('BusinessHome');
     } else {
       console.log('Unknown user type:', userType);
       alert('Unknown user type');
@@ -97,11 +96,16 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{marginBottom:150}}>
+      {/* <Text style={{ marginBottom: 150 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-        </Text>
+      </Text> */}
+      <View style={styles.logo}>
+        <Image
+          source={require('./LOC-EAT.png')}
+        />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -119,27 +123,27 @@ export default function LoginScreen({ navigation }) {
       />
 
       <TouchableOpacity onPress={navigateToForgotPassword}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom:20}}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: 'white', marginBottom: 20 }}>
           Forgot password?
         </Text>
       </TouchableOpacity>
 
       <View>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={LoginIn}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      )}
-    </View>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={LoginIn}
+          >
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <TouchableOpacity onPress={navigateToSignUp}>
         <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 100, color: 'white', }}>
-        Sign up
+          Sign up
         </Text>
       </TouchableOpacity>
     </View>
@@ -159,9 +163,9 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 300,
     marginBottom: 15,
-    borderRadius:18,
-    borderColor:'black',
-    borderWidth:1
+    borderRadius: 18,
+    borderColor: 'black',
+    borderWidth: 1
   },
   button: {
     width: 150,
@@ -170,11 +174,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFE135', // Button background color
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:20,
-    marginBottom:5,
+    marginTop: 20,
+    marginBottom: 5,
   },
   buttonText: {
-    fontWeight:'bold',
+    fontWeight: 'bold',
     color: 'black',
     fontSize: 20,
   },
@@ -189,5 +193,10 @@ const styles = StyleSheet.create({
     fontSize: 50, // Set your desired font size
     fontWeight: 'bold', // Make the text bold
     fontFamily: 'sans-serif', // Set a custom font family if desired
+  },
+  logo: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    padding: 30,
   },
 });

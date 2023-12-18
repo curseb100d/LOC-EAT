@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold', // Text font weight
         backgroundColor: 'green', // Background color
         padding: 10, // Padding around the text
-        borderRadius: 15, // Border radius for rounded corners
+        borderRadius: 30, // Border radius for rounded corners
         marginTop: 15,
         alignItems: 'center',
         justifyContent: 'center',
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginVertical: 8,
         borderRadius: 10,
-        backgroundColor: '#ffa700',
+        backgroundColor: 'orange',
         elevation: 2,
         marginBottom: 10,
     },

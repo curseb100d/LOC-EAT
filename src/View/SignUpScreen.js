@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ActivityIndicator, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { db_auth } from '../Components/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db } from '../Components/config';
@@ -92,11 +92,15 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={{ marginBottom: 10, marginTop: 55 }}>
+      {/* <Text style={{ marginBottom: 10, marginTop: 55 }}>
         <Text style={styles.yellowText}>LOC</Text>
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
-      </Text>
+      </Text> */}
+        <Image
+          source={require('./LOC-EAT.png')}
+          style={styles.logo}
+        />
 
       <View style={{
         flexDirection: 'row',     // Arrange the text and border in a row
@@ -293,5 +297,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     marginBottom: 55,
+  },
+  logo: {
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 30,
+    marginTop: 30,
+    marginBottom: 30,
+    width: 300,
+    height: 30,
   },
 });

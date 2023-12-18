@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'maroon',
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 20,
     color: 'white',
@@ -166,16 +166,14 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'left',
+    alignItems: 'flex-start',
     padding: 10,
     marginVertical: 5,
     borderRadius: 18,
-    borderColor: '#ccc',
-    borderWidth: 1,
     backgroundColor: '#FFA500',
-    width:'90%',
-    left:18,
-    marginTop:18,
+    width: '90%',
+    left: 18,
+    marginTop: 18,
   },
   itemName: {
     fontSize: 18,
@@ -186,8 +184,8 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   quantityContainer: {
-    justifyContent: 'center',
-    alignItems: 'left',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
   },
   quantity: {
     fontSize: 16,
@@ -230,7 +228,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // Text font weight
     backgroundColor: 'green', // Background color
     padding: 10, // Padding around the text
-    borderRadius: 15, // Border radius for rounded corners
+    borderRadius: 30, // Border radius for rounded corners
     marginTop: 15,
     alignItems: 'center',
     justifyContent: 'center',
