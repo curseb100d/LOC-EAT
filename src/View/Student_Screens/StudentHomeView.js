@@ -82,7 +82,11 @@ export default function StudentHomeView() {
   const navigation = useNavigation(); // Get the navigation object
 
   const getGreeting = () => {
-    const currentHour = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', hour12: false });
+    const currentHour = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Manila',
+      hourCycle: 'h23',
+      hour: 'numeric',
+    });
 
     let greeting = '';
 
@@ -98,7 +102,11 @@ export default function StudentHomeView() {
   };
 
   const renderGreetingIcon = () => {
-    const currentHour = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', hour12: false });
+    const currentHour = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Manila',
+      hourCycle: 'h23',
+      hour: 'numeric',
+    });
 
     if (parseInt(currentHour, 10) >= 5 && parseInt(currentHour, 10) < 12) {
       return <Ionicons name="ios-sunny" size={24} color="white" />;
