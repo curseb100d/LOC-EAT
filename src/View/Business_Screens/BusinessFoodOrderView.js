@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { db } from '../../Components/config';
+import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
 
 function BusinessFoodOrderView() {
   const [foodData, setFoodData] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const navigation = useNavigation();
+  const [userName, setUserName] = useState('');
 
 
   const fetchData = async () => {
@@ -32,12 +35,23 @@ function BusinessFoodOrderView() {
               key: orderId, // Add a unique key based on the order ID
             }));
 
+            let userFullName='';
+            if(order.userEmail){
+              let userEmailConverted = order.userEmail.replace('.', ',');
+              let listRef = ref(db, `Users`);
+              let emailQuery = query(listRef, orderByChild('email'), equalTo(order.userEmail));
+              let snapshot = await get(emailQuery);
+              let userDetails = snapshot.val()[userEmailConverted];
+              userFullName = userDetails.firstName + ' ' + userDetails.lastName;
+            }
+
             const orderData = {
               foodDetails: foodItems,
               paymentMethod: order.paymentMethod,
               pickUpTime: order.pickUpTime,
+              key: orderId,
+              userName: userFullName,
             };
-
             foodArray.push(orderData);
           }
         }
@@ -54,7 +68,7 @@ function BusinessFoodOrderView() {
       console.error('Error fetching data:', error);
     }
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -77,7 +91,6 @@ function BusinessFoodOrderView() {
   const handleAcceptItems = () => {
     // Navigate to the 'BusinessAcceptedOrderScreen' with the selected items
     navigation.navigate('BusinessAcceptedOrderScreen', { acceptedOrders: selectedItems.map((index) => foodData[index]) });
-    setSelectedItems([]);
   };
 
   const handleRejectItems = () => {
@@ -101,7 +114,6 @@ function BusinessFoodOrderView() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Order List</Text>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         {foodData.map((item, index) => (
           <View key={index} style={styles.card}>
@@ -112,7 +124,7 @@ function BusinessFoodOrderView() {
               item.foodDetails.map((foodItem, foodIndex) => (
                 <View key={foodIndex} style={styles.foodItem}>
                   <Text style={styles.foodName}>{foodItem.foodName}</Text>
-                  <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
+                  <Text style={styles.foodPrice}>Price: ₱{foodItem.price}</Text>
                   <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
                 </View>
               ))
@@ -123,6 +135,9 @@ function BusinessFoodOrderView() {
 
             <Text style={styles.pickTitle}>Pick Up Time:</Text>
             <Text style={styles.pickValue}>{item.pickUpTime}</Text>
+
+            <Text style={styles.pickTitle}>Student Name:</Text>
+            <Text style={styles.pickValue}>{item.userName}</Text>
 
             <TouchableOpacity onPress={() => handleSelectItem(index)}>
               <Text style={styles.selectButton}>{selectedItems.includes(index) ? 'Deselect' : 'Select'}</Text>
@@ -150,14 +165,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: 'maroon',
-  },
-  header: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'left',
-    color: 'white',
-    marginLeft: 20,
   },
   card: {
     backgroundColor: '#ffbf00',
@@ -210,7 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     borderColor: 'white',
     borderWidth: 1,
-    borderRadius: 15,
+    borderRadius:15,
     backgroundColor: '#ffbf00',
     padding: 20,
   },

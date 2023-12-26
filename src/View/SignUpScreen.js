@@ -23,6 +23,12 @@ export default function SignUpScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState(''); // New input field
   const auth = db_auth;
 
+  const toggleLocation = () => {
+    setLocation((prevLocation) =>
+      prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
+    );
+  };
+
   const handleAddAccount = () => {
     const accountData = {
       firstName: firstName,
@@ -97,10 +103,10 @@ export default function SignUpScreen({ navigation }) {
         <Text style={styles.yellowText}> - </Text>
         <Text style={styles.whiteText}>EAT</Text>
       </Text> */}
-        <Image
-          source={require('./LOC-EAT.png')}
-          style={styles.logo}
-        />
+      <Image
+        source={require('./LOC-EAT.png')}
+        style={styles.logo}
+      />
 
       <View style={{
         flexDirection: 'row',     // Arrange the text and border in a row
@@ -175,12 +181,14 @@ export default function SignUpScreen({ navigation }) {
               value={businessName}
               onChangeText={(text) => setBusinessName(text)}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Location"
-              value={location}
-              onChangeText={(text) => setLocation(text)}
-            />
+            <View>
+              <TouchableOpacity
+                style={styles.toggleContainer}
+                onPress={toggleLocation}
+              >
+                <Text style={styles.toggleLabel}>{location}</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Time Open"
@@ -307,4 +315,12 @@ const styles = StyleSheet.create({
     width: 300,
     height: 30,
   },
+  toggleContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'white',
+    borderRadius: 18,
+    padding: 10,
+    marginBottom: 10,
+},
 });

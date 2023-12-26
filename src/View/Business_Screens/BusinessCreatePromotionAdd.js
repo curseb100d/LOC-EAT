@@ -17,8 +17,7 @@ const BusinessCreatePromotionAdd = () => {
     const [foodDiscountDescription, setFoodDiscountDescription] = useState('');
     const [discount, setDiscount] = useState(0);
     const [storeName, setStoreName] = useState('');
-    const [location, setLocation] = useState('');
-    const [selectedLocation, setSelectedLocation] = useState('Front Gate');
+    const [location, setLocation] = useState('Front Gate');
     const [promotions, setPromotions] = useState([]);
     const [startDate, setStartDate] = useState(new Date()); // Updated to use Date object
     const [endDate, setEndDate] = useState(new Date()); // Updated to use Date object
@@ -26,7 +25,7 @@ const BusinessCreatePromotionAdd = () => {
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
     const toggleLocation = () => {
-        setSelectedLocation((prevLocation) =>
+        setLocation((prevLocation) =>
             prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
         );
     };
@@ -160,13 +159,12 @@ const BusinessCreatePromotionAdd = () => {
                     value={storeName}
                     onChangeText={(text) => setStoreName(text)}
                 />
-
                 <View>
                     <TouchableOpacity
                         style={styles.toggleContainer}
                         onPress={toggleLocation}
                     >
-                        <Text style={styles.toggleLabel}>{selectedLocation}</Text>
+                        <Text style={styles.toggleLabel}>{location}</Text>
                     </TouchableOpacity>
                 </View>
                 <View>

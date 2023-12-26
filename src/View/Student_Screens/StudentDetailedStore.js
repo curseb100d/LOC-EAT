@@ -6,14 +6,17 @@ import { useNavigation } from '@react-navigation/native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
 import { storage } from '../../Components/config';
+import axios from 'axios';
 
 const StudentDetailedStore = ({ route }) => {
   const { storeData } = route.params;
+  const [promoObj, setPromoObj] = useState({});
   const [foodmenus, setFoodMenu] = useState([]);
   const navigation = useNavigation();
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState([]);
   const [images, setImages] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchImages = async (foodmenus) => {
     for (let food of foodmenus) {
@@ -22,32 +25,51 @@ const StudentDetailedStore = ({ route }) => {
       let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
       if (downloadURLs.length > 0) {
         downloadURLs = downloadURLs.pop();
+        setImages((prevImages) => ({
+          ...prevImages,
+          [food.id]: downloadURLs,
+        }));
+        setIsLoading(true);
       }
-      setImages((prevImages) => ({
-        ...prevImages,
-        [food.id]: downloadURLs,
-      }));
     }
   }
 
   // Fetch products from the database
   useEffect(() => {
-    const foodmenuRef = ref(db, 'foodmenu');
+    const promoRef = ref(db, 'selectFoodPromotion');
     const cartRef = ref(db, 'foodcart');
+    const foodmenuRef = ref(db, 'foodmenu');
 
-    // Listen for changes in the database and update the state
     const unsubscribeFoodmenu = onValue(foodmenuRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const foodmenusData = snapshot.val();
-        const foodmenusArray = Object.keys(foodmenusData).map((id) => ({
-          id,
-          ...foodmenusData[id],
-          quantity: 0,
-          totalPrice: 0,
-        }));
-        setFoodMenu(foodmenusArray);
-        fetchImages(foodmenusArray);
-      }
+      axios.get(promoRef + '.json')
+        .then((response) => {
+          if (response.data) {
+            let promoDataObj = {};
+            for (promo of response.data) {
+              promoDataObj[promo.id] = promo;
+              promoObj[promo.id] = promo;
+            }
+          }
+        }).then(() => {
+          if (snapshot.exists()) {
+            const foodmenusData = snapshot.val();
+            const foodmenusArray = Object.keys(foodmenusData).map((id) => {
+              tempFoodMenu = {
+                id,
+                ...foodmenusData[id],
+                quantity: 0,
+                totalPrice: 0,
+              }
+              if (id in promoObj) {
+                tempFoodMenu['price'] = promoObj[id].discountedPrice;
+              }
+
+              return tempFoodMenu;
+            });
+            setFoodMenu(foodmenusArray);
+            fetchImages(foodmenusArray);
+          }
+        });
     });
 
     const unsubscribeCart = onValue(cartRef, (snapshot) => {
@@ -59,8 +81,8 @@ const StudentDetailedStore = ({ route }) => {
 
     // Clean up the listeners when the component unmounts
     return () => {
-      unsubscribeFoodmenu();
       unsubscribeCart();
+      unsubscribeFoodmenu();
     };
   }, []);
 
@@ -127,8 +149,8 @@ const StudentDetailedStore = ({ route }) => {
         <Text>{`Location: ${storeData.location}`}</Text>
         <Text>{`Schedule: ${storeData.schedule}`}</Text>
         <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
-        <Text style={styles.reviewButtonText}>View Reviews</Text>
-      </TouchableOpacity>
+          <Text style={styles.reviewButtonText}>View Reviews</Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.menuHeading}>Store Menu</Text>
@@ -137,7 +159,9 @@ const StudentDetailedStore = ({ route }) => {
         {foodmenus.map((item, index) => (
           <View key={index} style={styles.itemContainer}>
             <View style={styles.circularCard}>
-              <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              {isLoading && (
+                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              )}
             </View>
             <Text style={styles.itemName}>{item.foodName}</Text>
             <Text style={styles.itemPrice}>Price: P{item.price}</Text>
@@ -161,8 +185,8 @@ const StudentDetailedStore = ({ route }) => {
         <Text style={styles.total}>{calculateTotalQuantity()}x Total Calculated: P{calculateTotal()}</Text>
       </View>
       {/* <TouchableOpacity style={styles.reviewButton} onPress={navigateToReviewScreen}>
-        <Text style={styles.reviewButtonText}>View Reviews</Text>
-      </TouchableOpacity> */}
+      <Text style={styles.reviewButtonText}>View Reviews</Text>
+    </TouchableOpacity> */}
     </SafeAreaView>
   );
 };

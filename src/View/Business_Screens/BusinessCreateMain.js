@@ -16,7 +16,6 @@ export default function BusinessCreateMain() {
   const [selectedItemId, setSelectedItemId] = useState(null);
 
   const [foodName, setFoodName] = useState('');
-  const [foodDescription, setFoodDescription] = useState('');
   const [price, setPrice] = useState(0);
   const [discountPercentage, setDiscountPercentage] = useState('');
   const [storeName, setStoreName] = useState('');
@@ -82,11 +81,13 @@ export default function BusinessCreateMain() {
       let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
       if (downloadURLs.length > 0) {
         downloadURLs = downloadURLs.pop();
+        setImages((prevImages) => ({
+          ...prevImages,
+          [food.id]: downloadURLs,
+        }));
+        setIsLoading(true);
       }
-      setImages((prevImages) => ({
-        ...prevImages,
-        [food.id]: downloadURLs,
-      }));
+
     }
   }
 
@@ -99,7 +100,6 @@ export default function BusinessCreateMain() {
   function handleEditFoodItem(item) {
     setSelectedItemId(item.id);
     setFoodName(item.foodName);
-    setFoodDescription(item.foodDescription);
     setPrice(item.price);
     setDiscountPercentage(item.discountPercentage.toString());
     setStoreName(item.storeName);
@@ -137,42 +137,47 @@ export default function BusinessCreateMain() {
   const updateDiscount = async () => {
     if (selectedItemId) {
       const databaseRef = ref(db, `foodmenu/${selectedItemId}`);
-
-      // Calculate the discounted price based on the imported BusinessCreateController
-      const updatedDiscount = {
-        foodName,
-        foodDescription,
-        price,
-        discountPercentage: parseFloat(discountPercentage),
-        storeName,
-        location,
-        // Calculate the discounted price using BusinessCreateController
-        discountedPrice: BusinessCreateController.calculateDiscount(
-          foodName,
-          foodDescription,
-          price,
-          parseFloat(discountPercentage),
-          storeName,
-          location
-        ).discountedPrice,
-      };
-
+  
       try {
-        await update(databaseRef, updatedDiscount);
-        alert('Discount updated');
-        setSelectedItemId(null); // Clear the selected item
-        // Clear the form fields
-        setFoodName('');
-        setFoodDescription('');
-        setPrice(0);
-        setDiscountPercentage('');
-        setStoreName('');
-        setLocation('');
+        if (
+          foodName !== '' &&
+          !isNaN(price) &&
+          price !== 0 &&
+          storeName !== '' &&
+          location !== ''
+        ) {
+          const updatedDiscount = {
+            foodName,
+            price,
+            discountPercentage: parseFloat(discountPercentage),
+            storeName,
+            location,
+            discountedPrice: BusinessCreateController.calculateDiscount(
+              foodName,
+              price,
+              parseFloat(discountPercentage),
+              storeName,
+              location
+            ).discountedPrice,
+          };
+  
+          await update(databaseRef, updatedDiscount);
+          alert('Discount updated');
+          setSelectedItemId(null);
+          setFoodName('');
+          setPrice(0);
+          setDiscountPercentage('');
+          setStoreName('');
+          setLocation('');
+        } else {
+          alert('Please fill in all required fields');
+        }
       } catch (error) {
         alert(`Error: ${error}`);
       }
     }
   };
+  
 
   const handleDeleteItem = (itemId) => {
     // Remove the item from Realtime Firebase and update the local state
@@ -184,7 +189,7 @@ export default function BusinessCreateMain() {
       setSelectedItems((prevSelectedItems) => prevSelectedItems.filter((id) => id !== itemId));
     });
   };
-  console.log("IMAGESS", images);
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Food Menu</Text>
@@ -195,11 +200,13 @@ export default function BusinessCreateMain() {
           <View style={styles.itemContainer}>
             <TouchableOpacity onPress={() => pickImage(item)}>
               <View style={styles.circularCard}>
-                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+                {isLoading && (
+                  <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+                )}
               </View>
             </TouchableOpacity>
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+            <Text style={styles.itemPrice}>Price: ₱{item.price}</Text>
             <Text style={styles.itemPrice}>Location: {item.location}</Text>
             <View style={styles.quantityContainer}>
               <TouchableOpacity onPress={() => handleEditFoodItem(item)}>
@@ -220,12 +227,6 @@ export default function BusinessCreateMain() {
                   placeholder="Food Name"
                   value={foodName}
                   onChangeText={(text) => setFoodName(text)}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Food Description"
-                  value={foodDescription}
-                  onChangeText={(text) => setFoodDescription(text)}
                 />
                 <TextInput
                   style={styles.input}
@@ -315,12 +316,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  deleteButton: {
+  },
   deleteButtonText: {
     color: 'white', // Text color
     fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
     backgroundColor: 'red', // Background color
     padding: 8, // Padding around the text
-    borderRadius: 30, // Border radius for rounded corners
+    borderRadius: 18, // Border radius for rounded corners
     marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -404,9 +408,10 @@ const styles = StyleSheet.create({
   Edit: {
     color: 'white', // Text color
     fontSize: 20, // Text font size
+    fontWeight: 'bold', // Text font weight
     backgroundColor: 'green', // Background color
     padding: 8, // Padding around the text
-    borderRadius: 30, // Border radius for rounded corners
+    borderRadius: 18, // Border radius for rounded corners
     marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',

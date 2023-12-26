@@ -83,7 +83,7 @@ function BusinessDashboardView() {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.card}>
           <Text style={styles.text}>Total Sales</Text>
-          <Text style={styles.value}>{state.sales}</Text>
+          <Text style={styles.value}>₱{state.sales}</Text>
         </View>
         <View style={styles.card}>
           <Text style={styles.text}>Total Orders</Text>

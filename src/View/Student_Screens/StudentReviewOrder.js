@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput, Image } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../../Components/config';
 import { ref, set, push } from 'firebase/database';
 import axios from 'axios';
+import {
+  getAuth,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
+import { storage } from '../../Components/config';
 
 const StudentReviewOrder = () => {
   const route = useRoute();
@@ -13,6 +19,38 @@ const StudentReviewOrder = () => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [pickUpTime, setPickUpTime] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Reservation');
+  const [userEmail, setUserEmail] = useState(null);
+  const auth = getAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [images, setImages] = useState({});
+
+  const fetchImages = async (foodCart) => {
+    for (let food of foodCart) {
+      const listRef = ref1(storage, `food/${food.id}`);
+      const imageList = await listAll(listRef);
+      let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+      if (downloadURLs.length > 0) {
+        downloadURLs = downloadURLs.pop();
+        setImages((prevImages) => ({
+          ...prevImages,
+          [food.id]: downloadURLs,
+        }));
+        setIsLoading(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail(null);
+      }
+    });
+
+    return unsubscribe;
+  }, [auth]);
 
   const calculateSubTotal = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -26,6 +64,7 @@ const StudentReviewOrder = () => {
         if (response.data) {
           const foodCartData = response.data;
           setFoodCart(foodCartData);
+          fetchImages(foodCartData);
         } else {
           console.log('No data found in Firebase for foodcart.');
         }
@@ -42,7 +81,7 @@ const StudentReviewOrder = () => {
   const showOrderPrompt = () => {
     Alert.alert(
       'Order Details',
-      `Total Cost: $${calculateSubTotal().toFixed(2)}`,
+      `Total Cost: ₱${calculateSubTotal().toFixed(2)}`,
       [
         {
           text: 'Pick Up Now',
@@ -62,6 +101,7 @@ const StudentReviewOrder = () => {
   };
 
   const handleOrder = (pickupOption) => {
+    const firebaseURL = 'https://loc-eat-ddb73-default-rtdb.firebaseio.com/Users.json';
     if (foodCart.length === 0) {
       Alert.alert('Error', 'Your cart is empty. Add items to your cart before placing an order.');
       return;
@@ -71,12 +111,15 @@ const StudentReviewOrder = () => {
       foodName: item.foodName,
       price: item.totalPrice,
       quantity: item.quantity,
+      status: '',
     }));
 
     const dataToSave = {
       pickUpTime: pickUpTime,
       paymentMethod: paymentMethod,
       foodDetails: foodDetails,
+      status: '',
+      userEmail: userEmail,
     };
 
     const dbRef = ref(db, '/orderedFood');
@@ -99,15 +142,20 @@ const StudentReviewOrder = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
+            <View style={styles.circularCard}>
+              {isLoading && (
+                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              )}
+            </View>
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>Price: ${item.totalPrice}</Text>
+            <Text style={styles.itemPrice}>Price: ₱{item.totalPrice}</Text>
             <View style={styles.quantityContainer}>
               <Text style={styles.quantity}>Quantity: {item.quantity}</Text>
             </View>
           </View>
         )}
       />
-      <Text style={styles.total}>Total Cost: ${calculateSubTotal().toFixed(2)}</Text>
+      <Text style={styles.total}>Total Cost: ₱{calculateSubTotal().toFixed(2)}</Text>
       <TouchableOpacity
         style={styles.placeOrderButton}
         onPress={handlePlaceOrder}
@@ -142,7 +190,7 @@ const StudentReviewOrder = () => {
               style={styles.buttonOrder}
               onPress={handleOrder}
             >
-              <Text style={styles.buttonOrderText}>Place Order</Text>
+              <Text style={styles.buttonOrderText}>Done</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -166,7 +214,7 @@ const styles = StyleSheet.create({
   itemContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     padding: 10,
     marginVertical: 5,
     borderRadius: 18,
@@ -243,6 +291,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderColor: 'black',
     borderWidth: 1,
+  },
+  circularCard: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'white', // Customize the color of the circular card
+    margin: 10,
   },
 });
 

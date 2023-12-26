@@ -89,9 +89,9 @@ export default function BusinessCreatePromotionMain() {
                   <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
                 </View>
                 <Text style={styles.itemName}>{item.foodName}</Text>
-                <Text style={styles.itemPrice}>{`Original Price: ${item.price}`}</Text>
-                <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}`}</Text>
-                <Text style={styles.itemPrice}>{`Discount Price: ${item.discountedPrice}`}</Text>
+                <Text style={styles.itemPrice}>{`Original Price: ₱${item.price}`}</Text>
+                <Text style={styles.itemPrice}>{`Discount: ${item.discountPercentage}%`}</Text>
+                <Text style={styles.itemPrice}>{`Discount Price: ₱${item.discountedPrice}`}</Text>
               </View>
             ))}
           </View>

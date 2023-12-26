@@ -1,8 +1,8 @@
 import BusinessCreateModel from "../../Model/Business_Model/BusinessCreateModel";
 
 class BusinessCreateController {
-  calculateDiscount(foodName, foodDescription, price, discountPercentage, storeName, location) {
-    return BusinessCreateModel.calculateDiscount(foodName, foodDescription, price, discountPercentage, storeName, location);
+  calculateDiscount(foodName, price, discountPercentage, storeName, location) {
+    return BusinessCreateModel.calculateDiscount(foodName, price, discountPercentage, storeName, location);
   }
 
   updateDiscount(index, updatedDiscount) {

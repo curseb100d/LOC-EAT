@@ -9,39 +9,28 @@ import { Picker } from '@react-native-picker/picker';
 function BusinessCreateAdd() {
     const navigation = useNavigation();
     const [foodName, setFoodName] = useState('');
-    const [foodDescription, setFoodDescription] = useState('');
     const [price, setPrice] = useState(0);
     const [discountPercentage, setDiscountPercentage] = useState('');
     const [storeName, setStoreName] = useState('');
     const [location, setLocation] = useState('Front Gate');
-    const [image, setImage] = useState(null);
 
-    const pickImage = async () => {
-        const result = await launchImageLibraryAsync({
-            mediaTypes: 'Images',
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setImage(result.uri);
-        }
-    };
+    const toggleLocation = () => {
+        setLocation((prevLocation) =>
+            prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
+        );
+    };    
 
     const handleAddFoodMenu = async () => {
         if (
             discountPercentage !== '' &&
             !isNaN(discountPercentage) &&
             foodName !== '' &&
-            foodDescription !== '' &&
             price !== 0 &&
             storeName !== '' &&
             location !== ''
         ) {
             const newDiscount = BusinessCreateController.calculateDiscount(
                 foodName,
-                foodDescription,
                 price,
                 parseFloat(discountPercentage),
                 storeName,
@@ -64,7 +53,6 @@ function BusinessCreateAdd() {
 
             // Clear the form fields
             setFoodName('');
-            setFoodDescription('');
             setDiscountPercentage('');
             setStoreName('');
             setLocation('');
@@ -82,15 +70,10 @@ function BusinessCreateAdd() {
                 />
                 <TextInput
                     style={styles.input}
-                    placeholder="Food Description"
-                    value={foodDescription}
-                    onChangeText={(text) => setFoodDescription(text)}
-                />
-                <TextInput
-                    style={styles.input}
                     placeholder="Enter Price"
                     onChangeText={(text) => setPrice(parseFloat(text))}
                 />
+                <Text>Note: You can put "0" for non-discount</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Enter Discount Percentage"
@@ -103,7 +86,7 @@ function BusinessCreateAdd() {
                     value={storeName}
                     onChangeText={(text) => setStoreName(text)}
                 />
-                <Picker
+                {/* <Picker
                     selectedValue={location}
                     style={styles.input}
                     onValueChange={(itemValue) => setLocation(itemValue)}
@@ -111,7 +94,15 @@ function BusinessCreateAdd() {
                     <Picker.Item label="Front Gate" value="Front Gate" />
                     <Picker.Item label="Back Gate" value="Back Gate" />
                     <Picker.Item label="Canteen" value="Canteen" />
-                </Picker>
+    </Picker> */}
+                <View>
+                    <TouchableOpacity
+                        style={styles.toggleContainer}
+                        onPress={toggleLocation}
+                    >
+                        <Text style={styles.toggleLabel}>{location}</Text>
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity style={styles.button} onPress={handleAddFoodMenu}>
                     <Text style={styles.buttonText}>Add Food</Text>
                 </TouchableOpacity>
@@ -128,7 +119,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         backgroundColor: '#ffbf00',
-        borderRadius: 5,
+        borderRadius: 30,
         padding: 10,
         marginBottom: 10,
         elevation: 3,
@@ -140,7 +131,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         backgroundColor: 'white',
-        borderRadius: 18,
+        borderRadius: 30,
         padding: 10,
         marginBottom: 10,
         marginTop: 5,
@@ -151,7 +142,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold', // Text font weight
         backgroundColor: 'green', // Background color
         padding: 10, // Padding around the text
-        borderRadius: 15, // Border radius for rounded corners
+        borderRadius: 30, // Border radius for rounded corners
         marginTop: 15,
         alignItems: 'center',
         justifyContent: 'center',

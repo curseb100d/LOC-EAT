@@ -1,14 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ref, set, onValue, remove } from "firebase/database";
-import { db } from '../../Components/config';
+import { ref, set, onValue } from "firebase/database";
+import { db, storage } from '../../Components/config';
+import axios from 'axios';
+import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
 
 const StudentCartView = () => {
   const [foodCart, setFoodCart] = useState([]);
   const [foodmenus, setFoodMenu] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [images, setImages] = useState({});
+
+  const fetchImages = async (foodCart) => {
+    for (let food of foodCart) {
+      const listRef = ref1(storage, `food/${food.id}`);
+      const imageList = await listAll(listRef);
+      let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
+      if (downloadURLs.length > 0) {
+        downloadURLs = downloadURLs.pop();
+        setImages((prevImages) => ({
+          ...prevImages,
+          [food.id]: downloadURLs,
+        }));
+        setIsLoading(true);
+      }
+    }
+  }
 
   useEffect(() => {
     const foodmenuRef = ref(db, 'foodmenu');
@@ -42,6 +61,28 @@ const StudentCartView = () => {
       unsubscribeFoodmenu();
       unsubscribe();
     };
+  }, []);
+
+  const fetchFoodCartData = () => {
+    const firebaseURL = 'https://loc-eat-ddb73-default-rtdb.firebaseio.com/foodcart.json';
+
+    axios.get(firebaseURL)
+      .then((response) => {
+        if (response.data) {
+          const foodCartData = response.data;
+          setFoodCart(foodCartData);
+          fetchImages(foodCartData);
+        } else {
+          console.log('No data found in Firebase for foodcart.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching data: ', error);
+      });
+  };
+
+  useEffect(() => {
+    fetchFoodCartData();
   }, []);
 
   const addToCart = (foodName, quantity) => {
@@ -81,7 +122,7 @@ const StudentCartView = () => {
     return foodCart.reduce((total, item) => total + item.price * item.quantity, 0);
     // return foodCart.reduce((total, item) => total + item.totalPrice, 0);
   };
-  
+
   const handleReviewButtonPress = () => {
     navigation.navigate('StudentReviewOrder');
   };
@@ -94,13 +135,18 @@ const StudentCartView = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
+            <View style={styles.circularCard}>
+              {isLoading && (
+                <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              )}
+            </View>
             <View
               style={[
                 styles.itemContent
               ]}
             >
               <Text style={styles.itemName}>{item.foodName}</Text>
-              <Text style={styles.itemPrice}>Price: ${item.totalPrice}</Text>
+              <Text style={styles.itemPrice}>Price: ₱{item.totalPrice}</Text>
               <Text style={styles.itemLocation}>Location: {item.location}</Text>
               <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
             </View>
@@ -116,7 +162,7 @@ const StudentCartView = () => {
           </View>
         )}
       />
-      <Text style={styles.total}>Total: P{calculateTotal().toFixed(2)}</Text>
+      <Text style={styles.total}>Total: ₱{calculateTotal().toFixed(2)}</Text>
       <TouchableOpacity style={styles.button} onPress={handleReviewButtonPress}>
         <Text style={styles.review}>Review</Text>
       </TouchableOpacity>
@@ -144,7 +190,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 15,
     backgroundColor: '#FFA500',
-    marginTop:15,
+    marginTop: 15,
   },
   selectedItem: {
     backgroundColor: 'white',
@@ -214,6 +260,13 @@ const styles = StyleSheet.create({
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  circularCard: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'white', // Customize the color of the circular card
+    margin: 10,
   },
 });
 

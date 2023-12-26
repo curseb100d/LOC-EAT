@@ -5,6 +5,7 @@ import axios from 'axios';
 function BusinessAcceptedOrderScreen({ route }) {
   const { acceptedOrders } = route.params;
   const [ordersWithStatus, setOrdersWithStatus] = useState(acceptedOrders);
+  const [orderId, setOrderId] = useState('');
 
   useEffect(() => {
     // Fetch the latest status for each order from Firebase (e.g., when the screen loads)
@@ -50,8 +51,12 @@ function BusinessAcceptedOrderScreen({ route }) {
   
   const handleStatusChange = (order, newStatus) => {
     // Update the status locally first
+    {order.foodDetails.map((foodItem) => {
+      setOrderId(foodItem.key);
+    })};
     const updatedOrder = { ...order, status: newStatus };
-    const updatedOrders = ordersWithStatus.map((o) => (o.key === order.key ? updatedOrder : o));
+    const updatedOrders = ordersWithStatus.map((o) => (o.key === orderId ? updatedOrder : o));
+    
     setOrdersWithStatus(updatedOrders);
   
     // Update the status on Firebase
@@ -78,54 +83,23 @@ function BusinessAcceptedOrderScreen({ route }) {
     }
   };
 
-  const handleOrder = (pickupOption) => {
-    if (foodCart.length === 0) {
-      Alert.alert('Error', 'Your cart is empty. Add items to your cart before placing an order.');
-      return;
-    }
-
-    const foodDetails = foodCart.map((item) => ({
-      foodName: item.foodName,
-      price: item.totalPrice,
-      quantity: item.quantity,
-    }));
-
-    const dataToSave = {
-      foodDetails: foodDetails,
-      paymentMethod: paymentMethod,
-      pickUpTime: pickUpTime,
-      status: 'Preparing', // Set the initial status here
-    };
-
-    const dbRef = ref(db, '/orderedFood');
-    const newOrderRef = push(dbRef); // Generates a unique key for the order
-
-    set(newOrderRef, dataToSave)
-      .then(() => {
-        setModalVisible(false);
-      })
-      .catch((error) => {
-        console.error('Error saving data: ', error);
-      });
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Accepted Orders</Text>
       <FlatList
         data={ordersWithStatus}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
+        keyExtractor={(item) => item.toString()}
+        renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.acceptedOrderText}>Accepted Order Details:</Text>
             <Text style={styles.paymentLabel}>Payment Method:</Text>
             <Text style={styles.paymentMethodValue}>{item.paymentMethod}</Text>
             <Text style={styles.pickLabel}>Pick Up Time:</Text>
             <Text style={styles.pickValue}>{item.pickUpTime}</Text>  
-            {item.foodDetails.map((foodItem, foodIndex) => (
-              <View key={foodIndex} style={styles.foodItem}>
+            {item.foodDetails.map((foodItem) => (
+              <View key={foodItem} style={styles.foodItem}>
                 <Text style={styles.foodName}>{foodItem.foodName}</Text>
-                <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
+                <Text style={styles.foodPrice}>Price: ₱{foodItem.price}</Text>
                 <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
               </View>
             ))}
