@@ -17,7 +17,6 @@ const StudentReviewOrder = () => {
   const route = useRoute();
   const [foodCart, setFoodCart] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [pickUpTime, setPickUpTime] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Reservation');
   const [userEmail, setUserEmail] = useState(null);
   const auth = getAuth();
@@ -81,7 +80,7 @@ const StudentReviewOrder = () => {
   const showOrderPrompt = () => {
     Alert.alert(
       'Order Details',
-      `Total Cost: ₱${calculateSubTotal().toFixed(2)}`,
+      `Total Cost: $${calculateSubTotal().toFixed(2)}`,
       [
         {
           text: 'Pick Up Now',
@@ -111,11 +110,10 @@ const StudentReviewOrder = () => {
       foodName: item.foodName,
       price: item.totalPrice,
       quantity: item.quantity,
-      status: '',
     }));
 
     const dataToSave = {
-      pickUpTime: pickUpTime,
+      pickUpTime: '',
       paymentMethod: paymentMethod,
       foodDetails: foodDetails,
       status: '',
@@ -171,20 +169,14 @@ const StudentReviewOrder = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalLabel}>Choose Pick Up Time</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Time"
-              value={pickUpTime}
-              onChangeText={(text) => setPickUpTime(text)}
-            />
             <Text style={styles.modalLabel}>Payment Method</Text>
             <Picker
               selectedValue={paymentMethod}
               onValueChange={(itemValue) => setPaymentMethod(itemValue)}
               style={styles.picker}
             >
-              <Picker.Item label="Reservation" value="Reservation" />
+              <Picker.Item label="Dine in" value="Dine in" />
+              <Picker.Item label="Take out" value="Take out" />
             </Picker>
             <TouchableOpacity
               style={styles.buttonOrder}

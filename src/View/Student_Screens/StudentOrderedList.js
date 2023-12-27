@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import Carousel from 'react-native-snap-carousel';
 
 function StudentOrderedList() {
   const [ordersWithStatus, setOrdersWithStatus] = useState([]);
@@ -30,14 +29,6 @@ function StudentOrderedList() {
     }
   };
 
-  const renderFoodItem = ({ item }) => (
-    <View style={styles.foodItem}>
-      <Text style={styles.foodName}>{item.foodName}</Text>
-      <Text style={styles.foodPrice}>Price: ${item.price}</Text>
-      <Text style={styles.foodQuantity}>Quantity: {item.quantity}</Text>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Your Orders</Text>
@@ -51,18 +42,18 @@ function StudentOrderedList() {
             <Text style={styles.value}>{item.paymentMethod}</Text>
             <Text style={styles.label}>Pick Up Time:</Text>
             <Text style={styles.value}>{item.pickUpTime}</Text>
-            <View style={styles.foodCarouselContainer}>
-              <Carousel
-                data={item.foodDetails || []}
-                renderItem={renderFoodItem}
-                sliderWidth={300}
-                itemWidth={300}
-                layout={'default'}
-                layoutCardOffset={18}
-              />
+            {item.foodDetails && item.foodDetails.map((foodItem, foodIndex) => (
+              <View key={foodIndex} style={styles.foodItem}>
+                <Text style={styles.foodName}>{foodItem.foodName}</Text>
+                <Text style={styles.foodPrice}>Price: ₱{foodItem.price}</Text>
+                <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
+              </View>
+            ))}
+            <View style={styles.statusContainer}>
+              <Text style={styles.label}>Estimated Time: {item.pickUpTime}</Text>
             </View>
             <View style={styles.statusContainer}>
-              <Text style={styles.orderDetails}>Status: {item.status}</Text>
+              <Text style={styles.label}>Status: {item.status}</Text>
             </View>
           </View>
         )}
@@ -74,7 +65,7 @@ function StudentOrderedList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: 'maroon', // Attractive color
   },
   header: {
@@ -90,7 +81,7 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 15,
     elevation: 2,
-    height: 390,
+    height: 500,
   },
   orderDetails: {
     fontSize: 24,
@@ -140,6 +131,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 35,
     left: 25,
+  },
+  acceptedOrderText: {
+    fontSize: 24,
+    color: 'maroon',
+    fontWeight: 'bold',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'center',
+    textAlign:'center',
+    marginBottom:35,
   },
 });
 

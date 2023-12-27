@@ -130,7 +130,8 @@ export default function StudentHomeView() {
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemName}>{item.foodName}</Text>
                   <Text style={styles.itemPrice}>{`Price: ₱${item.price}`}</Text>
-                  <Text style={styles.itemPrice}>{item.location}</Text>
+                  <Text style={styles.itemPrice}>{`Store: ${item.storeName}`}</Text>
+                  <Text style={styles.itemPrice}>{`Location: ${item.location}`}</Text>
                 </View>
               </View>
             ))}

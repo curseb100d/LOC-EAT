@@ -36,49 +36,54 @@ const StudentDetailedStore = ({ route }) => {
 
   // Fetch products from the database
   useEffect(() => {
-    const promoRef = ref(db, 'selectFoodPromotion');
+    const promoRef= ref(db, 'selectFoodPromotion');
     const cartRef = ref(db, 'foodcart');
     const foodmenuRef = ref(db, 'foodmenu');
 
     const unsubscribeFoodmenu = onValue(foodmenuRef, (snapshot) => {
-      axios.get(promoRef + '.json')
-        .then((response) => {
-          if (response.data) {
-            let promoDataObj = {};
-            for (promo of response.data) {
-              promoDataObj[promo.id] = promo;
-              promoObj[promo.id] = promo;
-            }
+      axios.get(promoRef+'.json')
+      .then((response) => {
+        if (response.data) {
+          let promoDataObj = {};
+          for (promo of response.data) {
+            promoDataObj[promo.id] = promo;
+            promoObj[promo.id] = promo;
           }
-        }).then(() => {
-          if (snapshot.exists()) {
-            const foodmenusData = snapshot.val();
-            const foodmenusArray = Object.keys(foodmenusData).map((id) => {
+        }
+      }).then(()=> {
+        if (snapshot.exists()) {
+          const foodmenusData = snapshot.val();
+          const foodmenusArrayMapped = Object.keys(foodmenusData).map((id) => {
+            if ( storeData.storeName === foodmenusData[id].storeName){
               tempFoodMenu = {
                 id,
                 ...foodmenusData[id],
                 quantity: 0,
                 totalPrice: 0,
               }
+            
               if (id in promoObj) {
                 tempFoodMenu['price'] = promoObj[id].discountedPrice;
               }
-
-              return tempFoodMenu;
-            });
-            setFoodMenu(foodmenusArray);
-            fetchImages(foodmenusArray);
-          }
-        });
+              return tempFoodMenu; 
+            } else {
+              return undefined;
+            }
+          });
+          const foodmenusArray = foodmenusArrayMapped.filter((item) => {return (item) ? true : false});
+          setFoodMenu(foodmenusArray);
+          fetchImages(foodmenusArray);
+        }
+      });
     });
-
+    
     const unsubscribeCart = onValue(cartRef, (snapshot) => {
       if (snapshot.exists()) {
         const cartData = snapshot.val();
-        setCart(cartData || []);
+        setCart(cartData || []);  
       }
     });
-
+    
     // Clean up the listeners when the component unmounts
     return () => {
       unsubscribeCart();
@@ -89,7 +94,7 @@ const StudentDetailedStore = ({ route }) => {
   const addToCart = (foodName, quantity) => {
     const updatedCart = [...cart];
     const foodmenuIndex = updatedCart.findIndex((item) => item.id === foodName.id);
-
+    
     if (foodmenuIndex !== -1) {
       updatedCart[foodmenuIndex].quantity += quantity;
       if (updatedCart[foodmenuIndex].quantity <= 0) {
@@ -97,42 +102,42 @@ const StudentDetailedStore = ({ route }) => {
         updatedCart.splice(foodmenuIndex, 1);
       } else {
         updatedCart[foodmenuIndex].totalPrice =
-          updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
+        updatedCart[foodmenuIndex].price * updatedCart[foodmenuIndex].quantity;
       }
     } else if (quantity > 0) {
       updatedCart.push({ ...foodName, quantity, totalPrice: foodName.price * quantity });
     }
-
+    
     setCart(updatedCart);
-
+    
     // Update the cart data in Realtime Firebase
     const cartRef = ref(db, 'foodcart');
     set(cartRef, updatedCart);
-
+    
     // Calculate the total quantity from the updatedCart and set it to the item.quantity
     const updatedFoodMenus = [...foodmenus];
     updatedFoodMenus.forEach((item) => {
       const cartItem = updatedCart.find((cartItem) => cartItem.id === item.id);
       item.quantity = cartItem ? cartItem.quantity : 0;
     });
-
+    
     setFoodMenu(updatedFoodMenus);
   };
-
+  
   const calculateTotal = () => {
     return cart.reduce((total, item) => total + item.totalPrice, 0);
   };
-
+  
   const calculateTotalQuantity = () => {
     return cart.reduce((totalQuantity, item) => totalQuantity + item.quantity, 0);
   };
-
+  
   const navigateToReviewScreen = () => {
     // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
     // and then navigate to the review screen with the cart data.
     navigation.navigate('StudentReviewScreen', { storeData });
   };
-
+  
   const navigateToCartScreen = () => {
     // Here, you can implement the logic to send the cart data to the 'reviewedorder' in Firebase
     // and then navigate to the review screen with the cart data.
@@ -144,7 +149,6 @@ const StudentDetailedStore = ({ route }) => {
       <Text style={styles.heading}>Store Details</Text>
       <View style={styles.storeContainer}>
         <Text style={[styles.storeName, styles.centeredText]}>{storeData.storeName}</Text>
-        <Text>{`Status: ${storeData.status}`}</Text>
         <Text>{`Time Open: ${storeData.timeOpen}`}</Text>
         <Text>{`Location: ${storeData.location}`}</Text>
         <Text>{`Schedule: ${storeData.schedule}`}</Text>
@@ -164,7 +168,8 @@ const StudentDetailedStore = ({ route }) => {
               )}
             </View>
             <Text style={styles.itemName}>{item.foodName}</Text>
-            <Text style={styles.itemPrice}>Price: P{item.price}</Text>
+            <Text style={styles.itemPrice}>Price: ₱{item.price}</Text>
+            <Text style={styles.itemLocation}>Store Name: {item.storeName}</Text>
             <Text style={styles.itemLocation}>Location: {item.location}</Text>
             <View style={styles.quantityContainer}>
               <TouchableOpacity onPress={() => addToCart(item, -1)}>

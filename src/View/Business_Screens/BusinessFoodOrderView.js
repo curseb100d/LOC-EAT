@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../Components/config';
@@ -11,7 +11,6 @@ function BusinessFoodOrderView() {
   const [selectedItems, setSelectedItems] = useState([]);
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
-
 
   const fetchData = async () => {
     try {
