@@ -41,6 +41,7 @@ function BusinessAcceptedOrderScreen({ route }) {
       // Update the status for a specific order in Firebase
       await axios.patch(`https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood/${orderKey}.json`, {
         status: newStatus,
+        hasNotification: true
       });
 
       // Update the local state with the updated status
@@ -71,7 +72,7 @@ function BusinessAcceptedOrderScreen({ route }) {
     order.foodDetails.forEach((foodItem) => {
       setOrderId(foodItem.key);
     });
-    const updatedOrder = { ...order, status: newStatus };
+    const updatedOrder = { ...order, status: newStatus, hasNotification: true };
     const updatedOrders = ordersWithStatus.map((o) => (o.key === orderId ? updatedOrder : o));
 
     setOrdersWithStatus(updatedOrders);
@@ -107,6 +108,7 @@ function BusinessAcceptedOrderScreen({ route }) {
         style={styles.input}
         onValueChange={(itemValue) => handlePickerChange(selectedItem, itemValue)}
       >
+        <Picker.Item label="Select Prepartion Time" value="" enabled={false} />
         <Picker.Item label="1 minute" value="1 minute" />
         <Picker.Item label="2 minutes" value="2 minutes" />
         <Picker.Item label="5 minutes" value="5 minutes" />
@@ -116,7 +118,7 @@ function BusinessAcceptedOrderScreen({ route }) {
       </Picker>
     );
   };
-
+  console.log(ordersWithStatus[0].foodDetails)
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Accepted Orders</Text>
@@ -186,7 +188,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'white',
     elevation: 2,
-    height: 470,
+    height: 380,
   },
   sectionTitle: {
     fontSize: 18,
@@ -226,43 +228,44 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
     bottom: 35,
-    left: 25,
+    left: 32,
+    marginBottom: 20,
   },
   statusButton: {
     fontSize: 14,
-    right: 15,
-    bottom: 18,
+    right: 25,
+    bottom: 17,
     borderRadius: 15,
     padding: 6,
-    width: 100,
+    width: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },
   statusButton2: {
     fontSize: 14,
     right: 25,
-    bottom: 18,
+    bottom: 17,
     borderRadius: 15,
     padding: 6,
-    width: 100,
+    width: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },
   statusButton3: {
     fontSize: 14,
     right: 25,
-    bottom: 18,
+    bottom: 17,
     borderRadius: 15,
     padding: 6,
-    width: 100,
+    width: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },
   statusButtonText: {
-    fontSize: 18,
+    fontSize: 15,
     color: 'white',
     fontWeight: 'bold',
   },
@@ -271,7 +274,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 15,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 35,
     width: 150,
     justifyContent: 'center',
     alignItems: 'center',
@@ -286,27 +289,29 @@ const styles = StyleSheet.create({
   paymentMethodValue: {
     fontSize: 18,
     color: 'maroon',
-    bottom: 25,
-    left: 175,
+    bottom: 39,
+    left: 160,
   },
   paymentLabel: {
     fontSize: 18,
     color: 'maroon',
     fontWeight: 'bold',
-    left: 25,
+    left: 4,
+    marginBottom: 15,
   },
   pickLabel: {
     fontSize: 18,
     color: 'maroon',
     fontWeight: 'bold',
-    left: 25,
+    left: 4,
     bottom: 20,
+    marginBottom: 15,
   },
   pickValue: {
     fontSize: 18,
     color: 'maroon',
-    bottom: 44,
-    left: 150,
+    bottom: 60,
+    left: 130,
   },
   input: {
     borderWidth: 1,
@@ -326,6 +331,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     marginBottom: 35,
+    right: 30,
   }
 });
 

@@ -16,9 +16,11 @@ export default function BusinessCreateMain() {
   const [selectedItemId, setSelectedItemId] = useState(null);
 
   const [foodName, setFoodName] = useState('');
+  const [foodDescription, setFoodDescription] = useState('');
   const [price, setPrice] = useState(0);
   const [discountPercentage, setDiscountPercentage] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [storeEmail, setStoreEmail] = useState('');
   const [location, setLocation] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Front Gate');
 
@@ -69,11 +71,6 @@ export default function BusinessCreateMain() {
     }
   };
 
-  const changeImage = () => {
-    // When the "Change Image" button is pressed, allow the user to select a new image.
-    pickImage();
-  };
-
   const fetchImages = async (foodmenus) => {
     for (let food of foodmenus) {
       const listRef = ref1(storage, `food/${food.id}`);
@@ -91,19 +88,12 @@ export default function BusinessCreateMain() {
     }
   }
 
-  const toggleLocation = () => {
-    setSelectedLocation((prevLocation) =>
-      prevLocation === 'Front Gate' ? 'Back Gate' : 'Front Gate'
-    );
-  };
-
   function handleEditFoodItem(item) {
     setSelectedItemId(item.id);
     setFoodName(item.foodName);
+    setFoodDescription(item.foodDescription);
     setPrice(item.price);
     setDiscountPercentage(item.discountPercentage.toString());
-    setStoreName(item.storeName);
-    setLocation(item.location);
   }
 
   const handleEditFoodClick = () => {
@@ -137,47 +127,39 @@ export default function BusinessCreateMain() {
   const updateDiscount = async () => {
     if (selectedItemId) {
       const databaseRef = ref(db, `foodmenu/${selectedItemId}`);
-  
+
+      // Calculate the discounted price based on the imported BusinessCreateController
+      const updatedDiscount = {
+        foodName,
+        foodDescription,
+        price,
+        discountPercentage: parseFloat(discountPercentage),
+        // Calculate the discounted price using BusinessCreateController
+        discountedPrice: BusinessCreateController.calculateDiscount(
+          foodName,
+          foodDescription,
+          price,
+          parseFloat(discountPercentage),
+          storeName,
+          storeEmail,
+          location
+        ).discountedPrice,
+      };
+
       try {
-        if (
-          foodName !== '' &&
-          !isNaN(price) &&
-          price !== 0 &&
-          storeName !== '' &&
-          location !== ''
-        ) {
-          const updatedDiscount = {
-            foodName,
-            price,
-            discountPercentage: parseFloat(discountPercentage),
-            storeName,
-            location,
-            discountedPrice: BusinessCreateController.calculateDiscount(
-              foodName,
-              price,
-              parseFloat(discountPercentage),
-              storeName,
-              location
-            ).discountedPrice,
-          };
-  
-          await update(databaseRef, updatedDiscount);
-          alert('Discount updated');
-          setSelectedItemId(null);
-          setFoodName('');
-          setPrice(0);
-          setDiscountPercentage('');
-          setStoreName('');
-          setLocation('');
-        } else {
-          alert('Please fill in all required fields');
-        }
+        await update(databaseRef, updatedDiscount);
+        alert('Discount updated');
+        setSelectedItemId(null); // Clear the selected item
+        // Clear the form fields
+        setFoodName('');
+        setFoodDescription('');
+        setPrice(0);
+        setDiscountPercentage('');
       } catch (error) {
         alert(`Error: ${error}`);
       }
     }
   };
-  
 
   const handleDeleteItem = (itemId) => {
     // Remove the item from Realtime Firebase and update the local state
@@ -230,6 +212,12 @@ export default function BusinessCreateMain() {
                 />
                 <TextInput
                   style={styles.input}
+                  placeholder="Food Description"
+                  value={foodDescription}
+                  onChangeText={(text) => setFoodDescription(text)}
+                />
+                <TextInput
+                  style={styles.input}
                   placeholder="Price"
                   onChangeText={(text) => setPrice(parseFloat(text))}
                 />
@@ -239,18 +227,6 @@ export default function BusinessCreateMain() {
                   value={discountPercentage}
                   onChangeText={(text) => setDiscountPercentage(text)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Store Name"
-                  value={storeName}
-                  onChangeText={(text) => setStoreName(text)}
-                />
-                <TouchableOpacity
-                  style={styles.toggleContainer}
-                  onPress={toggleLocation}
-                >
-                  <Text style={styles.toggleLabel}>{selectedLocation}</Text>
-                </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={updateDiscount}>
                   <Text style={styles.buttonText}>Update</Text>
                 </TouchableOpacity>

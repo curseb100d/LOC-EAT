@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, TextInput, Image } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import { db } from '../../Components/config';
@@ -14,7 +13,6 @@ import { getDownloadURL, ref as ref1, listAll } from 'firebase/storage';
 import { storage } from '../../Components/config';
 
 const StudentReviewOrder = () => {
-  const route = useRoute();
   const [foodCart, setFoodCart] = useState([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('Reservation');
@@ -110,6 +108,8 @@ const StudentReviewOrder = () => {
       foodName: item.foodName,
       price: item.totalPrice,
       quantity: item.quantity,
+      storeName: item.storeName,
+      storeEmail: item.storeEmail
     }));
 
     const dataToSave = {
@@ -118,6 +118,7 @@ const StudentReviewOrder = () => {
       foodDetails: foodDetails,
       status: '',
       userEmail: userEmail,
+      hasNotification: false,
     };
 
     const dbRef = ref(db, '/orderedFood');

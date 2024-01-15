@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import BusinessCreateController from '../../Controller/Business_Controller/BusinessCreateController';
 import { ref, push, set, query, orderByChild, get, equalTo } from "firebase/database";
 import { db } from '../../Components/config';
@@ -12,34 +12,35 @@ function BusinessCreateAdd() {
     const navigation = useNavigation();
     const [foodName, setFoodName] = useState('');
     const [price, setPrice] = useState(0);
+    const [foodDescription, setFoodDescription] = useState('');
     const [discountPercentage, setDiscountPercentage] = useState('');
 
     useEffect(() => {
-        const fetchUserData = async () => {
-    
-          const usersRef = ref(db, 'Business user');
-          const emailQuery = query(
-            usersRef,
-            orderByChild('email'),
-            equalTo(currentUser.email.toLowerCase()) // Convert email to lowercase
-          );
-    
-          try {
-            const snapshot = await get(emailQuery);
-            if (snapshot.exists()) {
-              const userData = snapshot.val();
-              const userKey = Object.keys(userData)[0];
-              const user = userData[userKey];
-              setUser(user);
-            } else {
-              console.log('User not found in the database');
-            }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-          } 
-        };
-        fetchUserData();
-      }, []);
+      const fetchUserData = async () => {
+  
+        const usersRef = ref(db, 'Business user');
+        const emailQuery = query(
+          usersRef,
+          orderByChild('email'),
+          equalTo(currentUser.email.toLowerCase()) // Convert email to lowercase
+        );
+  
+        try {
+          const snapshot = await get(emailQuery);
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            const userKey = Object.keys(userData)[0];
+            const user = userData[userKey];
+            setUser(user);
+          } else {
+            console.log('User not found in the database');
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        } 
+      };
+      fetchUserData();
+    }, []);
 
     const handleAddFoodMenu = async () => {
         if (
@@ -48,14 +49,16 @@ function BusinessCreateAdd() {
             foodName !== '' &&
             price !== 0
         ) {
+          
             const newDiscount = BusinessCreateController.calculateDiscount(
                 foodName,
+                foodDescription,
                 price,
                 parseFloat(discountPercentage),
                 user.businessName,
+                user.email,
                 user.location,
             );
-
             // Push the new discount object to Firebase with a unique key
             const databaseRef = ref(db, 'foodmenu');
             const newDiscountRef = push(databaseRef); // Create a new reference with a unique key
@@ -73,9 +76,10 @@ function BusinessCreateAdd() {
             // Clear the form fields
             setFoodName('');
             setDiscountPercentage('');
+            setFoodDescription('');
         }
     };
-
+    
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.inputContainer}>
@@ -84,6 +88,12 @@ function BusinessCreateAdd() {
                     placeholder="Food Name"
                     value={foodName}
                     onChangeText={(text) => setFoodName(text)}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Food Description"
+                    value={foodDescription}
+                    onChangeText={(text) => setFoodDescription(text)}
                 />
                 <TextInput
                     style={styles.input}
@@ -97,6 +107,7 @@ function BusinessCreateAdd() {
                     value={discountPercentage}
                     onChangeText={(text) => setDiscountPercentage(text)}
                 />
+                
                 <TouchableOpacity style={styles.button} onPress={handleAddFoodMenu}>
                     <Text style={styles.buttonText}>Add Food</Text>
                 </TouchableOpacity>
