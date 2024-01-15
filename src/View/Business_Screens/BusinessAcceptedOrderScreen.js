@@ -43,7 +43,7 @@ function BusinessAcceptedOrderScreen({ route }) {
         status: newStatus,
         hasNotification: true
       });
-
+  
       // Update the local state with the updated status
       const updatedOrders = ordersWithStatus.map((o) => (o.key === orderKey ? { ...o, status: newStatus } : o));
       setOrdersWithStatus(updatedOrders);
@@ -74,9 +74,9 @@ function BusinessAcceptedOrderScreen({ route }) {
     });
     const updatedOrder = { ...order, status: newStatus, hasNotification: true };
     const updatedOrders = ordersWithStatus.map((o) => (o.key === orderId ? updatedOrder : o));
-
+    
     setOrdersWithStatus(updatedOrders);
-
+  
     // Update the status on Firebase
     updateStatusOnFirebase(order.key, newStatus);
   };
@@ -84,10 +84,10 @@ function BusinessAcceptedOrderScreen({ route }) {
   const handleDeleteItem = (itemToDelete) => {
     // Create a new array of items excluding the item to delete
     const updatedOrders = ordersWithStatus.filter((item) => item.key !== itemToDelete.key);
-
+  
     // Update the state with the new array
     setOrdersWithStatus(updatedOrders);
-
+  
     // Delete the item from Firebase
     deleteItemFromFirebase(itemToDelete.key);
   };
@@ -232,7 +232,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 35,
     left: 32,
+<<<<<<< HEAD
+    marginBottom:20,
+=======
     marginBottom: 20,
+>>>>>>> Master
   },
   statusButton: {
     fontSize: 14,
@@ -297,7 +301,11 @@ const styles = StyleSheet.create({
     color: 'maroon',
     fontWeight: 'bold',
     left: 4,
+<<<<<<< HEAD
+    marginBottom:15,
+=======
     marginBottom: 15,
+>>>>>>> Master
   },
   pickLabel: {
     fontSize: 18,
@@ -305,7 +313,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     left: 4,
     bottom: 20,
+<<<<<<< HEAD
+    marginBottom:15,
+=======
     marginBottom: 15,
+>>>>>>> Master
   },
   pickValue: {
     fontSize: 18,
@@ -331,7 +343,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     marginBottom: 35,
+<<<<<<< HEAD
+    right:30,
+=======
     right: 30,
+>>>>>>> Master
   }
 });
 
