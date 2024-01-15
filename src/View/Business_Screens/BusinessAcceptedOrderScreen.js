@@ -232,11 +232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 35,
     left: 32,
-<<<<<<< HEAD
-    marginBottom:20,
-=======
     marginBottom: 20,
->>>>>>> Master
   },
   statusButton: {
     fontSize: 14,
@@ -301,11 +297,7 @@ const styles = StyleSheet.create({
     color: 'maroon',
     fontWeight: 'bold',
     left: 4,
-<<<<<<< HEAD
-    marginBottom:15,
-=======
     marginBottom: 15,
->>>>>>> Master
   },
   pickLabel: {
     fontSize: 18,
@@ -313,11 +305,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     left: 4,
     bottom: 20,
-<<<<<<< HEAD
-    marginBottom:15,
-=======
     marginBottom: 15,
->>>>>>> Master
   },
   pickValue: {
     fontSize: 18,
@@ -343,11 +331,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     marginBottom: 35,
-<<<<<<< HEAD
-    right:30,
-=======
     right: 30,
->>>>>>> Master
   }
 });
 
