@@ -67,6 +67,7 @@ function BusinessFoodOrderView() {
         setExpanded(initialExpanded);
 
         setFoodData(foodArray);
+        console.log(foodArray);
       }
     } catch (error) {
       console.error('Error fetching data:', error);

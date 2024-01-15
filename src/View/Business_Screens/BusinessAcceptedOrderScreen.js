@@ -108,6 +108,7 @@ function BusinessAcceptedOrderScreen({ route }) {
         style={styles.input}
         onValueChange={(itemValue) => handlePickerChange(selectedItem, itemValue)}
       >
+        <Picker.Item label="Select Prepartion Time" value="" enabled={false} />
         <Picker.Item label="1 minute" value="1 minute" />
         <Picker.Item label="2 minutes" value="2 minutes" />
         <Picker.Item label="5 minutes" value="5 minutes" />
@@ -117,7 +118,7 @@ function BusinessAcceptedOrderScreen({ route }) {
       </Picker>
     );
   };
-
+  console.log(ordersWithStatus[0].foodDetails)
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>Accepted Orders</Text>
@@ -231,7 +232,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 35,
     left: 32,
+<<<<<<< HEAD
     marginBottom:20,
+=======
+    marginBottom: 20,
+>>>>>>> Master
   },
   statusButton: {
     fontSize: 14,
@@ -296,7 +301,11 @@ const styles = StyleSheet.create({
     color: 'maroon',
     fontWeight: 'bold',
     left: 4,
+<<<<<<< HEAD
     marginBottom:15,
+=======
+    marginBottom: 15,
+>>>>>>> Master
   },
   pickLabel: {
     fontSize: 18,
@@ -304,7 +313,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     left: 4,
     bottom: 20,
+<<<<<<< HEAD
     marginBottom:15,
+=======
+    marginBottom: 15,
+>>>>>>> Master
   },
   pickValue: {
     fontSize: 18,
@@ -330,7 +343,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
     marginBottom: 35,
+<<<<<<< HEAD
     right:30,
+=======
+    right: 30,
+>>>>>>> Master
   }
 });
 
