@@ -1,29 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { db_auth } from '../../Components/config';
+import {
+  getAuth,
+} from 'firebase/auth';
 
 function StudentOrderedList() {
   const [ordersWithStatus, setOrdersWithStatus] = useState([]);
+  const auth = getAuth();
 
   useEffect(() => {
-    // Fetch the latest status for each order from Firebase (e.g., when the screen loads)
     fetchStatusFromFirebase();
-  }, []);
+  }, [auth]);
 
   const fetchStatusFromFirebase = async () => {
     try {
+      const userEmail = db_auth.currentUser.email;
       // Fetch data from your Realtime Firebase database using axios
-      const response = await axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json');
+      axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json')
+      .then((response) => {
+        if (response.status === 200) {
+          const data = response.data;
+  
+          const ordersArrayMapped = Object.keys(data).map((id) => {
+            if ( userEmail === data[id].userEmail){
+              tempFoodMenu = {
+                id,
+                ...data[id],
+              }
 
-      if (response.status === 200) {
-        const data = response.data;
+              return tempFoodMenu; 
+            } else {
+              return undefined;
+            }
+          });
+          const ordersArray = ordersArrayMapped.filter((item) => {return (item) ? true : false});
+          setOrdersWithStatus(ordersArray);
+        }
+      })
 
-        // Convert the data object into an array of order items
-        const orders = Object.values(data);
-
-        // Update the local state with the fetched orders
-        setOrdersWithStatus(orders);
-      }
+      
     } catch (error) {
       console.error('Error fetching data from Firebase:', error);
     }
@@ -94,12 +111,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'black',
     fontWeight: 'bold',
-    marginVertical: 5,
+    marginVertical: 8,
+    marginLeft:15,
+    marginTop:15,
   },
   value: {
     fontSize: 18,
     color: 'black',
     marginBottom: 10,
+    marginLeft:15,
   },
   foodItem: {
     marginVertical: 10,
@@ -111,26 +131,31 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'black',
+    marginRight:235,
+    marginBottom:10,
   },
   foodPrice: {
     fontSize: 16,
     color: 'black',
+    marginRight:215,
+    marginBottom:10,
   },
   foodQuantity: {
     fontSize: 16,
     color: 'black',
+    marginRight:215,
+    marginBottom:20,
   },
   foodCarouselContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
   },
   statusContainer: {
-    marginTop: 30,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     bottom: 35,
-    left: 25,
   },
   acceptedOrderText: {
     fontSize: 24,

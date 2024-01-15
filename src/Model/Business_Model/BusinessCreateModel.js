@@ -3,9 +3,9 @@ class BusinessCreateModel {
     this.discounts = [];
   }  
 
-  calculateDiscount(foodName, price, discountPercentage, storeName, location) {
+  calculateDiscount(foodName, foodDescription, price, discountPercentage, storeName, storeEmail, location) {
     const discountedPrice = price - (price * (discountPercentage / 100));
-    return {foodName, price, discountPercentage, discountedPrice, storeName, location};
+    return {foodName, foodDescription, price, discountPercentage, discountedPrice, storeName, storeEmail, location};
   }
 
   updateDiscount(index, updatedDiscount) {

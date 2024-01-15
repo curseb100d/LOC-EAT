@@ -12,6 +12,7 @@ import SignUpScreen from './src/View/SignUpScreen';
 import BusinessCreateMain from './src/View/Business_Screens/BusinessCreateMain';
 
 import StudentEditScreen from './src/View/Student_Screens/StudentEditScreen';
+import StudentNotificationView from './src/View/Student_Screens/StudentNotificationView';
 import ForgotPasswordScreen from './src/View/ForgotPasswordScreen';
 import StudentCartView from './src/View/Student_Screens/StudentCartView';
 import StudentReviewOrder from './src/View/Student_Screens/StudentReviewOrder';
@@ -48,6 +49,7 @@ function App() {
           <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
           <Stack.Screen name="BusinessCreateMain" component={BusinessCreateMain} />
           <Stack.Screen name="StudentEditScreen" component={StudentEditScreen} />
+          <Stack.Screen name="StudentNotificationView" component={StudentNotificationView} />
           <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
           <Stack.Screen name="StudentEmailScreen" component={StudentEmailScreen} />
           <Stack.Screen name="StudentHome" component={StudentHome} />

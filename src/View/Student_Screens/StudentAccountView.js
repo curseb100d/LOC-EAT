@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Image, BackHandler } from 'react-native';
 import { db_auth } from '../../Components/config';
 import {
   getAuth,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { ref, get, query, orderByChild, equalTo} from 'firebase/database';
-import { getDownloadURL, uploadBytes, listAll, ref as ref1} from 'firebase/storage';
+import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import { getDownloadURL, uploadBytes, listAll, ref as ref1 } from 'firebase/storage';
 import { db } from '../../Components/config';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { storage } from '../../Components/config';
+import axios from 'axios';
 
 export default function StudentAccountView() {
   const [userEmail, setUserEmail] = useState('');
@@ -19,10 +20,11 @@ export default function StudentAccountView() {
   const [currentImageIndex, setCurrentImageIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userUID, setUserUID] = useState(null);
-  const [imageRefs, setImageRefs] = useState([]); 
+  const [imageRefs, setImageRefs] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
+  const [ordersWithStatus, setOrdersWithStatus] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -54,7 +56,41 @@ export default function StudentAccountView() {
       }
     };
 
+    const fetchStatusFromFirebase = async () => {
+      try {
+        const userEmail = db_auth.currentUser.email;
+        // Fetch data from your Realtime Firebase database using axios
+        axios.get('https://loc-eat-ddb73-default-rtdb.firebaseio.com/orderedFood.json')
+          .then((response) => {
+            if (response.status === 200) {
+              const data = response.data;
+
+              const ordersArrayMapped = Object.keys(data).map((id) => {
+                if (userEmail === data[id].userEmail && data[id].hasNotification) {
+                  tempFoodMenu = {
+                    id,
+                    ...data[id],
+                  }
+
+                  return tempFoodMenu;
+                } else {
+                  return undefined;
+                }
+              });
+              const ordersArray = ordersArrayMapped.filter((item) => { return (item) ? true : false });
+              setOrdersWithStatus(ordersArray);
+            }
+          })
+
+
+      } catch (error) {
+        console.error('Error fetching data from Firebase:', error);
+      }
+    };
+
+    fetchStatusFromFirebase();
     fetchUserData();
+    console.log('ows', ordersWithStatus.length)
   }, []);
 
   useEffect(() => {
@@ -71,7 +107,7 @@ export default function StudentAccountView() {
     return unsubscribe;
   }, [auth]);
 
-const pickImage = async () => {
+  const pickImage = async () => {
     setIsLoading(true);
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -158,6 +194,10 @@ const pickImage = async () => {
     navigation.navigate('StudentEditScreen');
   }
 
+  function handleNotification() {
+    navigation.navigate('StudentNotificationView');
+  }
+
   function handleLogoutClick() {
     db_auth
       .signOut()
@@ -177,36 +217,36 @@ const pickImage = async () => {
       ) : user ? (
         <View style={styles.userData}>
           <View style={styles.card}>
-          <View style={styles.circularCard}>
-          <Image source={{ uri: images[currentImageIndex] }} style={{ width: 120, height: 120, borderRadius:60 }} />
-          {/* Add your circular card content here */}
-        </View>
+            <View style={styles.circularCard}>
+              <Image source={{ uri: images[currentImageIndex] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+              {/* Add your circular card content here */}
+            </View>
 
-        {/* Button 1 (Custom Style) */}
-        {images.length === 0 ? (
-          <TouchableOpacity onPress={changeImage}>
-              <View style={styles.customButton2}>
-                  <Text style={styles.customButtonText2}>Change</Text>
-              </View>
-              
-          </TouchableOpacity>
-          
-        ) : (
-          <>
-            {images[currentImageIndex] && (
+            {/* Button 1 (Custom Style) */}
+            {images.length === 0 ? (
               <TouchableOpacity onPress={changeImage}>
-              <View style={styles.customButton2}>
+                <View style={styles.customButton2}>
                   <Text style={styles.customButtonText2}>Change</Text>
-              </View>
-          </TouchableOpacity>
+                </View>
+
+              </TouchableOpacity>
+
+            ) : (
+              <>
+                {images[currentImageIndex] && (
+                  <TouchableOpacity onPress={changeImage}>
+                    <View style={styles.customButton2}>
+                      <Text style={styles.customButtonText2}>Change</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              </>
             )}
-          </>
-        )}
             <UserDetail
               value={`${user.firstName} ${user.lastName}`}
             />
-            
-            
+
+
             <UserDetail
               value={user.schoolId}
             />
@@ -218,8 +258,13 @@ const pickImage = async () => {
             />
           </View>
 
-         
+
           <View style={styles.buttonsContainer}>
+            <View style={styles.buttonWrapper}>
+              <TouchableOpacity onPress={handleNotification}>
+                <Text style={styles.linkText}>Notifications ({ordersWithStatus.length})</Text>
+              </TouchableOpacity>
+            </View>
             <View style={styles.buttonWrapper}>
               <TouchableOpacity onPress={handleEditAccountClick}>
                 <Text style={styles.linkText}>Edit Account</Text>
@@ -305,8 +350,8 @@ const styles = StyleSheet.create({
     bottom: 25,
   },
   customButtonText: {
-    fontWeight:'bold',
-    fontSize:18,
+    fontWeight: 'bold',
+    fontSize: 18,
   },
   customButton2: {
     width: 150,
@@ -317,12 +362,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 150,
     marginBottom: 5,
-    right:-110,
+    right: -110,
     top: -20,
   },
   customButtonText2: {
-    color:'white',
-    fontWeight:'bold',
-    fontSize:18,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
   }
 });

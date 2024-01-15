@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../Components/config';
+import { db_auth } from '../../Components/config';
+
 import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
 
 function BusinessFoodOrderView() {
@@ -10,7 +12,6 @@ function BusinessFoodOrderView() {
   const [expanded, setExpanded] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
   const navigation = useNavigation();
-  const [userName, setUserName] = useState('');
 
   const fetchData = async () => {
     try {
@@ -23,17 +24,21 @@ function BusinessFoodOrderView() {
 
         for (const orderId in data) {
           const order = data[orderId];
-
-          if (order.foodDetails && order.paymentMethod && order.pickUpTime) {
+          if (order.foodDetails && order.paymentMethod) {
             const foodDetails = order.foodDetails;
 
-            const foodItems = foodDetails.map((foodItem) => ({
+            const foodItemsMapped = foodDetails.map((foodItem) => ({
               foodName: foodItem.foodName,
               price: foodItem.price,
               quantity: foodItem.quantity,
+              storeEmail: foodItem.storeEmail,
               key: orderId, // Add a unique key based on the order ID
             }));
 
+            const foodItems = foodItemsMapped.filter((food) => {
+              return food.storeEmail === db_auth.currentUser.email;
+            });
+            
             let userFullName='';
             if(order.userEmail){
               let userEmailConverted = order.userEmail.replace('.', ',');
@@ -119,15 +124,13 @@ function BusinessFoodOrderView() {
             <TouchableOpacity onPress={() => toggleExpansion(index)}>
               <Text style={styles.sectionTitle}>Food Details</Text>
             </TouchableOpacity>
-            {expanded[index] && (
-              item.foodDetails.map((foodItem, foodIndex) => (
-                <View key={foodIndex} style={styles.foodItem}>
-                  <Text style={styles.foodName}>{foodItem.foodName}</Text>
-                  <Text style={styles.foodPrice}>Price: ₱{foodItem.price}</Text>
-                  <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
-                </View>
-              ))
-            )}
+            {item.foodDetails.map((foodItem) => (
+              <View key={foodItem} style={styles.foodItem}>
+                <Text style={styles.foodName}>{foodItem.foodName}</Text>
+                <Text style={styles.foodPrice}>Price: ${foodItem.price}</Text>
+                <Text style={styles.foodQuantity}>Quantity: {foodItem.quantity}</Text>
+              </View>
+            ))}
 
             <Text style={styles.paymentTitle}>Payment Method:</Text>
             <Text style={styles.paymentValue}>{item.paymentMethod}</Text>

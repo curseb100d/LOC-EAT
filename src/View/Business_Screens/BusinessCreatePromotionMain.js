@@ -11,6 +11,7 @@ export default function BusinessCreatePromotionMain() {
   const [selectedFoodPromotion, setSelectedFoodPromotion] = useState([]);
   const [dataFetched, setDataFetched] = useState(false);
   const [images, setImages] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const [promotions, setPromotions] = useState([]);
 
@@ -21,11 +22,12 @@ export default function BusinessCreatePromotionMain() {
       let downloadURLs = await Promise.all(imageList.items.map((imageRef) => getDownloadURL(imageRef)));
       if (downloadURLs.length > 0) {
         downloadURLs = downloadURLs.pop();
+        setImages((prevImages) => ({
+          ...prevImages,
+          [food.id]: downloadURLs,
+        }));
+        setIsLoading(true);
       }
-      setImages((prevImages) => ({
-        ...prevImages,
-        [food.id]: downloadURLs,
-      }));
     }
   }
 
@@ -86,7 +88,9 @@ export default function BusinessCreatePromotionMain() {
             {selectedFoodPromotion.map((item, index) => (
               <View key={index} style={styles.itemContainer}>
                 <View style={styles.circularCard}>
-                  <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+                  {isLoading && (
+                    <Image source={{ uri: images[item.id] }} style={{ width: 120, height: 120, borderRadius: 60 }} />
+                  )}
                 </View>
                 <Text style={styles.itemName}>{item.foodName}</Text>
                 <Text style={styles.itemPrice}>{`Original Price: ₱${item.price}`}</Text>
